@@ -13,7 +13,7 @@ struct QuickCalApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ProfileView()
+            WelcomeView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }

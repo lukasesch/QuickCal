@@ -25,7 +25,7 @@ struct ProfileView: View {
     @State private var heightTF: String = ""
     @State private var bodyFatTF: String = ""
     @State private var sportFrequency: String = "Kein Sport"
-    @State private var activityLevel: String = "kaum"
+    @State private var activityLevel: String = "etwas"
     @State private var goal: String = "halten"
 
     var body: some View {
@@ -133,9 +133,10 @@ struct ProfileView: View {
                         .font(.headline)
                         .foregroundColor(.gray)
                     Picker("Alltagsaktivität", selection: $activityLevel) {
-                        Text("Kaum").tag("kaum")
-                        Text("Mäßig").tag("maessig")
-                        Text("Sehr").tag("sehr")
+                        Text("Wenig aktiv").tag("wenig")
+                        Text("Etwas").tag("etwas")
+                        Text("Aktiv").tag("aktiv")
+                        Text("Sehr aktiv").tag("sehr aktiv")
                     }
                     .pickerStyle(MenuPickerStyle())
                 }
@@ -180,6 +181,7 @@ struct ProfileView: View {
         
             }
             .padding()
+            .navigationBarBackButtonHidden(true)
             .navigationDestination(isPresented: $navigateToMainView) {
                 MainView() // Ziel-View, die nach Navigation angezeigt wird
             }
