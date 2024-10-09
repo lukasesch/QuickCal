@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  ProfileView.swift
 //  QuickCal
 //
 //  Created by Lukas Esch on 09.10.24.
@@ -8,7 +8,7 @@
 import SwiftUI
 import CoreData
 
-struct ContentView: View {
+struct ProfileView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
@@ -63,6 +63,7 @@ struct ContentView: View {
                     .font(.headline)
                     .foregroundColor(.black)
                     .multilineTextAlignment(.trailing)
+                    .submitLabel(.done)
             }
             HStack {
                 Text("Alter:")
@@ -74,6 +75,7 @@ struct ContentView: View {
                     .foregroundColor(.black)
                     .multilineTextAlignment(.trailing)
                     .keyboardType(.decimalPad)
+                    .submitLabel(.done)
             }
             HStack {
                 Text("Gewicht:")
@@ -85,6 +87,7 @@ struct ContentView: View {
                     .foregroundColor(.black)
                     .multilineTextAlignment(.trailing)
                     .keyboardType(.decimalPad)
+                    .submitLabel(.done)
             }
             HStack {
                 Text("Körpergröße:")
@@ -96,6 +99,7 @@ struct ContentView: View {
                     .foregroundColor(.black)
                     .multilineTextAlignment(.trailing)
                     .keyboardType(.decimalPad)
+                    .submitLabel(.done)
             }
             HStack {
                 Text("Körperfettanteil:")
@@ -107,6 +111,7 @@ struct ContentView: View {
                     .foregroundColor(.black)
                     .multilineTextAlignment(.trailing)
                     .keyboardType(.decimalPad)
+                    .submitLabel(.done)
             }
             
             Divider()
@@ -174,5 +179,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    ProfileView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
