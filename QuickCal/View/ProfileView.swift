@@ -16,15 +16,15 @@ struct ProfileView: View {
 //        animation: .default)
 //    private var items: FetchedResults<Item>
     
+    @StateObject private var viewModel = ProfileViewModel()
     @State private var navigateToMainView = false
     
     @State private var gender: String = "weiblich"
-    @State private var name: String = ""
+    @State private var nameTF: String = ""
     @State private var ageTF: String = ""
     @State private var weightTF: String = ""
     @State private var heightTF: String = ""
     @State private var bodyFatTF: String = ""
-    @State private var sportFrequency: String = "Kein Sport"
     @State private var activityLevel: String = "etwas"
     @State private var goal: String = "halten"
 
@@ -62,7 +62,7 @@ struct ProfileView: View {
                         .font(.headline)
                         .foregroundColor(.gray)
                     Spacer() // Füllt den verfügbaren Platz zwischen den Texten
-                    TextField("Max", text: $name)
+                    TextField("Max", text: $nameTF)
                         .font(.headline)
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
@@ -158,7 +158,8 @@ struct ProfileView: View {
                 Spacer()
                 
                 Button(action: {
-                    //calculate() // kcal Berechnen Funnktion
+                    let bodyFatValue = bodyFatTF.isEmpty ? nil : bodyFatTF
+                    viewModel.updateUser(gender: gender, name: nameTF, age: ageTF, weight: weightTF, height: heightTF, bodyFat: bodyFatValue, activityLevel: activityLevel, goal: goal)
                     navigateToMainView = true // Navigation nach dem Aufruf der Funktion
                 }) {
                     Text("Weiter")
