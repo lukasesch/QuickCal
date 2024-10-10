@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct QuickCalApp: App {
     let persistenceController = PersistenceController.shared
+    var profileViewModel = ProfileViewModel()
 
     var body: some Scene {
         WindowGroup {

@@ -16,7 +16,7 @@ struct ProfileView: View {
 //        animation: .default)
 //    private var items: FetchedResults<Item>
     
-    @StateObject private var viewModel = ProfileViewModel()
+    @StateObject private var profileviewModel = ProfileViewModel()
     @State private var navigateToMainView = false
     
     @State private var gender: String = "weiblich"
@@ -159,7 +159,7 @@ struct ProfileView: View {
                 
                 Button(action: {
                     let bodyFatValue = bodyFatTF.isEmpty ? nil : bodyFatTF
-                    viewModel.updateUser(gender: gender, name: nameTF, age: ageTF, weight: weightTF, height: heightTF, bodyFat: bodyFatValue, activityLevel: activityLevel, goal: goal)
+                    profileviewModel.updateUser(gender: gender, name: nameTF, age: ageTF, weight: weightTF, height: heightTF, bodyFat: bodyFatValue, activityLevel: activityLevel, goal: goal)
                     navigateToMainView = true // Navigation nach dem Aufruf der Funktion
                 }) {
                     Text("Weiter")
@@ -176,6 +176,7 @@ struct ProfileView: View {
             .navigationBarBackButtonHidden(true)
             .navigationDestination(isPresented: $navigateToMainView) {
                 MainView() // Ziel-View, die nach Navigation angezeigt wird
+                    .environmentObject(profileviewModel)
             }
         }
     }
