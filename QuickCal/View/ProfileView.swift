@@ -11,10 +11,10 @@ import CoreData
 struct ProfileView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
+//    @FetchRequest(
+//        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
+//        animation: .default)
+//    private var items: FetchedResults<Item>
     
     @State private var navigateToMainView = false
     
@@ -105,7 +105,7 @@ struct ProfileView: View {
                         .submitLabel(.done)
                 }
                 HStack {
-                    Text("Körperfettanteil:")
+                    Text("Körperfettanteil: (optional)")
                         .font(.headline)
                         .foregroundColor(.gray)
                     Spacer() // Füllt den verfügbaren Platz zwischen den Texten
@@ -120,15 +120,6 @@ struct ProfileView: View {
                 Divider()
                 
                 HStack {
-                    Text("Sport pro Woche:")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                    Picker("Sport pro Woche", selection: $sportFrequency) {
-                        Text("Kein Sport").tag("Kein Sport")
-                        Text("1-2 Mal").tag("1-2 Mal")
-                        Text("3-5 Mal").tag("3-5 Mal")
-                    }
-                    .pickerStyle(MenuPickerStyle())
                     Text("Aktivität:")
                         .font(.headline)
                         .foregroundColor(.gray)
