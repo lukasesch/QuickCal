@@ -9,16 +9,14 @@ import SwiftUI
 import CoreData
 
 struct ProfileView: View {
+    // CoreData
     @Environment(\.managedObjectContext) private var viewContext
-
-//    @FetchRequest(
-//        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-//        animation: .default)
-//    private var items: FetchedResults<Item>
-    
+    // Connect View mit ViewModel
     @StateObject private var profileviewModel = ProfileViewModel()
+    // Navigation to next View
     @State private var navigateToMainView = false
-    
+
+    // States
     @State private var gender: String = "weiblich"
     @State private var nameTF: String = ""
     @State private var ageTF: String = ""
@@ -28,6 +26,7 @@ struct ProfileView: View {
     @State private var activityLevel: String = "etwas"
     @State private var goal: String = "halten"
 
+    //Body
     var body: some View {
         NavigationStack{
             VStack(spacing: 20) {
@@ -159,8 +158,8 @@ struct ProfileView: View {
                 
                 Button(action: {
                     let bodyFatValue = bodyFatTF.isEmpty ? nil : bodyFatTF
-                    profileviewModel.updateUser(gender: gender, name: nameTF, age: ageTF, weight: weightTF, height: heightTF, bodyFat: bodyFatValue, activityLevel: activityLevel, goal: goal)
-                    navigateToMainView = true // Navigation nach dem Aufruf der Funktion
+                    profileviewModel.updateUser(context: viewContext, gender: gender, name: nameTF, age: ageTF, weight: weightTF, height: heightTF, bodyFat: bodyFatValue, activityLevel: activityLevel, goal: goal)
+                    navigateToMainView = true
                 }) {
                     Text("Weiter")
                         .frame(maxWidth: .infinity)

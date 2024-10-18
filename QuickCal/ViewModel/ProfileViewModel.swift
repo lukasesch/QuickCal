@@ -6,45 +6,55 @@
 //
 
 import Foundation
+import CoreData
 
 final class ProfileViewModel: ObservableObject {
-    @Published var user = UserModel(gender: "weiblich", name: "", age: 0, weight: 0.0, height: 0, bodyFat: nil, activityLevel: 0.0, goal: "halten")
+    @Published var user: User?
     
-    func updateUser(gender:String, name:String, age:String, weight:String, height:String, bodyFat:String?, activityLevel:String, goal:String) {
-        user.gender = gender
-        user.name = name
-        if let ageInt = Int(age) {
-            user.age = ageInt
-            print(user.age)
+    func updateUser(context: NSManagedObjectContext, gender: String, name: String, age: String, weight: String, height: String, bodyFat: String?, activityLevel: String, goal: String) {
+        
+        //User erstellen oder aktualisieren
+        if user == nil {
+            user = User(context: context)
         }
+        
+        user?.gender = gender
+        user?.name = name
+        
+        if let ageInt = Int16(age) {
+            user?.age = ageInt
+        }
+        
         if let weightFloat = Float(weight) {
-            user.weight = weightFloat
-            print(user.weight)
+            user?.weight = weightFloat
         }
-        if let heightInt = Int(height) {
-            user.height = heightInt
-            print(user.height)
+        
+        if let heightInt = Int16(height) {
+            user?.height = heightInt
         }
+        
         if let bodyFatString = bodyFat, let bodyFatFloat = Float(bodyFatString) {
-            user.bodyFat = bodyFatFloat
-            print(user.bodyFat)
+            user?.bodyfat = bodyFatFloat
         }
-        // Zahlen entsprechen Aktivitätslevel zum berechnen der kcal nach PAL-Werten
-        if activityLevel.isEqual("wenig") {
-            user.activityLevel = 1.3
-            print(user.activityLevel)
-        } else if activityLevel.isEqual("etwas") {
-            user.activityLevel = 1.5
-            print(user.activityLevel)
-        } else if activityLevel.isEqual("aktiv") {
-            user.activityLevel = 1.7
-            print(user.activityLevel)
-        } else if activityLevel.isEqual("sehr aktiv") {
-            user.activityLevel = 1.9
-            print(user.activityLevel)
+        
+        if activityLevel == "wenig" {
+            user?.activity = 1.3
+        } else if activityLevel == "etwas" {
+            user?.activity = 1.5
+        } else if activityLevel == "aktiv" {
+            user?.activity = 1.7
+        } else if activityLevel == "sehr aktiv" {
+            user?.activity = 1.9
         }
-        user.goal = goal
-        print(user.goal)
+        
+        user?.goal = goal
+        
+        //Speichern
+        do {
+            try context.save()
+        } catch {
+            print("Benutzer konnte nicht gespeichert werden: \(error.localizedDescription)")
+        }
     }
     
     

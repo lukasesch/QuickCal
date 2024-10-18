@@ -9,8 +9,8 @@ import SwiftUI
 
 struct MainView: View {
     
-    @StateObject private var viewModel = MainViewModel()
-    @EnvironmentObject var profileViewModel: ProfileViewModel
+    @StateObject private var mainViewModel = MainViewModel()
+    @Environment(\.managedObjectContext) private var viewContext
 
 
     
@@ -18,14 +18,14 @@ struct MainView: View {
         NavigationStack {
             VStack {
                 Text("Dein täglicher Kalorienbedarf beträgt")
-                Text("\(viewModel.dailyCalories, specifier: "%.0f") kcal")
+                Text("\(mainViewModel.dailyCalories, specifier: "%.0f") kcal")
                     .font(.title2)
                     .bold()
                     
             }
             .navigationBarBackButtonHidden(true)
             .onAppear {
-                viewModel.calculateCalories(for: profileViewModel.user) // Benutzer vom ProfileViewModel nutzen
+                mainViewModel.fetchUser(context: viewContext)
             }
 
         }
