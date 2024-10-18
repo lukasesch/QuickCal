@@ -17,11 +17,11 @@ class MainViewModel: ObservableObject {
         
         do {
             let users = try context.fetch(fetchRequest)
-            //First user
-            //Usecase with several users?
-            if let firstUser = users.first {
-                self.user = firstUser
-                calculateCalories(for: firstUser)
+            //Last user
+            //App needs to check if user already exists - for now while testing it always gets the last user
+            if let lastUser = users.last {
+                self.user = lastUser
+                calculateCalories(for: lastUser)
             } else {
                 print("No user found")
             }
