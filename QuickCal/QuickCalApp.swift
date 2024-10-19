@@ -9,13 +9,20 @@ import SwiftUI
 
 @main
 struct QuickCalApp: App {
+    @AppStorage("onboarding") private var onboardingDone = false
     let persistenceController = PersistenceController.shared
     var profileViewModel = ProfileViewModel()
 
     var body: some Scene {
         WindowGroup {
-            WelcomeView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            if onboardingDone == true {
+                MainView()
+                    .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            } else {
+                WelcomeView()
+                    .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            }
+            
         }
     }
 }

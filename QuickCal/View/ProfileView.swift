@@ -18,6 +18,8 @@ struct ProfileView: View {
     
     //Focus State for Decimal Pad not disappearing
     @FocusState private var isKeyboardActive: Bool
+    
+    @AppStorage("onboarding") private var onboardingDone = false
 
     // States
     @State private var gender: String = "weiblich"
@@ -163,6 +165,7 @@ struct ProfileView: View {
                 Button(action: {
                     let bodyFatValue = bodyFatTF.isEmpty ? nil : bodyFatTF
                     profileviewModel.updateUser(context: viewContext, gender: gender, name: nameTF, age: ageTF, weight: weightTF, height: heightTF, bodyFat: bodyFatValue, activityLevel: activityLevel, goal: goal)
+                    onboardingDone = true
                     navigateToMainView = true
                 }) {
                     Text("Weiter")

@@ -11,6 +11,7 @@ struct MainView: View {
     
     @StateObject private var mainViewModel = MainViewModel()
     @Environment(\.managedObjectContext) private var viewContext
+    @AppStorage("onboarding") private var onboardingDone = false
 
 
     
@@ -21,11 +22,23 @@ struct MainView: View {
                 Text("\(mainViewModel.dailyCalories, specifier: "%.0f") kcal")
                     .font(.title2)
                     .bold()
-                    
+                
+                Button(action: {
+                    onboardingDone = false
+                }) {
+                    Text("Reset")
+                        .padding()
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
             }
             .navigationBarBackButtonHidden(true)
             .onAppear {
-                mainViewModel.fetchUser(context: viewContext)
+                //if-case for testing, as MainView doesnt contain user from onboarding
+                if onboardingDone == true {
+                    mainViewModel.fetchUser(context: viewContext)
+                }
             }
 
         }
