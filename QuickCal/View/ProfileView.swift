@@ -15,6 +15,9 @@ struct ProfileView: View {
     @StateObject private var profileviewModel = ProfileViewModel()
     // Navigation to next View
     @State private var navigateToMainView = false
+    
+    //Focus State for Decimal Pad not disappearing
+    @FocusState private var isKeyboardActive: Bool
 
     // States
     @State private var gender: String = "weiblich"
@@ -66,6 +69,7 @@ struct ProfileView: View {
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
                         .submitLabel(.done)
+                        .focused($isKeyboardActive)
                 }
                 HStack {
                     Text("Alter:")
@@ -77,7 +81,7 @@ struct ProfileView: View {
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                        .submitLabel(.done)
+                        .focused($isKeyboardActive)
                 }
                 HStack {
                     Text("Gewicht:")
@@ -89,7 +93,7 @@ struct ProfileView: View {
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                        .submitLabel(.done)
+                        .focused($isKeyboardActive)
                 }
                 HStack {
                     Text("Körpergröße:")
@@ -101,7 +105,7 @@ struct ProfileView: View {
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                        .submitLabel(.done)
+                        .focused($isKeyboardActive)
                 }
                 HStack {
                     Text("Körperfettanteil: (optional)")
@@ -113,7 +117,7 @@ struct ProfileView: View {
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                        .submitLabel(.done)
+                        .focused($isKeyboardActive)
                 }
                 
                 Divider()
@@ -172,14 +176,19 @@ struct ProfileView: View {
         
             }
             .padding()
+            .onTapGesture {
+                isKeyboardActive = false
+            }
             .navigationBarBackButtonHidden(true)
             .navigationDestination(isPresented: $navigateToMainView) {
                 MainView() // Ziel-View, die nach Navigation angezeigt wird
                     .environmentObject(profileviewModel)
+            
             }
         }
     }
 }
+
 
 #Preview {
     ProfileView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
