@@ -32,47 +32,99 @@ struct MainView: View {
                 
                 VStack {
                     Text("QuickCal")
-                        .font(.largeTitle)
+                        .font(.title)
                         .fontWeight(.heavy)
                         .multilineTextAlignment(.center)
+                        .padding()
                     Divider()
                     Spacer()
-                    CircularProgressView(barColor: .blue, barWidth: 25, progressPercentage: kcalProgressPercentage)
-                        .frame(width: 120, height: 120)
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        CircularProgressView(barColor: .blue, barWidth: 21, progressPercentage: kcalProgressPercentage)
+                            .frame(width: 80, height: 100)
+                        Spacer()
+                        VStack {
+                            Text("Kalorien: 0 / \(mainViewModel.dailyCalories, specifier: "%.0f") kcal")
+                                .font(.callout)
+                                .multilineTextAlignment(.trailing)
+                            Text("Kohlenhydrate: 0 / \((mainViewModel.dailyCalories * 0.45 / 4), specifier: "%.0f") g")
+                                .font(.callout)
+                                .multilineTextAlignment(.trailing)
+                            Text("Proteine: 0 / \((mainViewModel.dailyCalories * 0.40 / 4), specifier: "%.0f") g")
+                                .font(.callout)
+                                .multilineTextAlignment(.trailing)
+                            Text("Fette: 0 / \((mainViewModel.dailyCalories * 0.15 / 9), specifier: "%.0f") g")
+                                .font(.callout)
+                                .multilineTextAlignment(.trailing)
+                        }
+                        
+                        Spacer()
+                    }
+        
+                    Spacer()
+                    Spacer()
                     Spacer()
                     HStack {
                         Spacer()
-                        CircularProgressView(barColor: .green, barWidth: 15, progressPercentage: carbohydrateProgressPercentage)
-                            .frame(width: 80, height: 80)
+                        CircularProgressView(barColor: .green, barWidth: 12, progressPercentage: carbohydrateProgressPercentage)
+                            .frame(width: 50, height: 50)
                         Spacer()
-                        CircularProgressView(barColor: .orange, barWidth: 15, progressPercentage: proteinProgressPercentage)
-                            .frame(width: 80, height: 80)
+                        CircularProgressView(barColor: .orange, barWidth: 12, progressPercentage: proteinProgressPercentage)
+                            .frame(width: 50, height: 50)
                         Spacer()
-                        CircularProgressView(barColor: .purple, barWidth: 15, progressPercentage: fatProgressPercentage)
-                            .frame(width: 80, height: 80)
+                        CircularProgressView(barColor: .purple, barWidth: 12, progressPercentage: fatProgressPercentage)
+                            .frame(width: 50, height: 50)
                         Spacer()
                     }
+                    Spacer()
+                    Spacer()
                     Spacer()
                     Divider()
-                    Spacer()
-                    Spacer()
                     
-                    Text("Dein täglicher Kalorienbedarf beträgt")
-                    Text("\(mainViewModel.dailyCalories, specifier: "%.0f") kcal")
-                        .font(.title2)
-                        .bold()
                     
-                    Button(action: {
-                        onboardingDone = false
-                    }) {
-                        Text("Reset Profile")
-                            .padding()
-                            .background(Color.red)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
+                    
+                    List {
+                        Section {
+                            Text("Bauernbrot")
+                            Text("Butter")
+                            Text("Nutella")
+                        } header: {
+                            Text("Frühstück")
+                        }
+                        Section {
+                            Text("Spaghetti")
+                            Text("Pesto")
+                        } header: {
+                            Text("Mittagessen")
+                        }
+                        Section {
+                            Text("Kartoffeln")
+                            Text("Brokkoli")
+                            Text("Rinderroulade")
+                        } header: {
+                            Text("Abendessen")
+                        }
+                        Section {
+                            Text("Kartoffelchips")
+                        } header: {
+                            Text("Snacks")
+                        }
+                        
                     }
+                    .listStyle(.inset)
+//                    .clipShape(RoundedRectangle(cornerRadius: 10))
+//                    .padding()
+                    
+                    
                     Spacer()
+                    Spacer()
+                    Spacer()
+                    Spacer()
+                    
                 }
+                
                 .navigationBarBackButtonHidden(true)
                 .onAppear {
                     //if-case for testing, as MainView doesnt contain user from onboarding
@@ -92,7 +144,9 @@ struct MainView: View {
             }
             .tabViewStyle(.page)
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+            
         }
+        
     }
     
     struct CircularProgressView: View {
@@ -114,12 +168,21 @@ struct MainView: View {
                         lineWidth: barWidth
                     )
                     .rotationEffect(Angle(degrees: -90))
-                Text("""
-                     \(progressPercentage, specifier: "%.2f")%
+                if (barWidth > 20) {
+                    Text("""
+                     \(Int(progressPercentage * 100))%
                      """)
-                .fontWeight(barWidth > 20 ? .bold : .regular)
-                
-                .multilineTextAlignment(.center)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                } else {
+                    Text("""
+                     \(Int(progressPercentage * 100))%
+                     """)
+                    .font(.footnote)
+                    .fontWeight(.regular)
+                    .multilineTextAlignment(.center)
+                }
+        
             }
         }
     }

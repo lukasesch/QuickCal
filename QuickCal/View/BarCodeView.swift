@@ -8,8 +8,23 @@
 import SwiftUI
 
 struct BarCodeView: View {
+    @AppStorage("onboarding") private var onboardingDone = false
+    
     var body: some View {
-        Text("Scanning product barcode will be added here")
+        VStack {
+            Text("Scanning product barcode will be added here")
+                                Button(action: {
+                                    onboardingDone = false
+                                }) {
+                                    Text("Reset Profile")
+                                        .padding()
+                                        .background(Color.red)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(8)
+                                }
+        }
+        
+        
     }
 }
 
