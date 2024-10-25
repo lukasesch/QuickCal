@@ -16,8 +16,13 @@ struct ProfileView: View {
     // Navigation to next View
     @State private var navigateToMainView = false
     
-    //Focus State for Decimal Pad not disappearing
-    @FocusState private var isKeyboardActive: Bool
+    //NEW FocusState for tracking focused field
+    @FocusState private var focusedField: Field?
+    
+    //NEW Enum for focus tracking
+    enum Field: Int, CaseIterable {
+        case name, age, weight, height, bodyFat
+    }
     
     @AppStorage("onboarding") private var onboardingDone = false
 
@@ -71,7 +76,7 @@ struct ProfileView: View {
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
                         .submitLabel(.done)
-                        .focused($isKeyboardActive)
+                        .focused($focusedField, equals: .name)
                 }
                 HStack {
                     Text("Alter:")
@@ -83,7 +88,7 @@ struct ProfileView: View {
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                        .focused($isKeyboardActive)
+                        .focused($focusedField, equals: .age)
                 }
                 HStack {
                     Text("Gewicht:")
@@ -95,7 +100,7 @@ struct ProfileView: View {
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                        .focused($isKeyboardActive)
+                        .focused($focusedField, equals: .weight)
                 }
                 HStack {
                     Text("Körpergröße:")
@@ -107,7 +112,7 @@ struct ProfileView: View {
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                        .focused($isKeyboardActive)
+                        .focused($focusedField, equals: .height)
                 }
                 HStack {
                     Text("Körperfettanteil: (optional)")
@@ -119,7 +124,7 @@ struct ProfileView: View {
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                        .focused($isKeyboardActive)
+                        .focused($focusedField, equals: .bodyFat)
                 }
                 
                 Divider()
@@ -180,7 +185,26 @@ struct ProfileView: View {
             }
             .padding()
             .onTapGesture {
-                isKeyboardActive = false
+                focusedField = nil
+            }
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Button(action: { moveFocus(-1) }) {
+                        Image(systemName: "chevron.up")
+                    }
+                    .disabled(focusedField == .name)
+                    
+                    Button(action: { moveFocus(1) }) {
+                        Image(systemName: "chevron.down")
+                    }
+                    .disabled(focusedField == .bodyFat)
+                    
+                    Spacer()
+                    
+                    Button("Fertig") {
+                        focusedField = nil
+                    }
+                }
             }
             .navigationBarBackButtonHidden(true)
             .navigationDestination(isPresented: $navigateToMainView) {
@@ -189,6 +213,16 @@ struct ProfileView: View {
             
             }
         }
+    }
+    
+    // Function to move focus between fields
+    private func moveFocus(_ direction: Int) {
+        guard let current = focusedField,
+              let newIndex = Field.allCases.firstIndex(of: current)?.advanced(by: direction),
+              Field.allCases.indices.contains(newIndex) else {
+            return
+        }
+        focusedField = Field.allCases[newIndex]
     }
 }
 
