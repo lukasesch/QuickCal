@@ -13,7 +13,7 @@ struct MainView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("onboarding") private var onboardingDone = false
     @State private var currentPage = 1
-    @State private var kcalProgressPercentage = 0.45
+    @State private var kcalProgressPercentage = 0.42
     @State private var carbohydrateProgressPercentage = 0.18
     @State private var proteinProgressPercentage = 0.37
     @State private var fatProgressPercentage = 0.11
@@ -31,60 +31,47 @@ struct MainView: View {
                 
                 
                 VStack {
-                    Text("QuickCal")
-                        .font(.title)
-                        .fontWeight(.heavy)
-                        .multilineTextAlignment(.center)
-                        .padding()
-                    Divider()
+                    HStack {
+                        Text("QuickCal")
+                            .font(.title)
+                            .fontWeight(.heavy)
+                            .multilineTextAlignment(.leading)
+                            .padding(.top, 5.0)
+                            .padding(.bottom, -2.0)
+                    }
+                    .padding(.horizontal, 25.0)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Spacer()
+                    Spacer()
                     Spacer()
                     Spacer()
                     
                     HStack {
                         Spacer()
-                        CircularProgressView(barColor: .blue, barWidth: 21, progressPercentage: kcalProgressPercentage)
-                            .frame(width: 80, height: 100)
-                        Spacer()
-                        VStack {
-                            Text("Kalorien: 0 / \(mainViewModel.dailyCalories, specifier: "%.0f") kcal")
-                                .font(.callout)
-                                .multilineTextAlignment(.trailing)
-                            Text("Kohlenhydrate: 0 / \((mainViewModel.dailyCalories * 0.45 / 4), specifier: "%.0f") g")
-                                .font(.callout)
-                                .multilineTextAlignment(.trailing)
-                            Text("Proteine: 0 / \((mainViewModel.dailyCalories * 0.40 / 4), specifier: "%.0f") g")
-                                .font(.callout)
-                                .multilineTextAlignment(.trailing)
-                            Text("Fette: 0 / \((mainViewModel.dailyCalories * 0.15 / 9), specifier: "%.0f") g")
-                                .font(.callout)
-                                .multilineTextAlignment(.trailing)
-                        }
-                        
+                        HalfCircularProgressView(barColor: .blue, barWidth: 20, progressPercentage: kcalProgressPercentage)
+                            .frame(width: 200, height: 200)
+                            
                         Spacer()
                     }
-        
-                    Spacer()
-                    Spacer()
-                    Spacer()
+                    .padding(.bottom, -40)
                     HStack {
                         Spacer()
-                        CircularProgressView(barColor: .green, barWidth: 12, progressPercentage: carbohydrateProgressPercentage)
-                            .frame(width: 50, height: 50)
                         Spacer()
-                        CircularProgressView(barColor: .orange, barWidth: 12, progressPercentage: proteinProgressPercentage)
-                            .frame(width: 50, height: 50)
+                        MacroBars(barColor: .green, barWidth: 90, barHeight: 15, progressPercentage: carbohydrateProgressPercentage, barName: "Kohlenhydrate")
                         Spacer()
-                        CircularProgressView(barColor: .purple, barWidth: 12, progressPercentage: fatProgressPercentage)
-                            .frame(width: 50, height: 50)
+                        MacroBars(barColor: .orange, barWidth: 90, barHeight: 15, progressPercentage: proteinProgressPercentage,
+                                  barName: "Protein")
+                        Spacer()
+                        MacroBars(barColor: .purple, barWidth: 90, barHeight: 15, progressPercentage: fatProgressPercentage,
+                                  barName: "Fett")
+                        Spacer()
                         Spacer()
                     }
+                    
                     Spacer()
                     Spacer()
-                    Spacer()
-                    Divider()
-                    
-                    
-                    
+    
                     List {
                         Section {
                             Text("Bauernbrot")
@@ -113,15 +100,18 @@ struct MainView: View {
                         }
                         
                     }
-                    .listStyle(.inset)
-//                    .clipShape(RoundedRectangle(cornerRadius: 10))
-//                    .padding()
+//                    .listStyle(.inset)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .padding()
+                    .shadow(radius: 10)
                     
                     
                     Spacer()
                     Spacer()
                     Spacer()
                     Spacer()
+                    
+                    
                     
                 }
                 
@@ -160,7 +150,6 @@ struct MainView: View {
                         barColor.opacity(0.4),
                         lineWidth: barWidth
                     )
-
                 Circle()
                     .trim(from: 0, to: progressPercentage)
                     .stroke(
@@ -183,6 +172,78 @@ struct MainView: View {
                     .multilineTextAlignment(.center)
                 }
         
+            }
+        }
+        
+    }
+    
+    struct HalfCircularProgressView: View {
+        var barColor: Color
+        var barWidth: CGFloat
+        var progressPercentage: CGFloat
+        var body: some View {
+            ZStack {
+                Circle()
+                    .trim(from: 0, to: 0.63)
+                    .stroke(
+                        barColor.opacity(0.25),
+                        style: StrokeStyle(lineWidth: barWidth, lineCap: .round))
+                    .rotationEffect(Angle(degrees: 159))
+                Circle()
+                    .trim(from: 0, to: 0.63 * progressPercentage)
+                    .stroke(
+                        barColor,
+                        style: StrokeStyle(lineWidth: barWidth, lineCap: .round))
+                    .rotationEffect(Angle(degrees: 159))
+                
+                VStack {
+                    Text("""
+                        1241
+                        """)
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                    
+                    Text("""
+                        kcal
+                        """)
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                    .padding(.bottom)
+                }
+            }
+        }
+    }
+    
+    struct MacroBars: View {
+        var barColor: Color
+        var barWidth: CGFloat
+        var barHeight: CGFloat
+        var progressPercentage: CGFloat
+        var barName: String
+        var body: some View {
+            VStack {
+                Text("\(barName)")
+                    .font(.footnote)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                ZStack (alignment: .leading) {
+                    Rectangle()
+                        .frame(width: barWidth, height: barHeight)
+                        .foregroundStyle(barColor)
+                        .opacity(0.25)
+                        .clipShape(.capsule)
+                    Rectangle()
+                        .frame(width: barWidth * progressPercentage, height: barHeight)
+                        .foregroundStyle(barColor)
+                        .clipShape(.capsule)
+                }
+                Text("81 / 131g")
+                    .font(.footnote)
+                    .fontWeight(.regular)
+                    .multilineTextAlignment(.center)
+                
             }
         }
     }
