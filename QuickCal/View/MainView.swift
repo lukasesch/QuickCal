@@ -58,13 +58,11 @@ struct MainView: View {
                     HStack {
                         Spacer()
                         Spacer()
-                        MacroBars(barColor: .green, barWidth: 90, barHeight: 12, progressPercentage: carbohydrateProgressPercentage, barName: "Kohlenhydrate")
+                        MacroBars(barColor: .green, barWidth: 90, barHeight: 12, targetProgress: (mainViewModel.dailyCalories * 0.40 / 4), progressPercentage: carbohydrateProgressPercentage, barName: "Kohlenhydrate")
                         Spacer()
-                        MacroBars(barColor: .orange, barWidth: 90, barHeight: 12, progressPercentage: proteinProgressPercentage,
-                                  barName: "Protein")
+                        MacroBars(barColor: .orange, barWidth: 90, barHeight: 12, targetProgress: (mainViewModel.dailyCalories * 0.30 / 4), progressPercentage: proteinProgressPercentage, barName: "Protein")
                         Spacer()
-                        MacroBars(barColor: .purple, barWidth: 90, barHeight: 12, progressPercentage: fatProgressPercentage,
-                                  barName: "Fett")
+                        MacroBars(barColor: .purple, barWidth: 90, barHeight: 12, targetProgress: (mainViewModel.dailyCalories * 0.30 / 9), progressPercentage: fatProgressPercentage, barName: "Fett")
                         Spacer()
                         Spacer()
                     }
@@ -222,6 +220,7 @@ struct MainView: View {
         var barColor: Color
         var barWidth: CGFloat
         var barHeight: CGFloat
+        var targetProgress: CGFloat
         var progressPercentage: CGFloat
         var barName: String
         var body: some View {
@@ -241,7 +240,7 @@ struct MainView: View {
                         .foregroundStyle(barColor)
                         .clipShape(.capsule)
                 }
-                Text("81 / 131g")
+                Text("\(String(format: "%.0f", (targetProgress * progressPercentage))) / \(String(format: "%.0f", targetProgress)) g")
                     .font(.footnote)
                     .fontWeight(.regular)
                     .multilineTextAlignment(.center)
