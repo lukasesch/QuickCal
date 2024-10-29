@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MainView: View {
     
-    @StateObject private var mainViewModel = MainViewModel()
+    @EnvironmentObject var mainViewModel: MainViewModel
     @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("onboarding") private var onboardingDone = false
     @State private var currentPage = 1
@@ -58,12 +58,12 @@ struct MainView: View {
                     HStack {
                         Spacer()
                         Spacer()
-                        MacroBars(barColor: .green, barWidth: 90, barHeight: 15, progressPercentage: carbohydrateProgressPercentage, barName: "Kohlenhydrate")
+                        MacroBars(barColor: .green, barWidth: 90, barHeight: 12, progressPercentage: carbohydrateProgressPercentage, barName: "Kohlenhydrate")
                         Spacer()
-                        MacroBars(barColor: .orange, barWidth: 90, barHeight: 15, progressPercentage: proteinProgressPercentage,
+                        MacroBars(barColor: .orange, barWidth: 90, barHeight: 12, progressPercentage: proteinProgressPercentage,
                                   barName: "Protein")
                         Spacer()
-                        MacroBars(barColor: .purple, barWidth: 90, barHeight: 15, progressPercentage: fatProgressPercentage,
+                        MacroBars(barColor: .purple, barWidth: 90, barHeight: 12, progressPercentage: fatProgressPercentage,
                                   barName: "Fett")
                         Spacer()
                         Spacer()
@@ -178,6 +178,7 @@ struct MainView: View {
     }
     
     struct HalfCircularProgressView: View {
+        @EnvironmentObject var mainViewModel: MainViewModel
         var barColor: Color
         var barWidth: CGFloat
         var progressPercentage: CGFloat
@@ -188,13 +189,13 @@ struct MainView: View {
                     .stroke(
                         barColor.opacity(0.25),
                         style: StrokeStyle(lineWidth: barWidth, lineCap: .round))
-                    .rotationEffect(Angle(degrees: 159))
+                    .rotationEffect(Angle(degrees: 157))
                 Circle()
                     .trim(from: 0, to: 0.63 * progressPercentage)
                     .stroke(
                         barColor,
                         style: StrokeStyle(lineWidth: barWidth, lineCap: .round))
-                    .rotationEffect(Angle(degrees: 159))
+                    .rotationEffect(Angle(degrees: 157))
                 
                 VStack {
                     Text("""
@@ -205,13 +206,14 @@ struct MainView: View {
                     .multilineTextAlignment(.center)
                     
                     Text("""
-                        kcal
+                        von
+                         \(String(format: "%.0f", mainViewModel.dailyCalories)) kcal
                         """)
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                     .padding(.bottom)
-                }
+                } 
             }
         }
     }
@@ -251,4 +253,5 @@ struct MainView: View {
 
 #Preview {
     MainView()
+        .environmentObject(MainViewModel())
 }
