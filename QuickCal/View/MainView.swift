@@ -117,7 +117,7 @@ struct MainView: View {
                 .onAppear {
                     //if-case for testing, as MainView doesnt contain user from onboarding
                     if onboardingDone == true {
-                        mainViewModel.fetchUser(context: viewContext)
+                        mainViewModel.checkAndCalculateDailyCalories(context: viewContext)
                     }
                 }
                 .tabItem { Text("Main View") }

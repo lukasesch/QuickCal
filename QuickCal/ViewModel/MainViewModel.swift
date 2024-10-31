@@ -45,7 +45,7 @@ class MainViewModel: ObservableObject {
                 fetchUser(context: context) // Holt den Benutzer, falls nicht bereits gesetzt
                 if let user = user {
                     calculateCalories(for: user)
-                    //saveDailyCalories(context: context, date: today, calories: dailyCalories)
+                    saveDailyCalories(context: context, date: today, calories: dailyCalories)
                 }
             } else {
                 // Eintrag für heute vorhanden, setze dailyCalories
@@ -87,6 +87,20 @@ class MainViewModel: ObservableObject {
             dailyCalories = dailyCalories + 250
         } else {
             print("Error: goal string has wrong value")
+        }
+    }
+    
+    func saveDailyCalories(context: NSManagedObjectContext, date: Date, calories: Double) {
+        let newKcal = Kcal(context: context)
+        newKcal.date = date
+        newKcal.kcalGoal = calories
+        newKcal.kcalReached = 0 // Setze `dailykcal_reached` auf 0, da der Tag gerade beginnt
+        
+        do {
+            try context.save()
+            print("Kalorien für heute gespeichert")
+        } catch {
+            print("Fehler beim Speichern der Kalorien: \(error)")
         }
     }
 }
