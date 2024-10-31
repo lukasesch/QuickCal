@@ -15,7 +15,7 @@ struct SettingsView: View {
     var body: some View {
         VStack() {
             Button(action: {
-                settingsViewModel.deleteAllEntries(for: "Kcal", in: viewContext)
+                settingsViewModel.deleteAllEntries(for: "User", in: viewContext)
                 onboardingDone = false
             }) {
                 Text("Reset Profile")
