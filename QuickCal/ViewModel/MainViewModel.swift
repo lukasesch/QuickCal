@@ -9,7 +9,14 @@ import Foundation
 import CoreData
 
 class MainViewModel: ObservableObject {
-    @Published var dailyCalories: Double = 0
+    @Published var kcalGoal: Double = 0
+    @Published var kcalReached: Double = 0
+    @Published var carbsGoal: Int = 0
+    @Published var carbsReached: Int = 0
+    @Published var proteinGoal: Int = 0
+    @Published var proteinReached: Int = 0
+    @Published var fatGoal: Int = 0
+    @Published var fatReached: Int = 0
     @Published var user: User?
         
     func fetchUser(context: NSManagedObjectContext) {
@@ -21,7 +28,7 @@ class MainViewModel: ObservableObject {
             //App needs to check if user already exists - for now while testing it always gets the last user
             if let lastUser = users.last {
                 self.user = lastUser
-                calculateCalories(for: lastUser)
+                //calculateCalories(for: lastUser)
             } else {
                 print("No user found")
             }
@@ -44,19 +51,26 @@ class MainViewModel: ObservableObject {
                 // Kein Eintrag für heute vorhanden, also berechnen und speichern
                 fetchUser(context: context) // Holt den Benutzer, falls nicht bereits gesetzt
                 if let user = user {
-                    calculateCalories(for: user)
-                    saveDailyCalories(context: context, date: today, calories: dailyCalories)
+                    calculateKcal(for: user)
+                    saveKcalDB(context: context, date: today, calories: kcalGoal, carbs: carbsGoal, protein: proteinGoal, fat: fatGoal)
                 }
             } else {
                 // Eintrag für heute vorhanden, setze dailyCalories
-                dailyCalories = results.first?.kcalGoal ?? 0
+                kcalGoal = results.first?.kcalGoal ?? 0
+                kcalReached = results.first?.kcalReached ?? 0
+                carbsGoal = Int(results.first?.carbsGoal ?? 0)
+                carbsReached = Int(results.first?.carbsReached ?? 0)
+                proteinGoal = Int(results.first?.proteinGoal ?? 0)
+                proteinReached = Int(results.first?.proteinReached ?? 0)
+                fatGoal = Int(results.first?.fatGoal ?? 0)
+                fatReached = Int(results.first?.fatReached ?? 0)
             }
         } catch {
             print("Fehler beim Abrufen der Kalorien für heute: \(error)")
         }
     }
     
-    func calculateCalories(for user: User) {
+    func calculateKcal(for user: User) {
         guard let gender = user.gender else {
             print("Error: Gender is nil")
             return
@@ -67,34 +81,46 @@ class MainViewModel: ObservableObject {
             let weightFactor = 13.7 * Double(user.weight)
             let heightFactor = 5.0 * Double(user.height)
             let ageFactor = 6.8 * Double(user.age)
-            dailyCalories = Double(user.activity) * (66.47 + weightFactor + heightFactor - ageFactor)
+            kcalGoal = Double(user.activity) * (66.47 + weightFactor + heightFactor - ageFactor)
             
         } else if gender == "weiblich" {
             // Weiblich: Grundumsatz (kcal/Tag) = 655,1 + (9,6 × Gewicht in kg) + (1,8 × Größe in cm) − (4,7 × Alter in Jahren)
             let weightFactor = 9.6 * Double(user.weight)
             let heightFactor = 1.8 * Double(user.height)
             let ageFactor = 4.7 * Double(user.age)
-            dailyCalories = Double(user.activity) * (655.1 + weightFactor + heightFactor - ageFactor)
+            kcalGoal = Double(user.activity) * (655.1 + weightFactor + heightFactor - ageFactor)
         } else {
             print("Error in calculating Calories")
         }
         
         if user.goal == 0 {
-            dailyCalories = dailyCalories - 250
+            kcalGoal = kcalGoal - 250
         } else if user.goal == 1 {
-            dailyCalories = dailyCalories
+            kcalGoal = kcalGoal
         } else if user.goal == 2 {
-            dailyCalories = dailyCalories + 250
+            kcalGoal = kcalGoal + 250
         } else {
             print("Error: goal string has wrong value")
         }
+        
+        //Calculate Macros (rounded as accuracy not needed)
+        carbsGoal = Int((kcalGoal * 0.40 / 4).rounded())
+        proteinGoal = Int((kcalGoal * 0.30 / 4).rounded())
+        fatGoal = Int((kcalGoal * 0.30 / 9).rounded())
     }
     
-    func saveDailyCalories(context: NSManagedObjectContext, date: Date, calories: Double) {
+    func saveKcalDB(context: NSManagedObjectContext, date: Date, calories: Double, carbs: Int, protein: Int, fat: Int) {
         let newKcal = Kcal(context: context)
         newKcal.date = date
         newKcal.kcalGoal = calories
         newKcal.kcalReached = 0 // Setze `dailykcal_reached` auf 0, da der Tag gerade beginnt
+        newKcal.carbsGoal = Int16(carbs)
+        newKcal.carbsReached = 0
+        newKcal.proteinGoal = Int16(protein)
+        newKcal.proteinReached = 0
+        newKcal.fatGoal = Int16(fat)
+        newKcal.fatReached = 0
+
         
         do {
             try context.save()

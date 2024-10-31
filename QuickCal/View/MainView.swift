@@ -13,10 +13,22 @@ struct MainView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("onboarding") private var onboardingDone = false
     @State private var currentPage = 1
-    @State private var kcalProgressPercentage = 0.42
-    @State private var carbohydrateProgressPercentage = 0.18
-    @State private var proteinProgressPercentage = 0.37
-    @State private var fatProgressPercentage = 0.11
+    var kcalProgressPercentage: Double {
+        guard mainViewModel.kcalGoal > 0 else { return 0 }
+        return 1.0 - ((mainViewModel.kcalGoal - mainViewModel.kcalReached) / mainViewModel.kcalGoal)
+    }
+    var carbsProgressPercentage: Double {
+        guard mainViewModel.carbsGoal > 0 else { return 0 }
+        return 1.0 - ((Double(mainViewModel.carbsGoal) - Double(mainViewModel.carbsReached)) / Double(mainViewModel.carbsGoal))
+    }
+    var proteinProgressPercentage: Double {
+        guard mainViewModel.proteinGoal > 0 else { return 0 }
+        return 1.0 - ((Double(mainViewModel.proteinGoal) - Double(mainViewModel.proteinReached)) / Double(mainViewModel.proteinGoal))
+    }
+    var fatProgressPercentage: Double {
+        guard mainViewModel.fatGoal > 0 else { return 0 }
+        return 1.0 - ((Double(mainViewModel.fatGoal) - Double(mainViewModel.fatReached)) / Double(mainViewModel.fatGoal))
+    }
 
 
     
@@ -58,11 +70,11 @@ struct MainView: View {
                     HStack {
                         Spacer()
                         Spacer()
-                        MacroBars(barColor: .green, barWidth: 90, barHeight: 12, targetProgress: (mainViewModel.dailyCalories * 0.40 / 4), progressPercentage: carbohydrateProgressPercentage, barName: "Kohlenhydrate")
+                        MacroBars(barColor: .green, barWidth: 90, barHeight: 12, goal: mainViewModel.carbsGoal, progressPercentage: carbsProgressPercentage, barName: "Kohlenhydrate")
                         Spacer()
-                        MacroBars(barColor: .orange, barWidth: 90, barHeight: 12, targetProgress: (mainViewModel.dailyCalories * 0.30 / 4), progressPercentage: proteinProgressPercentage, barName: "Protein")
+                        MacroBars(barColor: .orange, barWidth: 90, barHeight: 12, goal: mainViewModel.proteinGoal, progressPercentage: proteinProgressPercentage, barName: "Protein")
                         Spacer()
-                        MacroBars(barColor: .purple, barWidth: 90, barHeight: 12, targetProgress: (mainViewModel.dailyCalories * 0.30 / 9), progressPercentage: fatProgressPercentage, barName: "Fett")
+                        MacroBars(barColor: .purple, barWidth: 90, barHeight: 12, goal: mainViewModel.fatGoal, progressPercentage: fatProgressPercentage, barName: "Fett")
                         Spacer()
                         Spacer()
                     }
@@ -197,7 +209,7 @@ struct MainView: View {
                 
                 VStack {
                     Text("""
-                        1241
+                        \(String(format: "%.0f", mainViewModel.kcalReached))
                         """)
                     .font(.largeTitle)
                     .fontWeight(.bold)
@@ -205,7 +217,7 @@ struct MainView: View {
                     
                     Text("""
                         von
-                         \(String(format: "%.0f", mainViewModel.dailyCalories)) kcal
+                         \(String(format: "%.0f", mainViewModel.kcalGoal)) kcal
                         """)
                     .font(.subheadline)
                     .fontWeight(.bold)
@@ -220,8 +232,8 @@ struct MainView: View {
         var barColor: Color
         var barWidth: CGFloat
         var barHeight: CGFloat
-        var targetProgress: CGFloat
-        var progressPercentage: CGFloat
+        var goal: Int
+        var progressPercentage: Double
         var barName: String
         var body: some View {
             VStack {
@@ -240,7 +252,7 @@ struct MainView: View {
                         .foregroundStyle(barColor)
                         .clipShape(.capsule)
                 }
-                Text("\(String(format: "%.0f", (targetProgress * progressPercentage))) / \(String(format: "%.0f", targetProgress)) g")
+                Text("\(String(format: "%.0f", (Double(goal) * progressPercentage))) / \(goal) g")
                     .font(.footnote)
                     .fontWeight(.regular)
                     .multilineTextAlignment(.center)
