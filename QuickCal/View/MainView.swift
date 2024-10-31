@@ -13,6 +13,7 @@ struct MainView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("onboarding") private var onboardingDone = false
     @State private var currentPage = 1
+    @State private var showingSettings = false
     
     // Percentage is calculated 'on the fly'
     var kcalProgressPercentage: Double {
@@ -52,6 +53,18 @@ struct MainView: View {
                             .multilineTextAlignment(.leading)
                             .padding(.top, 5.0)
                             .padding(.bottom, -2.0)
+                        Spacer()
+                        
+                        Button(action: {
+                            showingSettings.toggle()
+                        }) {
+                            Image(systemName: "gearshape")
+                                .font(.title2)
+                                .foregroundColor(.primary)
+                        }
+                        .sheet(isPresented: $showingSettings) {
+                            SettingsView()
+                        }
                     }
                     .padding(.horizontal, 25.0)
                     .frame(maxWidth: .infinity, alignment: .leading)

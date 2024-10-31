@@ -20,10 +20,12 @@ struct QuickCalApp: App {
                 MainView()
                     .environment(\.managedObjectContext, persistenceController.container.viewContext)
                     .environmentObject(mainViewModel)
+                    .environmentObject(SettingsVideoModel())
             } else {
                 WelcomeView()
                     .environment(\.managedObjectContext, persistenceController.container.viewContext)
                     .environmentObject(mainViewModel)
+                    .environmentObject(SettingsVideoModel())
             }
             
         }
