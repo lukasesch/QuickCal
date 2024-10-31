@@ -139,18 +139,23 @@ struct MainView: View {
                     
                     
                 }
-                
                 .navigationBarBackButtonHidden(true)
                 .onAppear {
-                    //if-case for testing, as MainView doesnt contain user from onboarding
-                    if onboardingDone == true {
+                    //Preview debugging as no user exists here
+                    if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+                        mainViewModel.kcalGoal = 2000
+                        mainViewModel.kcalReached = 0
+                        mainViewModel.carbsGoal = 200
+                        mainViewModel.proteinGoal = 100
+                        mainViewModel.fatGoal = 70
+                    } else {
                         mainViewModel.checkAndCalculateDailyCalories(context: viewContext)
+                        print("MainView: checkAndCalculateDailyCalories run!")
                     }
+                    
                 }
-                .tabItem { Text("Main View") }
+                //.tabItem { Text("Main View") }
                 .tag(1)
-                
-                
                 
                 // Add Item View
                 AddItemView()

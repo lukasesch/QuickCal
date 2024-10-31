@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct AddItemView: View {
+    
+    @State private var showCreatePanel = false
+    
     var body: some View {
         VStack {
             HStack {
@@ -21,7 +24,9 @@ struct AddItemView: View {
             .padding(.horizontal, 25.0)
             .frame(maxWidth: .infinity, alignment: .leading)
             VStack {
-                Button(action: {}) {
+                Button(action: {
+                    
+                }) {
                     Text("Hinzufügen")
                         .font(.title2)
                         .frame(maxWidth: .infinity, maxHeight: 80)
@@ -32,8 +37,11 @@ struct AddItemView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(.blue)
                 HStack {
-                    Button(action: {}) {
+                    Button(action: {
+                        showCreatePanel.toggle()
+                    }) {
                         Text("Lebensmittel erstellen")
+                            .font(.subheadline)
                             .frame(maxWidth: .infinity, maxHeight: 40)
                             .fontWeight(.semibold)
                             .padding()
@@ -41,8 +49,15 @@ struct AddItemView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.blue)
+                    .sheet(isPresented: $showCreatePanel) {
+                        CreatePanelView()
+                    }
                     Button(action: {}) {
-                        Text("Gericht erstellen")
+                        Text("""
+                            Gericht 
+                            erstellen
+                            """)
+                            .font(.subheadline)
                             .frame(maxWidth: .infinity, maxHeight: 40)
                             .fontWeight(.semibold)
                             .padding()
@@ -51,12 +66,14 @@ struct AddItemView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(.blue)
                 }
+                Spacer()
                 Text("Zuletzt hinzugefügt:")
+                Spacer()
             }
             .padding()
             
         }
-        Spacer()
+        //Spacer()
     }
 }
 

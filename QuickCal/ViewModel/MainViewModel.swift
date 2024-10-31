@@ -43,11 +43,12 @@ class MainViewModel: ObservableObject {
         
         // Check if there is already a Kcal entry in the DB for current Day
         let fetchRequest: NSFetchRequest<Kcal> = Kcal.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "date == %@", today as NSDate)
+        fetchRequest.predicate = NSPredicate(format: "date >= %@ AND date < %@", today as NSDate, Calendar.current.date(byAdding: .day, value: 1, to: today)! as NSDate)
         
         do {
             let results = try context.fetch(fetchRequest)
             if results.isEmpty {
+                print("Kcal is empty")
                 // No entry there, so get user and calculate Kcal entry
                 fetchUser(context: context)
                 if let user = user {
@@ -55,6 +56,7 @@ class MainViewModel: ObservableObject {
                     saveKcalDB(context: context, date: today, calories: kcalGoal, carbs: carbsGoal, protein: proteinGoal, fat: fatGoal)
                 }
             } else {
+                print ("Getting kcal")
                 // Get data from current day Kcal entry
                 kcalGoal = results.first?.kcalGoal ?? 0
                 kcalReached = results.first?.kcalReached ?? 0
