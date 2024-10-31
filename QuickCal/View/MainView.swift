@@ -13,6 +13,8 @@ struct MainView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("onboarding") private var onboardingDone = false
     @State private var currentPage = 1
+    
+    // Percentage is calculated 'on the fly'
     var kcalProgressPercentage: Double {
         guard mainViewModel.kcalGoal > 0 else { return 0 }
         return 1.0 - ((mainViewModel.kcalGoal - mainViewModel.kcalReached) / mainViewModel.kcalGoal)

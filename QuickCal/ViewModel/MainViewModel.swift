@@ -38,24 +38,24 @@ class MainViewModel: ObservableObject {
     }
     
     func checkAndCalculateDailyCalories(context: NSManagedObjectContext) {
-        // Heutiges Datum ohne Zeitkomponente
+        // Current Date
         let today = Calendar.current.startOfDay(for: Date())
         
-        // Prüfen, ob bereits ein Eintrag für heute in der `Kcal`-Entität vorhanden ist
+        // Check if there is already a Kcal entry in the DB for current Day
         let fetchRequest: NSFetchRequest<Kcal> = Kcal.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "date == %@", today as NSDate)
         
         do {
             let results = try context.fetch(fetchRequest)
             if results.isEmpty {
-                // Kein Eintrag für heute vorhanden, also berechnen und speichern
-                fetchUser(context: context) // Holt den Benutzer, falls nicht bereits gesetzt
+                // No entry there, so get user and calculate Kcal entry
+                fetchUser(context: context)
                 if let user = user {
                     calculateKcal(for: user)
                     saveKcalDB(context: context, date: today, calories: kcalGoal, carbs: carbsGoal, protein: proteinGoal, fat: fatGoal)
                 }
             } else {
-                // Eintrag für heute vorhanden, setze dailyCalories
+                // Get data from current day Kcal entry
                 kcalGoal = results.first?.kcalGoal ?? 0
                 kcalReached = results.first?.kcalReached ?? 0
                 carbsGoal = Int(results.first?.carbsGoal ?? 0)
@@ -113,7 +113,7 @@ class MainViewModel: ObservableObject {
         let newKcal = Kcal(context: context)
         newKcal.date = date
         newKcal.kcalGoal = calories
-        newKcal.kcalReached = 0 // Setze `dailykcal_reached` auf 0, da der Tag gerade beginnt
+        newKcal.kcalReached = 0 // Set to 0 again as new day in Kcal DB
         newKcal.carbsGoal = Int16(carbs)
         newKcal.carbsReached = 0
         newKcal.proteinGoal = Int16(protein)
