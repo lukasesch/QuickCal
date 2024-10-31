@@ -11,7 +11,7 @@ import CoreData
 class MainViewModel: ObservableObject {
     @Published var dailyCalories: Double = 0
     @Published var user: User?
-    
+        
     func fetchUser(context: NSManagedObjectContext) {
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
         
@@ -30,13 +30,35 @@ class MainViewModel: ObservableObject {
         }
     }
     
+    func checkAndCalculateDailyCalories(context: NSManagedObjectContext) {
+        // Heutiges Datum ohne Zeitkomponente
+        let today = Calendar.current.startOfDay(for: Date())
+        
+        // Prüfen, ob bereits ein Eintrag für heute in der `Kcal`-Entität vorhanden ist
+        let fetchRequest: NSFetchRequest<Kcal> = Kcal.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "date == %@", today as NSDate)
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            if results.isEmpty {
+                // Kein Eintrag für heute vorhanden, also berechnen und speichern
+                fetchUser(context: context) // Holt den Benutzer, falls nicht bereits gesetzt
+                if let user = user {
+                    calculateCalories(for: user)
+                    //saveDailyCalories(context: context, date: today, calories: dailyCalories)
+                }
+            } else {
+                // Eintrag für heute vorhanden, setze dailyCalories
+                dailyCalories = results.first?.kcalGoal ?? 0
+            }
+        } catch {
+            print("Fehler beim Abrufen der Kalorien für heute: \(error)")
+        }
+    }
+    
     func calculateCalories(for user: User) {
         guard let gender = user.gender else {
             print("Error: Gender is nil")
-            return
-        }
-        guard let goal = user.goal else {
-            print("Error: Goal is nil")
             return
         }
         
@@ -57,11 +79,11 @@ class MainViewModel: ObservableObject {
             print("Error in calculating Calories")
         }
         
-        if goal == "abnehmen" {
+        if user.goal == 0 {
             dailyCalories = dailyCalories - 250
-        } else if goal == "halten" {
+        } else if user.goal == 1 {
             dailyCalories = dailyCalories
-        } else if goal == "zunehmen" {
+        } else if user.goal == 2 {
             dailyCalories = dailyCalories + 250
         } else {
             print("Error: goal string has wrong value")

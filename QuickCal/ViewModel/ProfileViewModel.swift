@@ -47,7 +47,14 @@ final class ProfileViewModel: ObservableObject {
             user?.activity = 1.9
         }
         
-        user?.goal = goal
+        if goal == "abnehmen" {
+            user?.goal = 0
+        } else if goal == "halten" {
+            user?.goal = 1
+        } else if goal == "zunehmen" {
+            user?.goal = 2
+        }
+        
         
         //Speichern
         do {
