@@ -16,6 +16,11 @@ struct CreatePanelView: View {
     @State private var proteinTF = ""
     @State private var fatTF = ""
     
+    @Environment(\.managedObjectContext) private var viewContext    
+    @StateObject private var createPanelViewModel = CreatePanelViewModel()
+    
+    @Binding var showCreatePanel: Bool
+    
     //NEW FocusState for tracking focused field
     @FocusState private var focusedField: Field?
     //NEW Enum for focus tracking
@@ -131,7 +136,10 @@ struct CreatePanelView: View {
             }
             Divider()
             HStack {
-                Button(action: {}) {
+                Button(action: {
+                    createPanelViewModel.createFood(context: viewContext, name: nameTF, defaultQuantity: defaultQuantityTF, unit: unit, calories: caloriesTF, carbs: carbsTF, protein: proteinTF, fat: fatTF)
+                    showCreatePanel.toggle()
+                }) {
                     Text("Erstellen")
                         .frame(maxWidth: .infinity)
                         .fontWeight(.bold)
@@ -188,5 +196,5 @@ struct CreatePanelView: View {
 }
 
 #Preview {
-    CreatePanelView()
+    CreatePanelView(showCreatePanel: .constant(false))
 }

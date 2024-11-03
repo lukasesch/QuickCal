@@ -6,9 +6,13 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct AddItemView: View {
     
+    @Environment(\.managedObjectContext) private var managedObjectContext
+    @FetchRequest(entity: Food.entity(), sortDescriptors: [NSSortDescriptor(keyPath: \Food.name, ascending: true)]
+    ) var foodItems: FetchedResults<Food>
     @State private var showCreatePanel = false
     
     var body: some View {
@@ -50,7 +54,7 @@ struct AddItemView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(.blue)
                     .sheet(isPresented: $showCreatePanel) {
-                        CreatePanelView()
+                        CreatePanelView(showCreatePanel: $showCreatePanel)
                     }
                     Button(action: {}) {
                         Text("""
@@ -68,6 +72,21 @@ struct AddItemView: View {
                 }
                 Spacer()
                 Text("Zuletzt hinzugefügt:")
+                List(foodItems) { food in
+                    HStack {
+                        Text(food.name ?? "Unbekannt")
+                        Spacer()
+                        Text("\(food.kcal) kcal")
+                        Spacer()
+                        Text(" | ")
+                        Spacer()
+                        Text("C: \(String(format: "%.1f", food.carbohydrate))")
+                        Spacer()
+                        Text("P: \(String(format: "%.1f", food.protein))")
+                        Spacer()
+                        Text("F: \(String(format: "%.1f", food.fat))")
+                    }
+                }
                 Spacer()
             }
             .padding()

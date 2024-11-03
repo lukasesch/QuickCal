@@ -24,6 +24,17 @@ struct SettingsView: View {
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
+            Button(action: {
+                settingsViewModel.deleteAllEntries(for: "Food", in: viewContext)
+                
+            }) {
+                Text("Reset Food Entries")
+                    .padding()
+                    .background(Color.red)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+            
         }
     }
 }
