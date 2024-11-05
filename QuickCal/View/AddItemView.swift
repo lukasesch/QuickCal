@@ -26,6 +26,7 @@ struct AddItemView: View {
                     .padding(.bottom, -2.0)
             }
             .padding(.horizontal, 25.0)
+            .padding(.top, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
             VStack {
                 Button(action: {

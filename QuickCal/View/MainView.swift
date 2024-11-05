@@ -14,8 +14,10 @@ struct MainView: View {
     @AppStorage("onboarding") private var onboardingDone = false
     @State private var currentPage = 1
     @State private var showingSettings = false
+    @State private var showAddTrackedFoodPanel = false
     
     // Percentage is calculated 'on the fly'
+    // To-Do: Move into ViewModel?
     var kcalProgressPercentage: Double {
         guard mainViewModel.kcalGoal > 0 else { return 0 }
         return 1.0 - ((mainViewModel.kcalGoal - mainViewModel.kcalReached) / mainViewModel.kcalGoal)
@@ -60,24 +62,25 @@ struct MainView: View {
                         }) {
                             Image(systemName: "gearshape")
                                 .font(.title2)
-                                .foregroundColor(.primary)
+                                .foregroundColor(.blue)
                         }
                         .sheet(isPresented: $showingSettings) {
                             SettingsView()
                         }
                     }
                     .padding(.horizontal, 25.0)
+                    .padding(.top, 10)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     
                     Spacer()
                     Spacer()
                     Spacer()
-                    Spacer()
+                    //Spacer()
                     
                     HStack {
                         Spacer()
-                        HalfCircularProgressView(barColor: .blue, barWidth: 20, progressPercentage: kcalProgressPercentage)
-                            .frame(width: 200, height: 200)
+                        HalfCircularProgressView(barColor: .blue, barWidth: 18, progressPercentage: kcalProgressPercentage)
+                            .frame(width: 180, height: 200)
                             
                         Spacer()
                     }
@@ -95,40 +98,152 @@ struct MainView: View {
                     }
                     
                     Spacer()
-                    Spacer()
     
                     List {
                         Section {
-                            Text("Bauernbrot")
+                            HStack {
+                                Text("Bauernbrot")
+                                Spacer()
+                                Text("121 kcal")
+                                    .fontWeight(.light)
+                            }
                             Text("Butter")
                             Text("Nutella")
                         } header: {
-                            Text("Frühstück")
+                            VStack {
+                                HStack {
+                                    Text("Frühstück")
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                    Button(action: {
+                                        showAddTrackedFoodPanel.toggle()
+                                    }) {
+                                        Image(systemName: "plus")
+                                            .fontWeight(.semibold)
+                                    }
+                                    .sheet(isPresented: $showAddTrackedFoodPanel) {
+                                        AddTrackedFoodView(showAddTrackedFoodPanel: $showAddTrackedFoodPanel)
+                                    }
+                                }
+                                Divider()
+                                HStack {
+                                    Text("Kcal:")
+                                    Spacer()
+                                    Text("Carbs:")
+                                    Spacer()
+                                    Text("Protein:")
+                                    Spacer()
+                                    Text("Fat:")
+                                    Spacer()
+                                }
+                                .font(.footnote)
+                            }
                         }
                         Section {
                             Text("Spaghetti")
                             Text("Pesto")
                         } header: {
-                            Text("Mittagessen")
+                            VStack {
+                                HStack {
+                                    Text("Mittagessen")
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                    Button(action: {
+                                        showAddTrackedFoodPanel.toggle()
+                                    }) {
+                                        Image(systemName: "plus")
+                                            .fontWeight(.semibold)
+                                    }
+                                    .sheet(isPresented: $showAddTrackedFoodPanel) {
+                                        AddTrackedFoodView(showAddTrackedFoodPanel: $showAddTrackedFoodPanel)
+                                    }
+                                }
+                                Divider()
+                                HStack {
+                                    Text("Kcal:")
+                                    Spacer()
+                                    Text("Carbs:")
+                                    Spacer()
+                                    Text("Protein:")
+                                    Spacer()
+                                    Text("Fat:")
+                                    Spacer()
+                                }
+                                .font(.footnote)
+                            }
                         }
                         Section {
                             Text("Kartoffeln")
                             Text("Brokkoli")
                             Text("Rinderroulade")
                         } header: {
-                            Text("Abendessen")
+                            VStack {
+                                HStack {
+                                    Text("Abendessen")
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                    Button(action: {
+                                        showAddTrackedFoodPanel.toggle()
+                                    }) {
+                                        Image(systemName: "plus")
+                                            .fontWeight(.semibold)
+                                    }
+                                    .sheet(isPresented: $showAddTrackedFoodPanel) {
+                                        AddTrackedFoodView(showAddTrackedFoodPanel: $showAddTrackedFoodPanel)
+                                    }
+                                }
+                                Divider()
+                                HStack {
+                                    Text("Kcal:")
+                                    Spacer()
+                                    Text("Carbs:")
+                                    Spacer()
+                                    Text("Protein:")
+                                    Spacer()
+                                    Text("Fat:")
+                                    Spacer()
+                                }
+                                .font(.footnote)
+                            }
                         }
                         Section {
                             Text("Kartoffelchips")
                         } header: {
-                            Text("Snacks")
+                            VStack {
+                                HStack {
+                                    Text("Snacks")
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                    Button(action: {
+                                        showAddTrackedFoodPanel.toggle()
+                                    }) {
+                                        Image(systemName: "plus")
+                                            .fontWeight(.semibold)
+                                    }
+                                    .sheet(isPresented: $showAddTrackedFoodPanel) {
+                                        AddTrackedFoodView(showAddTrackedFoodPanel: $showAddTrackedFoodPanel)
+                                    }
+                                }
+                                Divider()
+                                HStack {
+                                    Text("Kcal:")
+                                    Spacer()
+                                    Text("Carbs:")
+                                    Spacer()
+                                    Text("Protein:")
+                                    Spacer()
+                                    Text("Fat:")
+                                    Spacer()
+                                }
+                                .font(.footnote)
+                            }
                         }
                         
                     }
-//                    .listStyle(.inset)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .listStyle(.grouped)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                     .padding()
-                    .shadow(radius: 10)
+                    .shadow(radius: 5)
                     
                     
                     Spacer()
@@ -161,11 +276,15 @@ struct MainView: View {
                 AddItemView()
                     .tabItem { Text("Add Item") } // TabItem für AddItemView
                     .tag(2)
+                
             }
             .tabViewStyle(.page)
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+            .padding(.bottom, 10)
+            .ignoresSafeArea(.container, edges: .bottom)
             
         }
+        
         
     }
     
