@@ -27,7 +27,7 @@ final class ProfileViewModel: ObservableObject {
     func validateInput(name: String, age: String, weight: String, height: String) -> Bool {
         guard !name.isEmpty,
               let _ = Int(age),
-              let _ = Float(weight),
+              let _ = Float(weight.replacingOccurrences(of: ",", with: ".")),
               let _ = Int(height)
         else {
             errorMessage = ErrorMessage(message: "Bitte alle Felder ausfüllen")
@@ -51,7 +51,7 @@ final class ProfileViewModel: ObservableObject {
             user?.age = ageInt
         }
         
-        if let weightFloat = Float(weight) {
+        if let weightFloat = Float(weight.replacingOccurrences(of: ",", with: ".")) {
             user?.weight = weightFloat
         }
         
@@ -59,7 +59,7 @@ final class ProfileViewModel: ObservableObject {
             user?.height = heightInt
         }
         
-        if let bodyFatString = bodyFat, let bodyFatFloat = Float(bodyFatString) {
+        if let bodyFatString = bodyFat, let bodyFatFloat = Float(bodyFatString.replacingOccurrences(of: ",", with: ".")) {
             user?.bodyfat = bodyFatFloat
         }
         

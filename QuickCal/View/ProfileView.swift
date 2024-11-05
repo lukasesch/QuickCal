@@ -80,7 +80,7 @@ struct ProfileView: View {
                         .font(.headline)
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
-                        .keyboardType(.decimalPad)
+                        .keyboardType(.numberPad)
                         .focused($focusedField, equals: .age)
                 }
                 HStack {
@@ -104,7 +104,7 @@ struct ProfileView: View {
                         .font(.headline)
                         .foregroundColor(.black)
                         .multilineTextAlignment(.trailing)
-                        .keyboardType(.decimalPad)
+                        .keyboardType(.numberPad)
                         .focused($focusedField, equals: .height)
                 }
                 HStack {
