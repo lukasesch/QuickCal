@@ -10,23 +10,12 @@ import CoreData
 
 struct ProfileView: View {
     // CoreData
-    @Environment(\.managedObjectContext) private var viewContext
+    // UPDATE @Environment(\.managedObjectContext) private var viewContext
     // Connect View mit ViewModel
-    @StateObject private var profileviewModel = ProfileViewModel()
-    // Navigation to next View
-    @State private var navigateToMainView = false
-    
-    //NEW FocusState for tracking focused field
+    @EnvironmentObject private var profileviewModel: ProfileViewModel
     @FocusState private var focusedField: Field?
-    
-    //NEW Enum for focus tracking
-    enum Field: Int, CaseIterable {
-        case name, age, weight, height, bodyFat
-    }
-    
     @AppStorage("onboarding") private var onboardingDone = false
-
-    // States
+    
     @State private var gender: String = "weiblich"
     @State private var nameTF: String = ""
     @State private var ageTF: String = ""
@@ -35,6 +24,10 @@ struct ProfileView: View {
     @State private var bodyFatTF: String = ""
     @State private var activityLevel: String = "etwas"
     @State private var goal: String = "halten"
+
+    enum Field: Int, CaseIterable {
+        case name, age, weight, height, bodyFat
+    }
 
     //Body
     var body: some View {
@@ -168,10 +161,14 @@ struct ProfileView: View {
                 Spacer()
                 
                 Button(action: {
-                    let bodyFatValue = bodyFatTF.isEmpty ? nil : bodyFatTF
-                    profileviewModel.updateUser(context: viewContext, gender: gender, name: nameTF, age: ageTF, weight: weightTF, height: heightTF, bodyFat: bodyFatValue, activityLevel: activityLevel, goal: goal)
-                    onboardingDone = true
-                    navigateToMainView = true
+                    if profileviewModel.validateInput(name: nameTF, age: ageTF, weight: weightTF, height: heightTF) {
+                        let bodyFatValue = bodyFatTF.isEmpty ? nil : bodyFatTF
+                        profileviewModel.updateUser(gender: gender, name: nameTF, age: ageTF, weight: weightTF, height: heightTF, bodyFat: bodyFatValue, activityLevel: activityLevel, goal: goal)
+                        onboardingDone = true
+                    } else {
+                        // Inputs incorrect
+                        print("Eingaben sind ungültig")
+                    }
                 }) {
                     Text("Weiter")
                         .frame(maxWidth: .infinity)
@@ -207,10 +204,13 @@ struct ProfileView: View {
                 }
             }
             .navigationBarBackButtonHidden(true)
-            .navigationDestination(isPresented: $navigateToMainView) {
+            .navigationDestination(isPresented: $profileviewModel.navigateToMainView) {
                 MainView() // Ziel-View, die nach Navigation angezeigt wird
                     .environmentObject(profileviewModel)
             
+            }
+            .alert(item: $profileviewModel.errorMessage) { errorMessage in
+                Alert(title: Text("Fehler"), message: Text(errorMessage.message), dismissButton: .default(Text("OK")))
             }
         }
     }
@@ -228,5 +228,8 @@ struct ProfileView: View {
 
 
 #Preview {
-    ProfileView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    let context = PersistenceController.preview.container.viewContext
+    ProfileView()
+        .environment(\.managedObjectContext, context)
+        .environmentObject(ProfileViewModel(context: context))
 }

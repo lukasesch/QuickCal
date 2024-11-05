@@ -6,14 +6,11 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct AddTrackedFoodView: View {
     @Binding var showAddTrackedFoodPanel: Bool
-    
-    //Database
-    @Environment(\.managedObjectContext) private var managedObjectContext
-    @FetchRequest(entity: Food.entity(), sortDescriptors: [NSSortDescriptor(keyPath: \Food.name, ascending: true)]
-    ) var foodItems: FetchedResults<Food>
+    @EnvironmentObject var viewModel: AddTrackedFoodViewModel
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -30,7 +27,7 @@ struct AddTrackedFoodView: View {
                 .padding(.bottom, 5)
             
             List {
-                ForEach(foodItems) { food in
+                ForEach(viewModel.foodItems) { food in
                     HStack {
                         Text(food.name ?? "Unbekannt")
                         Spacer()
@@ -47,9 +44,14 @@ struct AddTrackedFoodView: View {
             Spacer()
         }
         .padding()
+        .onAppear {
+            viewModel.fetchFoodItems()
+        }
     }
 }
 
 #Preview {
+    let context = PersistenceController.preview.container.viewContext
     AddTrackedFoodView(showAddTrackedFoodPanel: .constant(false))
+        .environment(\.managedObjectContext, context)
 }

@@ -11,20 +11,25 @@ import SwiftUI
 struct QuickCalApp: App {
     @AppStorage("onboarding") private var onboardingDone = false
     let persistenceController = PersistenceController.shared
-    //var profileViewModel = ProfileViewModel() //Sinnlos?
 
     var body: some Scene {
         WindowGroup {
             if onboardingDone == true {
                 MainView()
                     .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                    .environmentObject(MainViewModel())
-                    .environmentObject(SettingsVideoModel())
+                    .environmentObject(ProfileViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(MainViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(SettingsViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(AddTrackedFoodViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(AddItemViewModel(context: persistenceController.container.viewContext))
             } else {
                 WelcomeView()
                     .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                    .environmentObject(MainViewModel())
-                    .environmentObject(SettingsVideoModel())
+                    .environmentObject(ProfileViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(MainViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(SettingsViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(AddTrackedFoodViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(AddItemViewModel(context: persistenceController.container.viewContext))
             }
             
         }

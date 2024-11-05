@@ -9,13 +9,14 @@ import SwiftUI
 
 struct SettingsView: View {
     @AppStorage("onboarding") private var onboardingDone = false
-    @EnvironmentObject var settingsViewModel: SettingsVideoModel
-    @Environment(\.managedObjectContext) private var viewContext
+    @EnvironmentObject var settingsViewModel: SettingsViewModel
     
     var body: some View {
         VStack() {
             Button(action: {
-                settingsViewModel.deleteAllEntries(for: "User", in: viewContext)
+                settingsViewModel.deleteAllEntries(for: "User")
+                settingsViewModel.deleteAllEntries(for: "Kcal")
+                
                 onboardingDone = false
             }) {
                 Text("Reset Profile")
@@ -25,7 +26,7 @@ struct SettingsView: View {
                     .cornerRadius(8)
             }
             Button(action: {
-                settingsViewModel.deleteAllEntries(for: "Food", in: viewContext)
+                settingsViewModel.deleteAllEntries(for: "Food")
                 
             }) {
                 Text("Reset Food Entries")
@@ -40,6 +41,8 @@ struct SettingsView: View {
 }
 
 #Preview {
+    let context = PersistenceController.preview.container.viewContext
     SettingsView()
-        .environmentObject(SettingsVideoModel())
+        .environment(\.managedObjectContext, context)
+        .environmentObject(SettingsViewModel(context: context))
 }

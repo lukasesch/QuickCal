@@ -22,13 +22,10 @@ struct WelcomeView: View {
                     .fontWeight(.heavy)
                     .multilineTextAlignment(.center)
             
-                //Spacer()
                 Button(action: {
-                    //calculate() // kcal Berechnen Funnktion
                     navigateToProfileView = true // Navigation nach dem Aufruf der Funktion
                 }) {
                     Text("Los gehts!")
-                        //.frame(maxWidth: .infinity)
                         .fontWeight(.bold)
                         .padding()
                         .foregroundColor(.white)
@@ -40,7 +37,7 @@ struct WelcomeView: View {
             .padding()
             .navigationBarBackButtonHidden(true)
             .navigationDestination(isPresented: $navigateToProfileView) {
-                ProfileView() // Ziel-View, die nach Navigation angezeigt wird
+                ProfileView() // Destination-Vew
             }
         }
     }

@@ -10,8 +10,34 @@ import CoreData
 
 final class ProfileViewModel: ObservableObject {
     @Published var user: User?
+    @Published var navigateToMainView = false
+    @Published var errorMessage: ErrorMessage?
     
-    func updateUser(context: NSManagedObjectContext, gender: String, name: String, age: String, weight: String, height: String, bodyFat: String?, activityLevel: String, goal: String) {
+    private let context: NSManagedObjectContext
+    
+    init(context: NSManagedObjectContext) {
+        self.context = context
+    }
+    
+    struct ErrorMessage: Identifiable {
+        let id = UUID()
+        let message: String
+    }
+    
+    func validateInput(name: String, age: String, weight: String, height: String) -> Bool {
+        guard !name.isEmpty,
+              let _ = Int(age),
+              let _ = Float(weight),
+              let _ = Int(height)
+        else {
+            errorMessage = ErrorMessage(message: "Bitte alle Felder ausfüllen")
+            return false
+        }
+        errorMessage = nil
+        return true
+    }
+    
+    func updateUser(gender: String, name: String, age: String, weight: String, height: String, bodyFat: String?, activityLevel: String, goal: String) {
         
         //User erstellen oder aktualisieren
         if user == nil {
@@ -59,7 +85,11 @@ final class ProfileViewModel: ObservableObject {
         //Speichern
         do {
             try context.save()
+            navigateToMainView = true
+            errorMessage = nil
+            print("Benutzer gespeichert")
         } catch {
+            errorMessage = ErrorMessage(message: "Daten konnten nicht gespeichert werden. Bitte versuche es erneut.")
             print("Benutzer konnte nicht gespeichert werden: \(error.localizedDescription)")
         }
     }

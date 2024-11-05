@@ -6,37 +6,18 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct MainView: View {
     
     @EnvironmentObject var mainViewModel: MainViewModel
-    @Environment(\.managedObjectContext) private var viewContext
+    //@Environment(\.managedObjectContext) private var viewContext
     @AppStorage("onboarding") private var onboardingDone = false
     @State private var currentPage = 1
     @State private var showingSettings = false
     @State private var showAddTrackedFoodPanel = false
     
-    // Percentage is calculated 'on the fly'
-    // To-Do: Move into ViewModel?
-    var kcalProgressPercentage: Double {
-        guard mainViewModel.kcalGoal > 0 else { return 0 }
-        return 1.0 - ((mainViewModel.kcalGoal - mainViewModel.kcalReached) / mainViewModel.kcalGoal)
-    }
-    var carbsProgressPercentage: Double {
-        guard mainViewModel.carbsGoal > 0 else { return 0 }
-        return 1.0 - ((Double(mainViewModel.carbsGoal) - Double(mainViewModel.carbsReached)) / Double(mainViewModel.carbsGoal))
-    }
-    var proteinProgressPercentage: Double {
-        guard mainViewModel.proteinGoal > 0 else { return 0 }
-        return 1.0 - ((Double(mainViewModel.proteinGoal) - Double(mainViewModel.proteinReached)) / Double(mainViewModel.proteinGoal))
-    }
-    var fatProgressPercentage: Double {
-        guard mainViewModel.fatGoal > 0 else { return 0 }
-        return 1.0 - ((Double(mainViewModel.fatGoal) - Double(mainViewModel.fatReached)) / Double(mainViewModel.fatGoal))
-    }
 
-
-    
     var body: some View {
         NavigationStack {
             TabView(selection: $currentPage) {
@@ -79,7 +60,7 @@ struct MainView: View {
                     
                     HStack {
                         Spacer()
-                        HalfCircularProgressView(barColor: .blue, barWidth: 18, progressPercentage: kcalProgressPercentage)
+                        HalfCircularProgressView(barColor: .blue, barWidth: 18, progressPercentage: mainViewModel.kcalProgressPercentage)
                             .frame(width: 180, height: 200)
                             
                         Spacer()
@@ -88,11 +69,11 @@ struct MainView: View {
                     HStack {
                         Spacer()
                         Spacer()
-                        MacroBars(barColor: .green, barWidth: 90, barHeight: 12, goal: mainViewModel.carbsGoal, progressPercentage: carbsProgressPercentage, barName: "Kohlenhydrate")
+                        MacroBars(barColor: .green, barWidth: 90, barHeight: 12, goal: mainViewModel.carbsGoal, progressPercentage: mainViewModel.carbsProgressPercentage, barName: "Kohlenhydrate")
                         Spacer()
-                        MacroBars(barColor: .orange, barWidth: 90, barHeight: 12, goal: mainViewModel.proteinGoal, progressPercentage: proteinProgressPercentage, barName: "Protein")
+                        MacroBars(barColor: .orange, barWidth: 90, barHeight: 12, goal: mainViewModel.proteinGoal, progressPercentage: mainViewModel.proteinProgressPercentage, barName: "Protein")
                         Spacer()
-                        MacroBars(barColor: .purple, barWidth: 90, barHeight: 12, goal: mainViewModel.fatGoal, progressPercentage: fatProgressPercentage, barName: "Fett")
+                        MacroBars(barColor: .purple, barWidth: 90, barHeight: 12, goal: mainViewModel.fatGoal, progressPercentage: mainViewModel.fatProgressPercentage, barName: "Fett")
                         Spacer()
                         Spacer()
                     }
@@ -116,7 +97,7 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        showAddTrackedFoodPanel.toggle()
+                                        showAddTrackedFoodPanel = true
                                     }) {
                                         Image(systemName: "plus")
                                             .fontWeight(.semibold)
@@ -149,7 +130,7 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        showAddTrackedFoodPanel.toggle()
+                                        showAddTrackedFoodPanel = true
                                     }) {
                                         Image(systemName: "plus")
                                             .fontWeight(.semibold)
@@ -183,7 +164,7 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        showAddTrackedFoodPanel.toggle()
+                                        showAddTrackedFoodPanel = true
                                     }) {
                                         Image(systemName: "plus")
                                             .fontWeight(.semibold)
@@ -215,7 +196,7 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        showAddTrackedFoodPanel.toggle()
+                                        showAddTrackedFoodPanel = true
                                     }) {
                                         Image(systemName: "plus")
                                             .fontWeight(.semibold)
@@ -264,7 +245,7 @@ struct MainView: View {
                         mainViewModel.proteinGoal = 100
                         mainViewModel.fatGoal = 70
                     } else {
-                        mainViewModel.checkAndCalculateDailyCalories(context: viewContext)
+                        mainViewModel.checkAndCalculateDailyCalories()
                         print("MainView: checkAndCalculateDailyCalories run!")
                     }
                     
@@ -402,6 +383,11 @@ struct MainView: View {
 }
 
 #Preview {
+    let context = PersistenceController.preview.container.viewContext
     MainView()
-        .environmentObject(MainViewModel())
+        .environment(\.managedObjectContext, context)
+        .environmentObject(MainViewModel(context: context))
+        .environmentObject(AddItemViewModel(context: context))
+        .environmentObject(SettingsViewModel(context: context))
+        .environmentObject(AddTrackedFoodViewModel(context: context))
 }

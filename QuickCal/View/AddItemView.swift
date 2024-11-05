@@ -10,9 +10,7 @@ import CoreData
 
 struct AddItemView: View {
     
-    @Environment(\.managedObjectContext) private var managedObjectContext
-    @FetchRequest(entity: Food.entity(), sortDescriptors: [NSSortDescriptor(keyPath: \Food.name, ascending: true)]
-    ) var foodItems: FetchedResults<Food>
+    @EnvironmentObject var addItemViewModel: AddItemViewModel
     @State private var showCreatePanel = false
     
     var body: some View {
@@ -73,7 +71,7 @@ struct AddItemView: View {
                 }
                 Spacer()
                 Text("Zuletzt hinzugefügt:")
-                List(foodItems) { food in
+                List(addItemViewModel.foodItems) { food in
                     HStack {
                         Text(food.name ?? "Unbekannt")
                         Spacer()
@@ -98,5 +96,8 @@ struct AddItemView: View {
 }
 
 #Preview {
+    let context = PersistenceController.preview.container.viewContext
     AddItemView()
+        .environment(\.managedObjectContext, context)
+        .environmentObject(AddItemViewModel(context: context))
 }

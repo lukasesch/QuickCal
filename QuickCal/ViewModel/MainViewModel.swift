@@ -18,8 +18,32 @@ class MainViewModel: ObservableObject {
     @Published var fatGoal: Int = 0
     @Published var fatReached: Int = 0
     @Published var user: User?
-        
-    func fetchUser(context: NSManagedObjectContext) {
+    
+    
+    private let context: NSManagedObjectContext
+    init(context: NSManagedObjectContext) {
+        self.context = context
+    }
+    
+    var kcalProgressPercentage: Double {
+        guard kcalGoal > 0 else { return 0 }
+        return 1.0 - ((kcalGoal - kcalReached) / kcalGoal)
+    }
+    var carbsProgressPercentage: Double {
+        guard carbsGoal > 0 else { return 0 }
+        return 1.0 - ((Double(carbsGoal) - Double(carbsReached)) / Double(carbsGoal))
+    }
+    var proteinProgressPercentage: Double {
+        guard proteinGoal > 0 else { return 0 }
+        return 1.0 - ((Double(proteinGoal) - Double(proteinReached)) / Double(proteinGoal))
+    }
+    var fatProgressPercentage: Double {
+        guard fatGoal > 0 else { return 0 }
+        return 1.0 - ((Double(fatGoal) - Double(fatReached)) / Double(fatGoal))
+    }
+
+    @MainActor
+    func fetchOrCreateUser() {
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
         
         do {
@@ -28,7 +52,6 @@ class MainViewModel: ObservableObject {
             //App needs to check if user already exists - for now while testing it always gets the last user
             if let lastUser = users.last {
                 self.user = lastUser
-                //calculateCalories(for: lastUser)
             } else {
                 print("No user found")
             }
@@ -37,39 +60,40 @@ class MainViewModel: ObservableObject {
         }
     }
     
-    func checkAndCalculateDailyCalories(context: NSManagedObjectContext) {
-        // Current Date
-        let today = Calendar.current.startOfDay(for: Date())
-        
-        // Check if there is already a Kcal entry in the DB for current Day
+    @MainActor
+    func fetchOrCreateDailyKcal(for date: Date) {
         let fetchRequest: NSFetchRequest<Kcal> = Kcal.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "date >= %@ AND date < %@", today as NSDate, Calendar.current.date(byAdding: .day, value: 1, to: today)! as NSDate)
+        fetchRequest.predicate = NSPredicate(format: "date >= %@ AND date < %@", date as NSDate, Calendar.current.date(byAdding: .day, value: 1, to: date)! as NSDate)
         
         do {
             let results = try context.fetch(fetchRequest)
-            if results.isEmpty {
-                print("Kcal is empty")
-                // No entry there, so get user and calculate Kcal entry
-                fetchUser(context: context)
-                if let user = user {
-                    calculateKcal(for: user)
-                    saveKcalDB(context: context, date: today, calories: kcalGoal, carbs: carbsGoal, protein: proteinGoal, fat: fatGoal)
-                }
+            if let dailyKcal = results.first {
+                assignDailyKcalValues(dailyKcal)
             } else {
-                print ("Getting kcal")
-                // Get data from current day Kcal entry
-                kcalGoal = results.first?.kcalGoal ?? 0
-                kcalReached = results.first?.kcalReached ?? 0
-                carbsGoal = Int(results.first?.carbsGoal ?? 0)
-                carbsReached = Int(results.first?.carbsReached ?? 0)
-                proteinGoal = Int(results.first?.proteinGoal ?? 0)
-                proteinReached = Int(results.first?.proteinReached ?? 0)
-                fatGoal = Int(results.first?.fatGoal ?? 0)
-                fatReached = Int(results.first?.fatReached ?? 0)
+                if let user = user {
+                    calculateAndSaveDailyKcal(for: user, date: date)
+                }
             }
         } catch {
-            print("Fehler beim Abrufen der Kalorien für heute: \(error)")
+            print("Failed to fetch daily kcal: \(error)")
         }
+    }
+    
+    
+    private func assignDailyKcalValues(_ dailyKcal: Kcal) {
+        kcalGoal = dailyKcal.kcalGoal
+        kcalReached = dailyKcal.kcalReached
+        carbsGoal = Int(dailyKcal.carbsGoal)
+        carbsReached = Int(dailyKcal.carbsReached)
+        proteinGoal = Int(dailyKcal.proteinGoal)
+        proteinReached = Int(dailyKcal.proteinReached)
+        fatGoal = Int(dailyKcal.fatGoal)
+        fatReached = Int(dailyKcal.fatReached)
+    }
+    
+    func calculateAndSaveDailyKcal(for user: User, date: Date) {
+        calculateKcal(for: user)
+        saveKcalDB(date: date, calories: kcalGoal, carbs: carbsGoal, protein: proteinGoal, fat: fatGoal)
     }
     
     func calculateKcal(for user: User) {
@@ -111,7 +135,7 @@ class MainViewModel: ObservableObject {
         fatGoal = Int((kcalGoal * 0.30 / 9).rounded())
     }
     
-    func saveKcalDB(context: NSManagedObjectContext, date: Date, calories: Double, carbs: Int, protein: Int, fat: Int) {
+    func saveKcalDB(date: Date, calories: Double, carbs: Int, protein: Int, fat: Int) {
         let newKcal = Kcal(context: context)
         newKcal.date = date
         newKcal.kcalGoal = calories
@@ -130,5 +154,15 @@ class MainViewModel: ObservableObject {
         } catch {
             print("Fehler beim Speichern der Kalorien: \(error)")
         }
+    }
+    
+    @MainActor
+    func checkAndCalculateDailyCalories() {
+        // Make sure its the current user
+        fetchOrCreateUser()
+        // Current Date
+        let today = Calendar.current.startOfDay(for: Date())
+        fetchOrCreateDailyKcal(for: today)
+        
     }
 }
