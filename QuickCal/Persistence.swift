@@ -39,6 +39,23 @@ struct PersistenceController {
         exampleFood.unit = "g"
         //Should run itself because of .onAppear modifier?
         //viewModel.checkAndCalculateDailyCalories(context: viewContext)
+        
+        // Create TrackedFood Entry
+        let exampleTrackedFood = TrackedFood(context: viewContext)
+        exampleTrackedFood.date = Date() // Setzt das aktuelle Datum
+        exampleTrackedFood.daytime = 0 // 0 könnte für Frühstück stehen
+        exampleTrackedFood.quantity = 150.0 // Beispielmenge in Gramm
+        
+        // Verknüpfe TrackedFood mit Food und User
+        exampleTrackedFood.food = exampleFood
+        exampleTrackedFood.user = exampleUser
+        
+        // Save context to persist data for the preview
+        do {
+            try viewContext.save()
+        } catch {
+            print("Failed to save preview data: \(error)")
+        }
     }
 
     let container: NSPersistentContainer

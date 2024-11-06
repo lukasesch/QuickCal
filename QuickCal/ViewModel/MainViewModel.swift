@@ -18,6 +18,7 @@ class MainViewModel: ObservableObject {
     @Published var fatGoal: Int = 0
     @Published var fatReached: Int = 0
     @Published var user: User?
+    @Published var trackedFood: [TrackedFood] = []
     
     
     private let context: NSManagedObjectContext
@@ -58,6 +59,21 @@ class MainViewModel: ObservableObject {
         } catch {
             print("Failed to fetch user: \(error)")
         }
+    }
+    
+    func fetchTrackedFood() {
+        let fetchRequest: NSFetchRequest<TrackedFood> = TrackedFood.fetchRequest()
+        
+        do {
+            let trackedFoods = try context.fetch(fetchRequest)
+            self.trackedFood = trackedFoods
+        } catch {
+            print("Failed to fetch tracked food: \(error)")
+        }
+    }
+    
+    func trackedFood(forDaytime daytime: Int16) -> [TrackedFood] {
+        return trackedFood.filter { $0.daytime == daytime }
     }
     
     @MainActor

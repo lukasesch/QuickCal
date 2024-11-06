@@ -11,8 +11,8 @@ import CoreData
 class AddItemViewModel: ObservableObject {
     @Published var foodItems: [Food] = []
     
+    //Load Context and fetch Food items
     private let context: NSManagedObjectContext
-    
     init(context: NSManagedObjectContext) {
         self.context = context
         fetchFoodItems()
@@ -28,4 +28,6 @@ class AddItemViewModel: ObservableObject {
             print("Failed to fetch food items: \(error)")
         }
     }
+    
+    
 }

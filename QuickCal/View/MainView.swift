@@ -82,14 +82,20 @@ struct MainView: View {
     
                     List {
                         Section {
-                            HStack {
-                                Text("Bauernbrot")
-                                Spacer()
-                                Text("121 kcal")
-                                    .fontWeight(.light)
+                            ForEach(mainViewModel.trackedFood(forDaytime: 0)) { food in
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(food.food?.name ?? "Unknown Food") // Name des Lebensmittels
+                                        Text("\(String(format: "%.0f", food.quantity)) g") // Menge ohne Nachkommastellen
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text("\(food.food?.kcal ?? 0) kcal") // Kalorien
+                                }
                             }
-                            Text("Butter")
-                            Text("Nutella")
                         } header: {
                             VStack {
                                 HStack {
@@ -104,7 +110,9 @@ struct MainView: View {
                                     }
                                     .sheet(isPresented: $showAddTrackedFoodPanel) {
                                         AddTrackedFoodView(showAddTrackedFoodPanel: $showAddTrackedFoodPanel)
+                                        
                                     }
+                                    
                                 }
                                 Divider()
                                 HStack {
@@ -248,7 +256,7 @@ struct MainView: View {
                         mainViewModel.checkAndCalculateDailyCalories()
                         print("MainView: checkAndCalculateDailyCalories run!")
                     }
-                    
+                    mainViewModel.fetchTrackedFood()
                 }
                 //.tabItem { Text("Main View") }
                 .tag(1)
