@@ -44,7 +44,7 @@ struct PersistenceController {
         let exampleTrackedFood = TrackedFood(context: viewContext)
         exampleTrackedFood.date = Date() // Setzt das aktuelle Datum
         exampleTrackedFood.daytime = 0 // 0 könnte für Frühstück stehen
-        exampleTrackedFood.quantity = 150.0 // Beispielmenge in Gramm
+        exampleTrackedFood.quantity = 1.5 // Beispielmenge in Gramm
         
         // Verknüpfe TrackedFood mit Food und User
         exampleTrackedFood.food = exampleFood

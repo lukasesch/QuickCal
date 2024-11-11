@@ -94,6 +94,7 @@ struct MainView: View {
                                     Spacer()
                                     
                                     Text("\(food.food?.kcal ?? 0) kcal") // Kalorien
+    
                                 }
                             }
                         } header: {
@@ -261,10 +262,6 @@ struct MainView: View {
                 //.tabItem { Text("Main View") }
                 .tag(1)
                 
-                // Add Item View
-                AddItemView()
-                    .tabItem { Text("Add Item") } // TabItem für AddItemView
-                    .tag(2)
                 
             }
             .tabViewStyle(.page)
@@ -395,7 +392,6 @@ struct MainView: View {
     MainView()
         .environment(\.managedObjectContext, context)
         .environmentObject(MainViewModel(context: context))
-        .environmentObject(AddItemViewModel(context: context))
         .environmentObject(SettingsViewModel(context: context))
         .environmentObject(AddTrackedFoodViewModel(context: context))
 }
