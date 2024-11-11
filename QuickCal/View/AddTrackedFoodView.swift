@@ -20,72 +20,79 @@ struct AddTrackedFoodView: View {
 
     
     var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                Text("Suchleiste")
-                Spacer()
-                Text("+")
-            }
-            Divider()
-            Spacer()
-            
-            Text("Liste der letzten Lebensmittel")
-                .font(.headline)
-                .padding(.bottom, 5)
-            
-            List {
-                ForEach(addTrackedFoodViewModel.foodItems) { food in
-                    HStack {
-                        Text(food.name ?? "Unbekannt")
-                        Spacer()
-                        Text("\(food.kcal) kcal")
-                    }
-                    .onTapGesture {
-                        selectedFood = food
-                        showCustomAlert = true // Trigger the custom alert
+        NavigationStack {
+            VStack(alignment: .leading) {
+                HStack {
+                    Text("Lebensmittel")
+                        .font(.headline)
+                        .padding(.bottom, 5)
+                    Spacer()
+                    NavigationLink(destination: CreatePanelView()) {
+                        Image(systemName: "plus")
                     }
                 }
-                .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
+                Text("Suchleiste")
+                List {
+                    ForEach(addTrackedFoodViewModel.foodItems) { food in
+                        HStack {
+                            Text(food.name ?? "Unbekannt")
+                            Spacer()
+                            Text("\(food.kcal) kcal")
+                        }
+                        .onTapGesture {
+                            selectedFood = food
+                            showCustomAlert = true // Trigger the custom alert
+                        }
+                    }
+                    .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
+                }
+                .listStyle(.grouped)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .shadow(radius: 5)
+                
+                Spacer()
+                Spacer()
+                Divider()
+                Spacer()
+                HStack {
+                    Text("Gerichte")
+                        .font(.headline)
+                        .padding(.bottom, 5)
+                    Spacer()
+                    Text("+")
+                }
+                Text("Suchleiste")
+                List {
+                    
+                }
             }
-            .listStyle(.grouped)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            //.padding()
-            .shadow(radius: 5)
-            
-            
-            Spacer()
-            Divider()
-            Spacer()
-            Text("Liste der letzten Gerichte")
-                .font(.headline)
-            Spacer()
-        }
-        .padding()
-        .onAppear {
-            addTrackedFoodViewModel.fetchFoodItems()
-        }
-        .overlay(
-            CustomAlert(
-                isPresented: $showCustomAlert,
-                quantity: $quantity,
-                foodName: selectedFood?.name ?? "Unknown Food",
-                defaultQuantity: Double(selectedFood?.defaultQuantity ?? 0),
-                onSave: {
-                    if let food = selectedFood, let quantityValue = Double(quantity) {
-                        addTrackedFoodViewModel.addTrackedFood(
-                            food: food,
-                            quantity: Float(quantityValue),
-                            daytime: 0
-                        )
+            .padding()
+            .onAppear {
+                addTrackedFoodViewModel.fetchFoodItems()
+            }
+            .overlay(
+                CustomAlert(
+                    isPresented: $showCustomAlert,
+                    quantity: $quantity,
+                    foodName: selectedFood?.name ?? "Unknown Food",
+                    defaultQuantity: Double(selectedFood?.defaultQuantity ?? 0),
+                    onSave: {
+                        if let food = selectedFood, let quantityValue = Double(quantity) {
+                            addTrackedFoodViewModel.addTrackedFood(
+                                food: food,
+                                quantity: Float(quantityValue),
+                                daytime: 0
+                            )
+                            resetAlert()
+                        }
+                    },
+                    onCancel: {
                         resetAlert()
                     }
-                },
-                onCancel: {
-                    resetAlert()
-                }
+                )
             )
-        )
-        .textCase(.none)
+            .textCase(.none)
+        }
     }
     
     

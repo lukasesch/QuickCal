@@ -18,9 +18,7 @@ struct CreatePanelView: View {
     
     @Environment(\.managedObjectContext) private var viewContext    
     @StateObject private var createPanelViewModel = CreatePanelViewModel()
-    
-    @Binding var showCreatePanel: Bool
-    
+        
     //NEW FocusState for tracking focused field
     @FocusState private var focusedField: Field?
     //NEW Enum for focus tracking
@@ -30,7 +28,7 @@ struct CreatePanelView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Erstelle ein neues Lebensmittel:")
+            Text("Neues Lebensmittel:")
                 .font(.title)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.leading)
@@ -134,11 +132,11 @@ struct CreatePanelView: View {
                     .padding(.vertical, 5.0)
                     .padding(.trailing, 16.0)
             }
-            Divider()
+            Spacer()
             HStack {
                 Button(action: {
                     createPanelViewModel.createFood(context: viewContext, name: nameTF, defaultQuantity: defaultQuantityTF, unit: unit, calories: caloriesTF, carbs: carbsTF, protein: proteinTF, fat: fatTF)
-                    showCreatePanel.toggle()
+                    
                 }) {
                     Text("Erstellen")
                         .frame(maxWidth: .infinity)
@@ -147,7 +145,7 @@ struct CreatePanelView: View {
                         .foregroundColor(.white)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.green)
+                .tint(.blue)
                 Button(action: {}) {
                     Text("Abbrechen")
                         .frame(maxWidth: .infinity)
@@ -155,9 +153,10 @@ struct CreatePanelView: View {
                         .padding()
                         .foregroundColor(.white)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
+                .buttonStyle(.bordered)
+                .tint(.blue)
             }
+            
         }
         .padding()
         .onTapGesture {
@@ -182,7 +181,9 @@ struct CreatePanelView: View {
                 }
             }
         }
+        .navigationBarTitleDisplayMode(.inline)
     }
+    
     
     // Function to move focus between fields
     private func moveFocus(_ direction: Int) {
@@ -196,5 +197,5 @@ struct CreatePanelView: View {
 }
 
 #Preview {
-    CreatePanelView(showCreatePanel: .constant(false))
+    CreatePanelView()
 }

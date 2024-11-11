@@ -85,8 +85,10 @@ struct MainView: View {
                             ForEach(mainViewModel.trackedFood(forDaytime: 0)) { food in
                                 HStack {
                                     VStack(alignment: .leading) {
-                                        Text(food.food?.name ?? "Unknown Food") // Name des Lebensmittels
-                                        Text("\(String(format: "%.0f", food.quantity)) g") // Menge ohne Nachkommastellen
+                                        HStack {
+                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "g")") // Name des Lebensmittels
+                                        }
+                                        Text("\(String(format: "%.0f", food.quantity))") // Menge ohne Nachkommastellen
                                             .font(.subheadline)
                                             .foregroundColor(.secondary)
                                     }
