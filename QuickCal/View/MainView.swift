@@ -15,7 +15,7 @@ struct MainView: View {
     @AppStorage("onboarding") private var onboardingDone = false
     @State private var currentPage = 1
     @State private var showingSettings = false
-    @State private var showAddTrackedFoodPanel = false
+    //@State private var showAddTrackedFoodPanel = false
     
 
     var body: some View {
@@ -104,15 +104,13 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        showAddTrackedFoodPanel = true
+                                        print("Button pressed")
+                                        mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
                                         Image(systemName: "plus")
                                             .fontWeight(.semibold)
                                     }
-                                    .sheet(isPresented: $showAddTrackedFoodPanel) {
-                                        AddTrackedFoodView(showAddTrackedFoodPanel: $showAddTrackedFoodPanel)
-                                        
-                                    }
+                                    
                                     
                                 }
                                 Divider()
@@ -139,14 +137,13 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        showAddTrackedFoodPanel = true
+                                        print("Button pressed")
+                                        mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
                                         Image(systemName: "plus")
                                             .fontWeight(.semibold)
                                     }
-                                    .sheet(isPresented: $showAddTrackedFoodPanel) {
-                                        AddTrackedFoodView(showAddTrackedFoodPanel: $showAddTrackedFoodPanel)
-                                    }
+                                    
                                 }
                                 Divider()
                                 HStack {
@@ -173,15 +170,13 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        showAddTrackedFoodPanel = true
+                                        print("Button pressed")
+                                        mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
                                         Image(systemName: "plus")
                                             .fontWeight(.semibold)
                                     }
-                                    .sheet(isPresented: $showAddTrackedFoodPanel) {
-                                        AddTrackedFoodView(showAddTrackedFoodPanel: $showAddTrackedFoodPanel)
-                                    }
-                                }
+                                                                    }
                                 Divider()
                                 HStack {
                                     Text("Kcal:")
@@ -205,14 +200,13 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        showAddTrackedFoodPanel = true
+                                        print("Button pressed")
+                                        mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
                                         Image(systemName: "plus")
                                             .fontWeight(.semibold)
                                     }
-                                    .sheet(isPresented: $showAddTrackedFoodPanel) {
-                                        AddTrackedFoodView(showAddTrackedFoodPanel: $showAddTrackedFoodPanel)
-                                    }
+                                    
                                 }
                                 Divider()
                                 HStack {
@@ -229,6 +223,9 @@ struct MainView: View {
                             }
                         }
                         
+                    }
+                    .sheet(isPresented: $mainViewModel.showAddTrackedFoodPanel) {
+                        AddTrackedFoodView(showAddTrackedFoodPanel: $mainViewModel.showAddTrackedFoodPanel)
                     }
                     .listStyle(.grouped)
                     .clipShape(RoundedRectangle(cornerRadius: 10))

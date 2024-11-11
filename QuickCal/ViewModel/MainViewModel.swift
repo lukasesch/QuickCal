@@ -19,6 +19,7 @@ class MainViewModel: ObservableObject {
     @Published var fatReached: Int = 0
     @Published var user: User?
     @Published var trackedFood: [TrackedFood] = []
+    @Published var showAddTrackedFoodPanel: Bool = false
     
     
     private let context: NSManagedObjectContext
