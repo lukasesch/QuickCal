@@ -194,19 +194,21 @@ class MainViewModel: ObservableObject {
         
     }
     
-    func deleteTrackedFoodItem(at offsets: IndexSet) {
+    func deleteTrackedFoodItem(at offsets: IndexSet, forDaytime daytime: Int16) {
+        let itemsToDelete = trackedFood(forDaytime: daytime)
+        
         offsets.forEach { index in
-            let food = trackedFood[index]
+            let food = itemsToDelete[index]
             context.delete(food)
         }
         
         do {
             try context.save()
-            trackedFood.remove(atOffsets: offsets)
+            // Nach dem Löschen die Liste für diese Tageszeit aktualisieren
+            trackedFood.removeAll { $0.daytime == daytime }
             updateData()
             print("Tracked Food deleted")
         } catch {
             print("Failed to delete food item: \(error)")
         }
-    }
-}
+    }}

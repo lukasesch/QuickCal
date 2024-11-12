@@ -98,7 +98,9 @@ struct MainView: View {
     
                                 }
                             }
-                            .onDelete(perform: mainViewModel.deleteTrackedFoodItem)
+                            .onDelete { offsets in
+                                mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 0)
+                            }
                         } header: {
                             VStack {
                                 HStack {
@@ -153,7 +155,9 @@ struct MainView: View {
                                     
                                 }
                             }
-                            .onDelete(perform: mainViewModel.deleteTrackedFoodItem)
+                            .onDelete { offsets in
+                                mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 1)
+                            }
                         } header: {
                             VStack {
                                 HStack {
@@ -207,7 +211,9 @@ struct MainView: View {
                                     
                                 }
                             }
-                            .onDelete(perform: mainViewModel.deleteTrackedFoodItem)
+                            .onDelete { offsets in
+                                mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 2)
+                            }
                         } header: {
                             VStack {
                                 HStack {
@@ -260,7 +266,9 @@ struct MainView: View {
                                     
                                 }
                             }
-                            .onDelete(perform: mainViewModel.deleteTrackedFoodItem)
+                            .onDelete { offsets in
+                                mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 3)
+                            }
                         } header: {
                             VStack {
                                 HStack {
