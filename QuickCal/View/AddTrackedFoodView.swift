@@ -13,7 +13,7 @@ struct AddTrackedFoodView: View {
     @EnvironmentObject var addTrackedFoodViewModel: AddTrackedFoodViewModel
     @EnvironmentObject var mainViewModel: MainViewModel
     
-    
+    @State private var searchText = ""
     @State private var showCustomAlert = false
     @State private var quantity: String = ""
     @State private var selectedDaytime: String = "Morning"
@@ -22,30 +22,53 @@ struct AddTrackedFoodView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading) {
-                HStack {
-                    Text("Lebensmittel")
-                        .font(.headline)
-                        .padding(.bottom, 5)
-                    Spacer()
-                    NavigationLink(destination: CreatePanelView()) {
-                        Image(systemName: "plus")
+            HStack {
+                NavigationLink(destination: CreatePanelView()) {
+                    VStack {
+                        Text("+")
+                            .font(.largeTitle)
+                        Text("Lebensmittel")
+                            .font(.caption)
+                            .foregroundColor(.primary)
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal)
                 }
-                Text("Suchleiste")
-                List {
-                    ForEach(addTrackedFoodViewModel.foodItems) { food in
-                        HStack {
-                            Text("\(food.name ?? "Unbekannt"), \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
-                            Spacer()
-                            Text("\(food.kcal) kcal")
-                        }
-                        .onTapGesture {
-                            selectedFood = food
-                            showCustomAlert = true // Trigger the custom alert
-                        }
+                .buttonStyle(.bordered)
+                .padding(.leading)
+                Button(action: {
+                    // Aktion hier
+                }) {
+                    VStack {
+                        Text("+")
+                            .font(.largeTitle)
+                        Text("Gericht")
+                            .font(.caption)
+                            .foregroundColor(.primary)
                     }
-                    .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal)
+
+                }
+                .padding(.trailing)
+                .buttonStyle(.bordered)            }
+            
+            VStack(alignment: .leading) {
+                List {
+                    Section(header: Text("Lebensmittel").font(.subheadline)) { // Titel der Liste
+                        ForEach(addTrackedFoodViewModel.foodItems) { food in
+                            HStack {
+                                Text("\(food.name ?? "Unbekannt"), \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
+                                Spacer()
+                                Text("\(food.kcal) kcal")
+                            }
+                            .onTapGesture {
+                                selectedFood = food
+                                showCustomAlert = true // Trigger the custom alert
+                            }
+                        }
+                        .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
+                    }
                 }
                 .listStyle(.grouped)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -53,19 +76,17 @@ struct AddTrackedFoodView: View {
                 
                 Spacer()
                 Spacer()
-                Divider()
                 Spacer()
-                HStack {
-                    Text("Gerichte")
-                        .font(.headline)
-                        .padding(.bottom, 5)
-                    Spacer()
-                    Text("+")
-                }
-                Text("Suchleiste")
                 List {
+                    Section(header:
+                                Text("Gerichte").font(.subheadline)) {
+                        Text("Dummy")
+                    }
                     
                 }
+                .listStyle(.grouped)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .shadow(radius: 5)
             }
             .padding()
             .onAppear {
@@ -93,7 +114,10 @@ struct AddTrackedFoodView: View {
                 )
             )
             .textCase(.none)
+            .searchable(text: $searchText)
+            
         }
+        
     }
     
     
