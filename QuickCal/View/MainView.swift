@@ -13,21 +13,14 @@ struct MainView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
     //@Environment(\.managedObjectContext) private var viewContext
     @AppStorage("onboarding") private var onboardingDone = false
-    @State private var currentPage = 1
+    //@State private var currentPage = 1
     @State private var showingSettings = false
     //@State private var showAddTrackedFoodPanel = false
     
 
     var body: some View {
         NavigationStack {
-            TabView(selection: $currentPage) {
-                
-                // BarCode View
-                BarCodeView()
-                    .tabItem { Text("Barcode") } // TabItem für BarCodeView
-                    .tag(0)
-                
-                
+            
                 VStack {
                     HStack {
                         Text("QuickCal")
@@ -86,7 +79,7 @@ struct MainView: View {
                                 HStack {
                                     VStack(alignment: .leading) {
                                         HStack {
-                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "g")") // Name des Lebensmittels
+                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")") // Name des Lebensmittels
                                         }
                                         Text("\(String(format: "%.0f", food.quantity))") // Menge ohne Nachkommastellen
                                             .font(.subheadline)
@@ -99,6 +92,7 @@ struct MainView: View {
     
                                 }
                             }
+                            .onDelete(perform: mainViewModel.deleteTrackedFoodItem)
                         } header: {
                             VStack {
                                 HStack {
@@ -258,11 +252,7 @@ struct MainView: View {
                     }
                     mainViewModel.fetchTrackedFood()
                 }
-                //.tabItem { Text("Main View") }
-                .tag(1)
-                
-                
-            }
+          
             .tabViewStyle(.page)
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
             .padding(.bottom, 10)

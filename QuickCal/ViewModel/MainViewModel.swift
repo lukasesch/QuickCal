@@ -182,4 +182,19 @@ class MainViewModel: ObservableObject {
         fetchOrCreateDailyKcal(for: today)
         
     }
+    
+    func deleteTrackedFoodItem(at offsets: IndexSet) {
+        offsets.forEach { index in
+            let food = trackedFood[index]
+            context.delete(food)
+        }
+        
+        do {
+            try context.save()
+            trackedFood.remove(atOffsets: offsets)
+            print("Tracked Food deleted")
+        } catch {
+            print("Failed to delete food item: \(error)")
+        }
+    }
 }

@@ -16,6 +16,8 @@ struct CreatePanelView: View {
     @State private var proteinTF = ""
     @State private var fatTF = ""
     
+    @Environment(\.dismiss) private var dismiss
+    
     @Environment(\.managedObjectContext) private var viewContext    
     @StateObject private var createPanelViewModel = CreatePanelViewModel()
         
@@ -49,11 +51,11 @@ struct CreatePanelView: View {
             }
             Divider()
             HStack {
-                Text("Standardgröße:")
+                Text("Portionsgröße:")
                     .font(.headline)
                     .foregroundColor(.gray)
                 Spacer() // Füllt den verfügbaren Platz zwischen den Texten
-                TextField("10", text: $defaultQuantityTF)
+                TextField("100", text: $defaultQuantityTF)
                     .keyboardType(.numberPad)
                     .font(.headline)
                     .foregroundColor(.black)
@@ -136,6 +138,7 @@ struct CreatePanelView: View {
             HStack {
                 Button(action: {
                     createPanelViewModel.createFood(context: viewContext, name: nameTF, defaultQuantity: defaultQuantityTF, unit: unit, calories: caloriesTF, carbs: carbsTF, protein: proteinTF, fat: fatTF)
+                    dismiss()
                     
                 }) {
                     Text("Erstellen")
@@ -146,7 +149,9 @@ struct CreatePanelView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.blue)
-                Button(action: {}) {
+                Button(action: {
+                    dismiss()
+                }) {
                     Text("Abbrechen")
                         .frame(maxWidth: .infinity)
                         .fontWeight(.bold)

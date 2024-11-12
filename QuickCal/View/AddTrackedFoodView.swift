@@ -35,7 +35,7 @@ struct AddTrackedFoodView: View {
                 List {
                     ForEach(addTrackedFoodViewModel.foodItems) { food in
                         HStack {
-                            Text(food.name ?? "Unbekannt")
+                            Text("\(food.name ?? "Unbekannt"), \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
                             Spacer()
                             Text("\(food.kcal) kcal")
                         }
@@ -74,8 +74,7 @@ struct AddTrackedFoodView: View {
                 CustomAlert(
                     isPresented: $showCustomAlert,
                     quantity: $quantity,
-                    foodName: selectedFood?.name ?? "Unknown Food",
-                    defaultQuantity: Double(selectedFood?.defaultQuantity ?? 0),
+                    foodItem: selectedFood, // Übergebe das gesamte Food-Objekt
                     onSave: {
                         if let food = selectedFood, let quantityValue = Double(quantity) {
                             addTrackedFoodViewModel.addTrackedFood(
@@ -108,42 +107,62 @@ struct AddTrackedFoodView: View {
 struct CustomAlert: View {
     @Binding var isPresented: Bool
     @Binding var quantity: String
-    var foodName: String
-    var defaultQuantity: Double
+    var foodItem: Food? // Übergebe das gesamte Food-Objekt
     var onSave: () -> Void
     var onCancel: () -> Void
     
+    private var portionAmount: Float {
+        Float(quantity) ?? 1.0
+    }
+    
     var body: some View {
-        if isPresented {
+        if isPresented, let food = foodItem {
             ZStack {
                 Color.black.opacity(0.3)
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {
                     // Display the name of the selected food item
-                    Text(foodName)
+                    Text(food.name ?? "Unbekannt")
                         .font(.headline)
                         .padding(.top)
                     
                     // Display the default quantity of the food item
-                    Text("Default Quantity: \(String(format: "%.0f", defaultQuantity)) g")
+                    Text("Portionsgröße: \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
                     // Quantity input field
-                    TextField("Enter Quantity", text: $quantity)
+                    TextField("Anzahl an Portionen: 1", text: $quantity)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
                         .padding(.horizontal)
                     
+                    Divider()
+                    
+                    Text("Kcal: \(String(format: "%.0f", Float(food.kcal) * portionAmount))")
+                        .font(.subheadline)
+                    
+                    HStack {
+                        Spacer()
+                        Text("C: \(String(format: "%.1f", food.carbohydrate * portionAmount)) g")
+                        Spacer()
+                        Text("P: \(String(format: "%.1f", food.protein * portionAmount)) g")
+                        Spacer()
+                        Text("F: \(String(format: "%.1f", food.fat * portionAmount)) g")
+                        Spacer()
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    Divider()
                     // Action buttons
                     HStack {
-                        Button("Cancel") {
+                        Button("Abbrechen") {
                             onCancel()
                         }
                         .padding()
                         
-                        Button("Save") {
+                        Button("Hinzufügen") {
                             onSave()
                         }
                         .buttonStyle(.borderedProminent)
