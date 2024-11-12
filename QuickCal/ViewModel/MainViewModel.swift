@@ -44,6 +44,14 @@ class MainViewModel: ObservableObject {
         return 1.0 - ((Double(fatGoal) - Double(fatReached)) / Double(fatGoal))
     }
 
+    func updateData() {
+        fetchTrackedFood()
+        self.kcalReached = trackedFood.reduce(0.0) { $0 + Double($1.food?.kcal ?? 0) * Double($1.quantity) }
+        self.carbsReached = trackedFood.reduce(0) { $0 + Int(Double($1.food?.carbohydrate ?? 0) * Double($1.quantity)) }
+        self.proteinReached = trackedFood.reduce(0) { $0 + Int(Double($1.food?.protein ?? 0) * Double($1.quantity)) }
+        self.fatReached = trackedFood.reduce(0) { $0 + Int(Double($1.food?.fat ?? 0) * Double($1.quantity)) }
+    }
+    
     @MainActor
     func fetchOrCreateUser() {
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
@@ -68,6 +76,9 @@ class MainViewModel: ObservableObject {
         do {
             let trackedFoods = try context.fetch(fetchRequest)
             self.trackedFood = trackedFoods
+            
+            
+            
         } catch {
             print("Failed to fetch tracked food: \(error)")
         }
@@ -192,6 +203,7 @@ class MainViewModel: ObservableObject {
         do {
             try context.save()
             trackedFood.remove(atOffsets: offsets)
+            updateData()
             print("Tracked Food deleted")
         } catch {
             print("Failed to delete food item: \(error)")

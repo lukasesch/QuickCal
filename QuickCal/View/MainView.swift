@@ -318,7 +318,8 @@ struct MainView: View {
                         mainViewModel.checkAndCalculateDailyCalories()
                         print("MainView: checkAndCalculateDailyCalories run!")
                     }
-                    mainViewModel.fetchTrackedFood()
+                    //mainViewModel.fetchTrackedFood()
+                    mainViewModel.updateData()
                 }
           
             .tabViewStyle(.page)

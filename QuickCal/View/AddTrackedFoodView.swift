@@ -92,32 +92,32 @@ struct AddTrackedFoodView: View {
             .onAppear {
                 addTrackedFoodViewModel.fetchFoodItems()
             }
-            .overlay(
-                CustomAlert(
-                    isPresented: $showCustomAlert,
-                    quantity: $quantity,
-                    foodItem: selectedFood, // Übergebe das gesamte Food-Objekt
-                    onSave: {
-                        if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                            addTrackedFoodViewModel.addTrackedFood(
-                                food: food,
-                                quantity: quantityValue,
-                                daytime: 0
-                            )
-                            resetAlert()
-                            mainViewModel.fetchTrackedFood()
-                        }
-                    },
-                    onCancel: {
-                        resetAlert()
-                    }
-                )
-            )
+            
             .textCase(.none)
             .searchable(text: $searchText)
             
         }
-        
+        .overlay(
+            CustomAlert(
+                isPresented: $showCustomAlert,
+                quantity: $quantity,
+                foodItem: selectedFood, // Übergebe das gesamte Food-Objekt
+                onSave: {
+                    if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                        addTrackedFoodViewModel.addTrackedFood(
+                            food: food,
+                            quantity: quantityValue,
+                            daytime: 0
+                        )
+                        resetAlert()
+                        mainViewModel.updateData()
+                    }
+                },
+                onCancel: {
+                    resetAlert()
+                }
+            )
+        )
     }
     
     
