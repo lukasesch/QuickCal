@@ -16,7 +16,8 @@ struct MainView: View {
     //@State private var currentPage = 1
     @State private var showingSettings = false
     //@State private var showAddTrackedFoodPanel = false
-    
+    @State private var selectedDaytime: Int? = nil
+
 
     var body: some View {
         NavigationStack {
@@ -106,6 +107,7 @@ struct MainView: View {
                                     Spacer()
                                     Button(action: {
                                         print("Button pressed")
+                                        selectedDaytime = 0
                                         mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
                                         Image(systemName: "plus")
@@ -160,6 +162,7 @@ struct MainView: View {
                                     Spacer()
                                     Button(action: {
                                         print("Button pressed")
+                                        selectedDaytime = 1
                                         mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
                                         Image(systemName: "plus")
@@ -213,6 +216,7 @@ struct MainView: View {
                                     Spacer()
                                     Button(action: {
                                         print("Button pressed")
+                                        selectedDaytime = 2
                                         mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
                                         Image(systemName: "plus")
@@ -265,6 +269,7 @@ struct MainView: View {
                                     Spacer()
                                     Button(action: {
                                         print("Button pressed")
+                                        selectedDaytime = 3
                                         mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
                                         Image(systemName: "plus")
@@ -289,7 +294,9 @@ struct MainView: View {
                         
                     }
                     .sheet(isPresented: $mainViewModel.showAddTrackedFoodPanel) {
-                        AddTrackedFoodView(showAddTrackedFoodPanel: $mainViewModel.showAddTrackedFoodPanel)
+                        if let daytime = selectedDaytime {
+                            AddTrackedFoodView(showAddTrackedFoodPanel: $mainViewModel.showAddTrackedFoodPanel, selectedDaytime: daytime)
+                        }
                     }
                     .listStyle(.grouped)
                     .clipShape(RoundedRectangle(cornerRadius: 10))

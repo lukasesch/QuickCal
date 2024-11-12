@@ -12,12 +12,14 @@ struct AddTrackedFoodView: View {
     @Binding var showAddTrackedFoodPanel: Bool
     @EnvironmentObject var addTrackedFoodViewModel: AddTrackedFoodViewModel
     @EnvironmentObject var mainViewModel: MainViewModel
+    var selectedDaytime: Int
     
     @State private var searchText = ""
     @State private var showCustomAlert = false
     @State private var quantity: String = ""
-    @State private var selectedDaytime: String = "Morning"
+    @State private var selectedDaytimeString: String = "Morning"
     @State private var selectedFood: Food?
+    
 
     
     var body: some View {
@@ -107,7 +109,7 @@ struct AddTrackedFoodView: View {
                         addTrackedFoodViewModel.addTrackedFood(
                             food: food,
                             quantity: quantityValue,
-                            daytime: 0
+                            daytime: Int16(selectedDaytime)
                         )
                         resetAlert()
                         mainViewModel.updateData()
@@ -124,7 +126,7 @@ struct AddTrackedFoodView: View {
     private func resetAlert() {
         selectedFood = nil
         quantity = ""
-        selectedDaytime = "Morning"
+        selectedDaytimeString = "Morning"
         showCustomAlert = false
     }
 }
@@ -207,7 +209,7 @@ struct CustomAlert: View {
 
 #Preview {
     let context = PersistenceController.preview.container.viewContext
-    AddTrackedFoodView(showAddTrackedFoodPanel: .constant(false))
+    AddTrackedFoodView(showAddTrackedFoodPanel: .constant(false), selectedDaytime: 0)
         .environment(\.managedObjectContext, context)
         .environmentObject(AddTrackedFoodViewModel(context: context))
 }
