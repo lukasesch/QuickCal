@@ -68,7 +68,7 @@ struct CreatePanelView: View {
                     Text("Kilogramm").tag("kg")
                     Text("Milliliter").tag("ml")
                     Text("Liter").tag("l")
-                    Text("Stück").tag("unit")
+                    Text("Stück").tag("Stück")
                 }
                 .pickerStyle(MenuPickerStyle())
                 

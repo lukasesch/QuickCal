@@ -76,19 +76,24 @@ struct MainView: View {
                     List {
                         Section {
                             ForEach(mainViewModel.trackedFood(forDaytime: 0)) { food in
+                                let portion = food.quantity
+                                let kcal = food.food?.kcal ?? 0
+                                let totalkcal = Float(kcal) * portion
                                 HStack {
                                     VStack(alignment: .leading) {
                                         HStack {
                                             Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")") // Name des Lebensmittels
                                         }
-                                        Text("\(String(format: "%.0f", food.quantity))") // Menge ohne Nachkommastellen
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
+                                        Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
+                                             "\(Int(food.quantity))" :
+                                                "\(String(format: "%.1f", food.quantity))")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
                                     }
                                     
                                     Spacer()
                                     
-                                    Text("\(food.food?.kcal ?? 0) kcal") // Kalorien
+                                    Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
     
                                 }
                             }
@@ -124,8 +129,29 @@ struct MainView: View {
                             }
                         }
                         Section {
-                            Text("Spaghetti")
-                            Text("Pesto")
+                            ForEach(mainViewModel.trackedFood(forDaytime: 1)) { food in
+                                let portion = food.quantity
+                                let kcal = food.food?.kcal ?? 0
+                                let totalkcal = Float(kcal) * portion
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        HStack {
+                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")") // Name des Lebensmittels
+                                        }
+                                        Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
+                                             "\(Int(food.quantity))" :
+                                                "\(String(format: "%.1f", food.quantity))")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
+                                    
+                                }
+                            }
+                            .onDelete(perform: mainViewModel.deleteTrackedFoodItem)
                         } header: {
                             VStack {
                                 HStack {
@@ -156,9 +182,29 @@ struct MainView: View {
                             }
                         }
                         Section {
-                            Text("Kartoffeln")
-                            Text("Brokkoli")
-                            Text("Rinderroulade")
+                            ForEach(mainViewModel.trackedFood(forDaytime: 2)) { food in
+                                let portion = food.quantity
+                                let kcal = food.food?.kcal ?? 0
+                                let totalkcal = Float(kcal) * portion
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        HStack {
+                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")") // Name des Lebensmittels
+                                        }
+                                        Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
+                                             "\(Int(food.quantity))" :
+                                                "\(String(format: "%.1f", food.quantity))")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
+                                    
+                                }
+                            }
+                            .onDelete(perform: mainViewModel.deleteTrackedFoodItem)
                         } header: {
                             VStack {
                                 HStack {
@@ -188,7 +234,29 @@ struct MainView: View {
                             }
                         }
                         Section {
-                            Text("Kartoffelchips")
+                            ForEach(mainViewModel.trackedFood(forDaytime: 3)) { food in
+                                let portion = food.quantity
+                                let kcal = food.food?.kcal ?? 0
+                                let totalkcal = Float(kcal) * portion
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        HStack {
+                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")") // Name des Lebensmittels
+                                        }
+                                        Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
+                                             "\(Int(food.quantity))" :
+                                                "\(String(format: "%.1f", food.quantity))")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
+                                    
+                                }
+                            }
+                            .onDelete(perform: mainViewModel.deleteTrackedFoodItem)
                         } header: {
                             VStack {
                                 HStack {

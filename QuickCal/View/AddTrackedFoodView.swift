@@ -11,6 +11,7 @@ import CoreData
 struct AddTrackedFoodView: View {
     @Binding var showAddTrackedFoodPanel: Bool
     @EnvironmentObject var addTrackedFoodViewModel: AddTrackedFoodViewModel
+    @EnvironmentObject var mainViewModel: MainViewModel
     
     
     @State private var showCustomAlert = false
@@ -76,13 +77,14 @@ struct AddTrackedFoodView: View {
                     quantity: $quantity,
                     foodItem: selectedFood, // Übergebe das gesamte Food-Objekt
                     onSave: {
-                        if let food = selectedFood, let quantityValue = Double(quantity) {
+                        if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
                             addTrackedFoodViewModel.addTrackedFood(
                                 food: food,
-                                quantity: Float(quantityValue),
+                                quantity: quantityValue,
                                 daytime: 0
                             )
                             resetAlert()
+                            mainViewModel.fetchTrackedFood()
                         }
                     },
                     onCancel: {
@@ -112,7 +114,7 @@ struct CustomAlert: View {
     var onCancel: () -> Void
     
     private var portionAmount: Float {
-        Float(quantity) ?? 1.0
+        Float(quantity.replacingOccurrences(of: ",", with: ".")) ?? 1.0
     }
     
     var body: some View {
