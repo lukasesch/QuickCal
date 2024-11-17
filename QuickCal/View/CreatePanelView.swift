@@ -18,8 +18,7 @@ struct CreatePanelView: View {
     
     @Environment(\.dismiss) private var dismiss
     
-    @Environment(\.managedObjectContext) private var viewContext    
-    @StateObject private var createPanelViewModel = CreatePanelViewModel()
+    @EnvironmentObject var createPanelViewModel: CreatePanelViewModel
         
     //NEW FocusState for tracking focused field
     @FocusState private var focusedField: Field?
@@ -137,7 +136,7 @@ struct CreatePanelView: View {
             Spacer()
             HStack {
                 Button(action: {
-                    createPanelViewModel.createFood(context: viewContext, name: nameTF, defaultQuantity: defaultQuantityTF, unit: unit, calories: caloriesTF, carbs: carbsTF, protein: proteinTF, fat: fatTF)
+                    createPanelViewModel.createFood(name: nameTF, defaultQuantity: defaultQuantityTF, unit: unit, calories: caloriesTF, carbs: carbsTF, protein: proteinTF, fat: fatTF)
                     dismiss()
                     
                 }) {

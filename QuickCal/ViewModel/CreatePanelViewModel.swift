@@ -9,32 +9,34 @@ import Foundation
 import CoreData
 
 final class CreatePanelViewModel: ObservableObject {
-    @Published var food: Food?
-
-    func createFood(context: NSManagedObjectContext, name: String, defaultQuantity: String, unit: String, calories: String, carbs: String, protein: String, fat: String) {
-        
-        if food == nil {
-            food = Food(context: context)
+    private let context: NSManagedObjectContext
+    init(context: NSManagedObjectContext) {
+        self.context = context
+    }
     
-        }
+    //@Published var food: Food?
+
+    func createFood(name: String, defaultQuantity: String, unit: String, calories: String, carbs: String, protein: String, fat: String) {
         
-        food?.name = name
+        let food = Food(context: context)
+        
+        food.name = name
         
         if let defaultQuantityFloat = Float(defaultQuantity.replacingOccurrences(of: ",", with: ".")) {
-            food?.defaultQuantity = defaultQuantityFloat
+            food.defaultQuantity = defaultQuantityFloat
         }
-        food?.unit = unit
+        food.unit = unit
         if let caloriesInt = Int16(calories.replacingOccurrences(of: ",", with: ".")) {
-            food?.kcal = caloriesInt
+            food.kcal = caloriesInt
         }
         if let carbsFloat = Float(carbs.replacingOccurrences(of: ",", with: ".")) {
-            food?.carbohydrate = carbsFloat
+            food.carbohydrate = carbsFloat
         }
         if let proteinFloat = Float(protein.replacingOccurrences(of: ",", with: ".")) {
-            food?.protein = proteinFloat
+            food.protein = proteinFloat
         }
         if let fatFloat = Float(fat.replacingOccurrences(of: ",", with: ".")) {
-            food?.fat = fatFloat
+            food.fat = fatFloat
         }
         
         //Speichern
