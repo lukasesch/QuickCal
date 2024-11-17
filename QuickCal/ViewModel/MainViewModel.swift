@@ -43,7 +43,7 @@ class MainViewModel: ObservableObject {
         guard fatGoal > 0 else { return 0 }
         return 1.0 - ((Double(fatGoal) - Double(fatReached)) / Double(fatGoal))
     }
-
+    
     func updateData() {
         fetchTrackedFood()
         self.kcalReached = trackedFood.reduce(0.0) { $0 + Double($1.food?.kcal ?? 0) * Double($1.quantity) }
@@ -174,7 +174,7 @@ class MainViewModel: ObservableObject {
         newKcal.proteinReached = 0
         newKcal.fatGoal = Int16(fat)
         newKcal.fatReached = 0
-
+        
         
         do {
             try context.save()
@@ -204,11 +204,22 @@ class MainViewModel: ObservableObject {
         
         do {
             try context.save()
-            // Nach dem Löschen die Liste für diese Tageszeit aktualisieren
             trackedFood.removeAll { $0.daytime == daytime }
             updateData()
             print("Tracked Food deleted")
         } catch {
             print("Failed to delete food item: \(error)")
         }
-    }}
+    }
+    
+    func updateTrackedFoodQuantity(food: TrackedFood, newQuantity: Float) {
+        if let context = food.managedObjectContext {
+            food.quantity = newQuantity
+            do {
+                try context.save()
+            } catch {
+                print("Fehler beim Aktualisieren der Lebensmittelmenge: \(error)")
+            }
+        }
+    }
+}

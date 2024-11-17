@@ -17,6 +17,11 @@ struct MainView: View {
     @State private var showingSettings = false
     //@State private var showAddTrackedFoodPanel = false
     @State private var selectedDaytime: Int? = nil
+    
+    //Custom Alert to edit entries
+    @State private var showCustomAlert = false
+    @State private var selectedFood: TrackedFood?
+    @State private var quantity: String = ""
 
 
     var body: some View {
@@ -83,7 +88,7 @@ struct MainView: View {
                                 HStack {
                                     VStack(alignment: .leading) {
                                         HStack {
-                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")") // Name des Lebensmittels
+                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")")
                                         }
                                         Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
                                              "\(Int(food.quantity))" :
@@ -96,6 +101,15 @@ struct MainView: View {
                                     
                                     Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
     
+                                }
+                                .onTapGesture {
+                                    selectedFood = food
+                                    quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                    ? String(Int(food.quantity)) // Whole Number
+                                    : String(format: "%.1f", food.quantity) // Decimal Number
+                                    withAnimation {
+                                        showCustomAlert = true
+                                    }
                                 }
                             }
                             .onDelete { offsets in
@@ -140,7 +154,7 @@ struct MainView: View {
                                 HStack {
                                     VStack(alignment: .leading) {
                                         HStack {
-                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")") // Name des Lebensmittels
+                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")")
                                         }
                                         Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
                                              "\(Int(food.quantity))" :
@@ -152,7 +166,15 @@ struct MainView: View {
                                     Spacer()
                                     
                                     Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
-                                    
+                                }
+                                .onTapGesture {
+                                    selectedFood = food
+                                    quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                    ? String(Int(food.quantity)) // Whole Number
+                                    : String(format: "%.1f", food.quantity) // Decimal Number
+                                    withAnimation {
+                                        showCustomAlert = true
+                                    }
                                 }
                             }
                             .onDelete { offsets in
@@ -196,7 +218,7 @@ struct MainView: View {
                                 HStack {
                                     VStack(alignment: .leading) {
                                         HStack {
-                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")") // Name des Lebensmittels
+                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")")
                                         }
                                         Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
                                              "\(Int(food.quantity))" :
@@ -208,7 +230,15 @@ struct MainView: View {
                                     Spacer()
                                     
                                     Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
-                                    
+                                }
+                                .onTapGesture {
+                                    selectedFood = food
+                                    quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                    ? String(Int(food.quantity)) // Whole Number
+                                    : String(format: "%.1f", food.quantity) // Decimal Number
+                                    withAnimation {
+                                        showCustomAlert = true
+                                    }
                                 }
                             }
                             .onDelete { offsets in
@@ -263,6 +293,15 @@ struct MainView: View {
                                     Spacer()
                                     
                                     Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
+                                }
+                                .onTapGesture {
+                                    selectedFood = food
+                                    quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                    ? String(Int(food.quantity)) // Whole Number
+                                    : String(format: "%.1f", food.quantity) // Decimal Number
+                                    withAnimation {
+                                        showCustomAlert = true
+                                    }
                                     
                                 }
                             }
@@ -343,48 +382,41 @@ struct MainView: View {
             .ignoresSafeArea(.container, edges: .bottom)
             
         }
-        
-        
-    }
-    
-    struct CircularProgressView: View {
-        var barColor: Color
-        var barWidth: CGFloat
-        var progressPercentage: CGFloat
-        var body: some View {
-            ZStack {
-                Circle()
-                    .stroke(
-                        barColor.opacity(0.4),
-                        lineWidth: barWidth
+        .overlay(
+            Group {
+                if showCustomAlert {
+                    CustomAlertEdit(
+                        isPresented: $showCustomAlert,
+                        quantity: $quantity,
+                        foodItem: selectedFood?.food,
+                        onSave: {
+                            if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                                mainViewModel.updateTrackedFoodQuantity(food: food, newQuantity: quantityValue)
+                                resetAlert()
+                            }
+                            mainViewModel.updateData()
+                        },
+                        onCancel: {
+                            resetAlert()
+                        }
                     )
-                Circle()
-                    .trim(from: 0, to: progressPercentage)
-                    .stroke(
-                        barColor,
-                        lineWidth: barWidth
-                    )
-                    .rotationEffect(Angle(degrees: -90))
-                if (barWidth > 20) {
-                    Text("""
-                     \(Int(progressPercentage * 100))%
-                     """)
-                    .fontWeight(.bold)
-                    .multilineTextAlignment(.center)
-                } else {
-                    Text("""
-                     \(Int(progressPercentage * 100))%
-                     """)
-                    .font(.footnote)
-                    .fontWeight(.regular)
-                    .multilineTextAlignment(.center)
+                    .transition(.opacity)
                 }
-        
             }
-        }
+            .animation(.easeInOut(duration: 0.2), value: showCustomAlert)
+        )
         
     }
     
+    private func resetAlert() {
+        withAnimation {
+            showCustomAlert = false
+        }
+        selectedFood = nil
+        quantity = ""
+    }
+    
+
     struct HalfCircularProgressView: View {
         @EnvironmentObject var mainViewModel: MainViewModel
         var barColor: Color
@@ -455,6 +487,82 @@ struct MainView: View {
                     .fontWeight(.regular)
                     .multilineTextAlignment(.center)
                 
+            }
+        }
+    }
+}
+
+// Custom alert view with fields for quantity input and displays food name and default quantity
+struct CustomAlertEdit: View {
+    @Binding var isPresented: Bool
+    @Binding var quantity: String
+    var foodItem: Food? // Übergebe das gesamte Food-Objekt
+    var onSave: () -> Void
+    var onCancel: () -> Void
+    
+    private var portionAmount: Float {
+        Float(quantity.replacingOccurrences(of: ",", with: ".")) ?? 1.0
+    }
+    
+    var body: some View {
+        if isPresented, let food = foodItem {
+            ZStack {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 20) {
+                    // Display the name of the selected food item
+                    Text(food.name ?? "Unbekannt")
+                        .font(.headline)
+                        .padding(.top)
+                    
+                    // Display the default quantity of the food item
+                    Text("Portionsgröße: \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    // Quantity input field
+                    TextField("Anzahl an Portionen: 1", text: $quantity)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.decimalPad)
+                        .padding(.horizontal)
+                    
+                    Divider()
+                    
+                    Text("Kcal: \(String(format: "%.0f", Float(food.kcal) * portionAmount))")
+                        .font(.subheadline)
+                    
+                    HStack {
+                        Spacer()
+                        Text("C: \(String(format: "%.1f", food.carbohydrate * portionAmount)) g")
+                        Spacer()
+                        Text("P: \(String(format: "%.1f", food.protein * portionAmount)) g")
+                        Spacer()
+                        Text("F: \(String(format: "%.1f", food.fat * portionAmount)) g")
+                        Spacer()
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    Divider()
+                    // Action buttons
+                    HStack {
+                        Button("Abbrechen") {
+                            onCancel()
+                        }
+                        .padding()
+                        
+                        Button("Ändern") {
+                            onSave()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .padding()
+                    }
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
+                .shadow(radius: 10)
+                .frame(maxWidth: 300)
             }
         }
     }
