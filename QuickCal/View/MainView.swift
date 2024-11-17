@@ -102,6 +102,7 @@ struct MainView: View {
                                     Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
     
                                 }
+                                .contentShape(Rectangle())
                                 .onTapGesture {
                                     selectedFood = food
                                     quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
@@ -167,6 +168,7 @@ struct MainView: View {
                                     
                                     Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                 }
+                                .contentShape(Rectangle())
                                 .onTapGesture {
                                     selectedFood = food
                                     quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
@@ -231,6 +233,7 @@ struct MainView: View {
                                     
                                     Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                 }
+                                .contentShape(Rectangle())
                                 .onTapGesture {
                                     selectedFood = food
                                     quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
@@ -294,6 +297,7 @@ struct MainView: View {
                                     
                                     Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                 }
+                                .contentShape(Rectangle())
                                 .onTapGesture {
                                     selectedFood = food
                                     quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
@@ -431,11 +435,26 @@ struct MainView: View {
                         style: StrokeStyle(lineWidth: barWidth, lineCap: .round))
                     .rotationEffect(Angle(degrees: 157))
                 Circle()
-                    .trim(from: 0, to: 0.63 * progressPercentage)
+                    .trim(from: 0, to: 0.63 * min(progressPercentage, 1.0))
                     .stroke(
                         barColor,
                         style: StrokeStyle(lineWidth: barWidth, lineCap: .round))
                     .rotationEffect(Angle(degrees: 157))
+                // Calories overrreached, red transition
+                if progressPercentage > 1.0 {
+                    Circle()
+                        .trim(from: 0, to: 0.63)
+                        .stroke(
+                            AngularGradient(
+                                gradient: Gradient(colors: [barColor, .red]),
+                                center: .center,
+                                startAngle: .degrees(0), // Dynamischer Startwinkel
+                                endAngle: .degrees(227)
+                            ),
+                            style: StrokeStyle(lineWidth: barWidth, lineCap: .round)
+                        )
+                        .rotationEffect(Angle(degrees: 157))
+                }
                 
                 VStack {
                     Text("""
@@ -478,7 +497,7 @@ struct MainView: View {
                         .opacity(0.25)
                         .clipShape(.capsule)
                     Rectangle()
-                        .frame(width: barWidth * progressPercentage, height: barHeight)
+                        .frame(width: barWidth * min(progressPercentage, 1.0), height: barHeight)
                         .foregroundStyle(barColor)
                         .clipShape(.capsule)
                 }
@@ -522,7 +541,7 @@ struct CustomAlertEdit: View {
                         .foregroundColor(.secondary)
                     
                     // Quantity input field
-                    TextField("Anzahl an Portionen: 1", text: $quantity)
+                    TextField("", text: $quantity)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
                         .padding(.horizontal)

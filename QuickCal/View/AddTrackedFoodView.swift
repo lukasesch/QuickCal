@@ -64,6 +64,7 @@ struct AddTrackedFoodView: View {
                                 Spacer()
                                 Text("\(food.kcal) kcal")
                             }
+                            .contentShape(Rectangle())
                             .onTapGesture {
                                 selectedFood = food
                                 showCustomAlert = true // Trigger the custom alert
@@ -100,34 +101,42 @@ struct AddTrackedFoodView: View {
             
         }
         .overlay(
-            CustomAlert(
-                isPresented: $showCustomAlert,
-                quantity: $quantity,
-                foodItem: selectedFood, // Übergebe das gesamte Food-Objekt
-                onSave: {
-                    if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                        addTrackedFoodViewModel.addTrackedFood(
-                            food: food,
-                            quantity: quantityValue,
-                            daytime: Int16(selectedDaytime)
-                        )
-                        resetAlert()
-                        mainViewModel.updateData()
-                    }
-                },
-                onCancel: {
-                    resetAlert()
+            Group {
+                if showCustomAlert {
+                    CustomAlert(
+                        isPresented: $showCustomAlert,
+                        quantity: $quantity,
+                        foodItem: selectedFood,
+                        onSave: {
+                            if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                                addTrackedFoodViewModel.addTrackedFood(
+                                    food: food,
+                                    quantity: quantityValue,
+                                    daytime: Int16(selectedDaytime)
+                                )
+                                resetAlert()
+                                mainViewModel.updateData()
+                            }
+                        },
+                        onCancel: {
+                            resetAlert()
+                        }
+                    )
+                    .transition(.opacity) // Transition hinzufügen
                 }
-            )
+            }
         )
+        .animation(.easeInOut(duration: 0.2), value: showCustomAlert) // Animation aktivieren
     }
     
     
     private func resetAlert() {
+        withAnimation {
+            showCustomAlert = false
+        }
         selectedFood = nil
         quantity = ""
         selectedDaytimeString = "Morning"
-        showCustomAlert = false
     }
 }
 
