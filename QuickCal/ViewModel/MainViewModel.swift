@@ -21,6 +21,26 @@ class MainViewModel: ObservableObject {
     @Published var trackedFood: [TrackedFood] = []
     @Published var showAddTrackedFoodPanel: Bool = false
     
+    @Published var kcalMorning: Double = 0
+    @Published var carbsMorning: Double = 0
+    @Published var proteinMorning: Double = 0
+    @Published var fatMorning: Double = 0
+    
+    @Published var kcalMidday: Double = 0
+    @Published var carbsMidday: Double = 0
+    @Published var proteinMidday: Double = 0
+    @Published var fatMidday: Double = 0
+    
+    @Published var kcalEvening: Double = 0
+    @Published var carbsEvening: Double = 0
+    @Published var proteinEvening: Double = 0
+    @Published var fatEvening: Double = 0
+    
+    @Published var kcalSnacks: Double = 0
+    @Published var carbsSnacks: Double = 0
+    @Published var proteinSnacks: Double = 0
+    @Published var fatSnacks: Double = 0
+    
     
     private let context: NSManagedObjectContext
     init(context: NSManagedObjectContext) {
@@ -50,6 +70,11 @@ class MainViewModel: ObservableObject {
         self.carbsReached = trackedFood.reduce(0) { $0 + Int(Double($1.food?.carbohydrate ?? 0) * Double($1.quantity)) }
         self.proteinReached = trackedFood.reduce(0) { $0 + Int(Double($1.food?.protein ?? 0) * Double($1.quantity)) }
         self.fatReached = trackedFood.reduce(0) { $0 + Int(Double($1.food?.fat ?? 0) * Double($1.quantity)) }
+        
+        calculateAggregates(forDaytime: 0, into: &kcalMorning, &carbsMorning, &proteinMorning, &fatMorning)
+        calculateAggregates(forDaytime: 1, into: &kcalMidday, &carbsMidday, &proteinMidday, &fatMidday)
+        calculateAggregates(forDaytime: 2, into: &kcalEvening, &carbsEvening, &proteinEvening, &fatEvening)
+        calculateAggregates(forDaytime: 3, into: &kcalSnacks, &carbsSnacks, &proteinSnacks, &fatSnacks)
     }
     
     @MainActor
@@ -221,5 +246,14 @@ class MainViewModel: ObservableObject {
                 print("Fehler beim Aktualisieren der Lebensmittelmenge: \(error)")
             }
         }
+    }
+    
+    private func calculateAggregates(forDaytime daytime: Int16, into kcal: inout Double, _ carbs: inout Double, _ protein: inout Double, _ fat: inout Double) {
+        let filteredFoods = trackedFood.filter { $0.daytime == daytime }
+        
+        kcal = filteredFoods.reduce(0.0) { $0 + Double($1.food?.kcal ?? 0) * Double($1.quantity) }
+        carbs = filteredFoods.reduce(0.0) { $0 + Double($1.food?.carbohydrate ?? 0) * Double($1.quantity) }
+        protein = filteredFoods.reduce(0.0) { $0 + Double($1.food?.protein ?? 0) * Double($1.quantity) }
+        fat = filteredFoods.reduce(0.0) { $0 + Double($1.food?.fat ?? 0) * Double($1.quantity) }
     }
 }

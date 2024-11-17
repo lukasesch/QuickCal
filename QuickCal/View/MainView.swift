@@ -135,13 +135,13 @@ struct MainView: View {
                                 }
                                 Divider()
                                 HStack {
-                                    Text("Kcal:")
+                                    Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalMorning))")
                                     Spacer()
-                                    Text("Carbs:")
+                                    Text("C: \(String(format: "%.0f", mainViewModel.carbsMorning)) g")
                                     Spacer()
-                                    Text("Protein:")
+                                    Text("P: \(String(format: "%.0f", mainViewModel.proteinMorning)) g")
                                     Spacer()
-                                    Text("Fat:")
+                                    Text("F: \(String(format: "%.0f", mainViewModel.fatMorning)) g")
                                     Spacer()
                                 }
                                 .font(.footnote)
@@ -200,13 +200,13 @@ struct MainView: View {
                                 }
                                 Divider()
                                 HStack {
-                                    Text("Kcal:")
+                                    Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalMidday))")
                                     Spacer()
-                                    Text("Carbs:")
+                                    Text("C: \(String(format: "%.0f", mainViewModel.carbsMidday)) g")
                                     Spacer()
-                                    Text("Protein:")
+                                    Text("P: \(String(format: "%.0f", mainViewModel.proteinMidday)) g")
                                     Spacer()
-                                    Text("Fat:")
+                                    Text("F: \(String(format: "%.0f", mainViewModel.fatMidday)) g")
                                     Spacer()
                                 }
                                 .font(.footnote)
@@ -264,13 +264,13 @@ struct MainView: View {
                                                                     }
                                 Divider()
                                 HStack {
-                                    Text("Kcal:")
+                                    Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalEvening))")
                                     Spacer()
-                                    Text("Carbs:")
+                                    Text("C: \(String(format: "%.0f", mainViewModel.carbsEvening)) g")
                                     Spacer()
-                                    Text("Protein:")
+                                    Text("P: \(String(format: "%.0f", mainViewModel.proteinEvening)) g")
                                     Spacer()
-                                    Text("Fat:")
+                                    Text("F: \(String(format: "%.0f", mainViewModel.fatEvening)) g")
                                     Spacer()
                                 }
                                 .font(.footnote)
@@ -330,13 +330,13 @@ struct MainView: View {
                                 }
                                 Divider()
                                 HStack {
-                                    Text("Kcal:")
+                                    Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalSnacks))")
                                     Spacer()
-                                    Text("Carbs:")
+                                    Text("C: \(String(format: "%.0f", mainViewModel.carbsSnacks)) g")
                                     Spacer()
-                                    Text("Protein:")
+                                    Text("P: \(String(format: "%.0f", mainViewModel.proteinSnacks)) g")
                                     Spacer()
-                                    Text("Fat:")
+                                    Text("F: \(String(format: "%.0f", mainViewModel.fatSnacks)) g")
                                     Spacer()
                                 }
                                 .font(.footnote)
