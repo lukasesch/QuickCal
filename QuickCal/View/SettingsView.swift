@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage("onboarding") private var onboardingDone = false
     @EnvironmentObject var settingsViewModel: SettingsViewModel
+    @EnvironmentObject var mainViewModel: MainViewModel
     
     var body: some View {
         VStack() {
@@ -26,10 +27,23 @@ struct SettingsView: View {
                     .cornerRadius(8)
             }
             Button(action: {
-                settingsViewModel.deleteAllEntries(for: "Food")
-                
+                settingsViewModel.deleteAllEntries(for: "TrackedFood")
+                mainViewModel.fetchTrackedFood()
+                mainViewModel.updateData()
             }) {
                 Text("Reset Food Entries")
+                    .padding()
+                    .background(Color.red)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+            Button(action: {
+                settingsViewModel.deleteAllEntries(for: "Food")
+                settingsViewModel.deleteAllEntries(for: "TrackedFood")
+                mainViewModel.fetchTrackedFood()
+                mainViewModel.updateData()
+            }) {
+                Text("Reset All Food-Related Entries")
                     .padding()
                     .background(Color.red)
                     .foregroundColor(.white)
