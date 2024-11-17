@@ -98,6 +98,10 @@ struct AddTrackedFoodView: View {
             
             .textCase(.none)
             .searchable(text: $searchText)
+            .searchable(text: $searchText)
+            .onChange(of: searchText) {
+                addTrackedFoodViewModel.filterFoodItems(by: searchText)
+            }
             
         }
         .overlay(

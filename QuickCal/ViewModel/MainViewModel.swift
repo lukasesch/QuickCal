@@ -98,12 +98,14 @@ class MainViewModel: ObservableObject {
     func fetchTrackedFood() {
         let fetchRequest: NSFetchRequest<TrackedFood> = TrackedFood.fetchRequest()
         
+        // Filter for current day
+        let today = Calendar.current.startOfDay(for: Date())
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
+        fetchRequest.predicate = NSPredicate(format: "date >= %@ AND date < %@", today as NSDate, tomorrow as NSDate)
+        
         do {
             let trackedFoods = try context.fetch(fetchRequest)
             self.trackedFood = trackedFoods
-            
-            
-            
         } catch {
             print("Failed to fetch tracked food: \(error)")
         }

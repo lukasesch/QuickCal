@@ -16,15 +16,27 @@ class AddTrackedFoodViewModel: ObservableObject {
     }
     
     @Published var foodItems: [Food] = []
+    private var allFoodItems: [Food] = []
     
     func fetchFoodItems() {
         let request: NSFetchRequest<Food> = Food.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(keyPath: \Food.name, ascending: true)]
         
         do {
-            foodItems = try context.fetch(request)
+            allFoodItems = try context.fetch(request)
+            foodItems = allFoodItems
         } catch {
             print("Failed to fetch food items: \(error)")
+        }
+    }
+    
+    func filterFoodItems(by searchText: String) {
+        if searchText.isEmpty {
+            foodItems = allFoodItems // Reset to all items if the search is empty
+        } else {
+            foodItems = allFoodItems.filter { food in
+                (food.name?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
         }
     }
     
