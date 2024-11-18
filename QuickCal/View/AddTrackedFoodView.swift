@@ -12,6 +12,7 @@ struct AddTrackedFoodView: View {
     @Binding var showAddTrackedFoodPanel: Bool
     @EnvironmentObject var addTrackedFoodViewModel: AddTrackedFoodViewModel
     @EnvironmentObject var mainViewModel: MainViewModel
+    @EnvironmentObject var openFoodFactsViewModel: OpenFoodFactsViewModel
     var selectedDaytime: Int
     
     @State private var searchText = ""
@@ -20,15 +21,18 @@ struct AddTrackedFoodView: View {
     @State private var selectedDaytimeString: String = "Morning"
     @State private var selectedFood: Food?
     
-
+    // States for controlling the disclosure
+    @State private var isFoodListExpanded = true
+    @State private var isDishesListExpanded = true
     
     var body: some View {
         NavigationStack {
             HStack {
                 NavigationLink(destination: CreatePanelView()) {
                     VStack {
-                        Text("+")
-                            .font(.largeTitle)
+                        Image(systemName: "plus")
+                            .font(.title3)
+                            .padding(.bottom, 2)
                         Text("Lebensmittel")
                             .font(.caption)
                             .foregroundColor(.primary)
@@ -42,22 +46,39 @@ struct AddTrackedFoodView: View {
                     // Aktion hier
                 }) {
                     VStack {
-                        Text("+")
-                            .font(.largeTitle)
+                        Image(systemName: "plus")
+                            .font(.title3)
+                            .padding(.bottom, 2)
                         Text("Gericht")
                             .font(.caption)
                             .foregroundColor(.primary)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal)
-
+                    
                 }
                 .padding(.trailing)
-                .buttonStyle(.bordered)            }
+                .buttonStyle(.bordered)
+            }
+            
+            NavigationLink(destination: OpenFoodFactsView()) {
+                VStack {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.title3)
+                        .padding(.bottom, 2)
+                    Text("OpenFoodFacts")
+                        .font(.caption)
+                        .foregroundColor(.primary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal)
+            }
+            .buttonStyle(.bordered)
+            .padding(.horizontal)
             
             VStack(alignment: .leading) {
                 List {
-                    Section(header: Text("Lebensmittel").font(.subheadline)) { // Titel der Liste
+                    Section(header: Text("Lebensmittel").font(.subheadline)) {
                         ForEach(addTrackedFoodViewModel.foodItems) { food in
                             HStack {
                                 Text("\(food.name ?? "Unbekannt"), \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
@@ -72,35 +93,45 @@ struct AddTrackedFoodView: View {
                         }
                         .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
                     }
-                }
-                .listStyle(.grouped)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .shadow(radius: 5)
-                
-                Spacer()
-                Spacer()
-                Spacer()
-                List {
-                    Section(header:
-                                Text("Gerichte").font(.subheadline)) {
-                        Text("Dummy")
-                    }
                     
                 }
                 .listStyle(.grouped)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .shadow(radius: 5)
+                .textCase(.none)
+                Spacer()
+                Spacer()
+                Spacer()
+//                List {
+//                    Section(header:
+//                                Text("Gerichte").font(.subheadline)) {
+//                        ForEach(openFoodFactsViewModel.products) { product in
+//                            HStack {
+//                                Text("\(product.name), \(String(format: "%.0f", product.defaultQuantity)) \(product.unit)")
+//                                Spacer()
+//                                Text("\(product.kcal) kcal")
+//                            }
+//                            .contentShape(Rectangle())
+//                        }
+//                    }
+//                    
+//                }
+//                .listStyle(.grouped)
+//                .clipShape(RoundedRectangle(cornerRadius: 10))
+//                .shadow(radius: 5)
             }
-            .padding()
+            .padding([.top, .leading, .trailing])
             .onAppear {
                 addTrackedFoodViewModel.fetchFoodItems()
             }
             
             .textCase(.none)
             .searchable(text: $searchText)
-            .searchable(text: $searchText)
             .onChange(of: searchText) {
                 addTrackedFoodViewModel.filterFoodItems(by: searchText)
+            }
+            .onSubmit(of: .search) {
+                openFoodFactsViewModel.search(text: searchText)
             }
             
         }
@@ -225,4 +256,5 @@ struct CustomAlert: View {
     AddTrackedFoodView(showAddTrackedFoodPanel: .constant(false), selectedDaytime: 0)
         .environment(\.managedObjectContext, context)
         .environmentObject(AddTrackedFoodViewModel(context: context))
+        .environmentObject(OpenFoodFactsViewModel())
 }
