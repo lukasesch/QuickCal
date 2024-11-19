@@ -18,12 +18,8 @@ struct AddTrackedFoodView: View {
     @State private var searchText = ""
     @State private var showCustomAlert = false
     @State private var quantity: String = ""
-    @State private var selectedDaytimeString: String = "Morning"
     @State private var selectedFood: Food?
     
-    // States for controlling the disclosure
-    @State private var isFoodListExpanded = true
-    @State private var isDishesListExpanded = true
     
     var body: some View {
         NavigationStack {
@@ -60,25 +56,44 @@ struct AddTrackedFoodView: View {
                 .padding(.trailing)
                 .buttonStyle(.bordered)
             }
-            
-            NavigationLink(destination: OpenFoodFactsView()) {
-                VStack {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.title3)
-                        .padding(.bottom, 2)
-                    Text("OpenFoodFacts")
-                        .font(.caption)
-                        .foregroundColor(.primary)
+            HStack {
+                NavigationLink(destination: OpenFoodFactsView(selectedDaytime: selectedDaytime)) {
+                    VStack {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.title3)
+                            .padding(.bottom, 2)
+                        Text("OpenFoodFacts")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal)
+                .padding(.leading)
+                .buttonStyle(.bordered)
+                
+                NavigationLink(destination: OpenFoodFactsView(selectedDaytime: selectedDaytime)) {
+                    VStack {
+                        Image(systemName: "barcode")
+                            .font(.title)
+                            .padding(.bottom, 3)
+                        Text("Barcode")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal)
+                }
+                .buttonStyle(.bordered)
+                .padding(.trailing)
             }
-            .buttonStyle(.bordered)
-            .padding(.horizontal)
             
             VStack(alignment: .leading) {
                 List {
-                    Section(header: Text("Lebensmittel").font(.subheadline)) {
+                    Section(header: Text("Zuletzt benutzte Lebensmittel:")
+                        .font(.subheadline)
+                        .textCase(.none)
+                    ) {
                         ForEach(addTrackedFoodViewModel.foodItems) { food in
                             HStack {
                                 Text("\(food.name ?? "Unbekannt"), \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
@@ -98,7 +113,7 @@ struct AddTrackedFoodView: View {
                 .listStyle(.grouped)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .shadow(radius: 5)
-                .textCase(.none)
+            
                 Spacer()
                 Spacer()
                 Spacer()
@@ -125,7 +140,6 @@ struct AddTrackedFoodView: View {
                 addTrackedFoodViewModel.fetchFoodItems()
             }
             
-            .textCase(.none)
             .searchable(text: $searchText)
             .onChange(of: searchText) {
                 addTrackedFoodViewModel.filterFoodItems(by: searchText)
@@ -171,7 +185,6 @@ struct AddTrackedFoodView: View {
         }
         selectedFood = nil
         quantity = ""
-        selectedDaytimeString = "Morning"
     }
 }
 
@@ -256,5 +269,5 @@ struct CustomAlert: View {
     AddTrackedFoodView(showAddTrackedFoodPanel: .constant(false), selectedDaytime: 0)
         .environment(\.managedObjectContext, context)
         .environmentObject(AddTrackedFoodViewModel(context: context))
-        .environmentObject(OpenFoodFactsViewModel())
+        .environmentObject(OpenFoodFactsViewModel(context: context))
 }

@@ -6,9 +6,14 @@
 //
 
 import Foundation
+import CoreData
 
 class OpenFoodFactsViewModel: ObservableObject {
     @Published var products: [FoodItem] = []
+    private let context: NSManagedObjectContext
+    init(context: NSManagedObjectContext) {
+        self.context = context
+    }
     
     func search(text query: String) {
         print("Search initiated for: \(query)")
@@ -86,6 +91,34 @@ class OpenFoodFactsViewModel: ObservableObject {
         }
         
         task.resume()
+    }
+    
+    func OpenFoodFactsFoodToDB(name: String, defaultQuantity: Float, unit: String, calories: Int16, carbs: Float, protein: Float, fat: Float, daytime: Int16, quantity: Float) {
+        
+        let food = Food(context: context)
+        
+        food.name = name
+        food.defaultQuantity = defaultQuantity
+        food.unit = unit
+        food.kcal = calories
+        food.carbohydrate = carbs
+        food.protein = protein
+        food.fat = fat
+        
+        let trackedFood = TrackedFood(context: context)
+        trackedFood.date = Date()
+        trackedFood.daytime = daytime
+        trackedFood.quantity = quantity
+        trackedFood.food = food
+        
+        //Speichern
+        do {
+            try context.save()
+            print("Lebensmittel erfolgreich in Food gespeichert")
+            print("Lebensmittel erfolgreich in TrackedFood gespeichert")
+        } catch {
+            print("Benutzer konnte nicht gespeichert werden: \(error.localizedDescription)")
+        }
     }
 }
 

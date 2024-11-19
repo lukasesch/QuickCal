@@ -16,7 +16,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             VStack() {
-                NavigationLink(destination: OpenFoodFactsView()) {
+                NavigationLink(destination: OpenFoodFactsView(selectedDaytime: 0)) {
                     Text("Go to OFF View")
                         .padding()
                         .background(Color.blue)
@@ -83,5 +83,5 @@ struct SettingsView: View {
     SettingsView()
         .environment(\.managedObjectContext, context)
         .environmentObject(SettingsViewModel(context: context))
-        .environmentObject(OpenFoodFactsViewModel())
+        .environmentObject(OpenFoodFactsViewModel(context: context))
 }
