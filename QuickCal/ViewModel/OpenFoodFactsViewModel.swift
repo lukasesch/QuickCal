@@ -105,6 +105,8 @@ class OpenFoodFactsViewModel: ObservableObject {
         food.protein = protein
         food.fat = fat
         
+        food.lastUsed = Date()
+        
         let trackedFood = TrackedFood(context: context)
         trackedFood.date = Date()
         trackedFood.daytime = daytime

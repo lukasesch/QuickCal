@@ -39,6 +39,8 @@ final class CreatePanelViewModel: ObservableObject {
             food.fat = fatFloat
         }
         
+        food.lastUsed = Date()
+        
         //Speichern
         do {
             try context.save()

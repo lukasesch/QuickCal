@@ -20,7 +20,7 @@ class AddTrackedFoodViewModel: ObservableObject {
     
     func fetchFoodItems() {
         let request: NSFetchRequest<Food> = Food.fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \Food.name, ascending: true)]
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \Food.lastUsed, ascending: false)]
         
         do {
             allFoodItems = try context.fetch(request)
@@ -46,6 +46,7 @@ class AddTrackedFoodViewModel: ObservableObject {
         trackedFood.daytime = daytime
         trackedFood.quantity = quantity
         trackedFood.food = food
+        food.lastUsed = Date()
         
         do {
             try context.save()
