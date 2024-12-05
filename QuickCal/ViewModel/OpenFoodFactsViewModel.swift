@@ -56,7 +56,7 @@ class OpenFoodFactsViewModel: ObservableObject {
                 }
                 
                 // Convert to FoodItems
-                let foodItems = productsArray.prefix(5).compactMap { product -> FoodItem? in
+                let foodItems = productsArray.compactMap { product -> FoodItem? in
                     // Specify data from json
                     let brand = product["brands"] as? String ?? "Unbekannte Marke"
                     let name = product["product_name"] as? String ?? "Unbekanntes Produkt"
