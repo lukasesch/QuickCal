@@ -50,29 +50,39 @@ class CameraManager: NSObject, ObservableObject {
             // MetaData auf nebenlauefigem Thread und auf ean13 festlegen
             self.metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
             self.metadataOutput.metadataObjectTypes = [.ean13, .ean8]
-
         }
-        
-        // Starten der Session
-        func startSession() {
-            sessionQueue.async { [weak self] in
-                guard let self = self else { return }
-                if !self.session.isRunning {
-                    self.session.startRunning()
-                }
+    }
+    
+    // Starten der Session
+    func startSession() {
+        sessionQueue.async { [weak self] in
+            guard let self = self else { return }
+            if !self.session.isRunning {
+                self.session.startRunning()
             }
         }
-        
-        // Stoppen der Session
-        func stopSession() {
-            sessionQueue.async { [weak self] in
-                guard let self = self else { return }
-                if self.session.isRunning {
-                    self.session.stopRunning()
-                }
+    }
+    
+    // Stoppen der Session
+    func stopSession() {
+        sessionQueue.async { [weak self] in
+            guard let self = self else { return }
+            if self.session.isRunning {
+                self.session.stopRunning()
             }
         }
-        
+    }
+    
+    // PreviewLayer für SwiftUI
+    func getPreviewLayer() -> AVCaptureVideoPreviewLayer {
+        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        previewLayer.videoGravity = .resizeAspectFill
+        return previewLayer
+    }
+    
+    // Cleanup Combine Subscriptions
+    deinit {
+        cancellables.removeAll()
     }
 }
 
