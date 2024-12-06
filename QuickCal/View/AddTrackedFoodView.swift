@@ -74,7 +74,7 @@ struct AddTrackedFoodView: View {
                 .padding(.leading)
                 .buttonStyle(.bordered)
                 
-                NavigationLink(destination: BarCodeView()) {
+                NavigationLink(destination: BarCodeView(selectedDaytime: selectedDaytime)) {
                     VStack {
                         Image(systemName: "barcode")
                             .font(.title)

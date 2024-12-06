@@ -123,7 +123,7 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        print("Button pressed")
+                                        //print("Button pressed")
                                         selectedDaytime = 0
                                         mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
@@ -189,7 +189,7 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        print("Button pressed")
+                                        //print("Button pressed")
                                         selectedDaytime = 1
                                         mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
@@ -254,7 +254,7 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        print("Button pressed")
+                                        //print("Button pressed")
                                         selectedDaytime = 2
                                         mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {
@@ -319,7 +319,7 @@ struct MainView: View {
                                         .fontWeight(.semibold)
                                     Spacer()
                                     Button(action: {
-                                        print("Button pressed")
+                                        //print("Button pressed")
                                         selectedDaytime = 3
                                         mainViewModel.showAddTrackedFoodPanel.toggle()
                                     }) {

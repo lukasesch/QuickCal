@@ -62,7 +62,7 @@ class CameraManager: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 self.isSessionConfigured = true
                 completion(true)
-                print("Kamera konfiguriert")
+                //print("Kamera konfiguriert")
             }
         }
     }
@@ -71,7 +71,7 @@ class CameraManager: NSObject, ObservableObject {
         sessionQueue.async { [weak self] in
             guard let self = self, !self.session.isRunning else { return }
             self.session.startRunning()
-            print("Session running: \(session.isRunning)")
+            //print("Session running: \(session.isRunning)")
         }
     }
     
@@ -80,7 +80,7 @@ class CameraManager: NSObject, ObservableObject {
             guard let self = self else { return }
             if self.session.isRunning {
                 self.session.stopRunning()
-                print("Session gestoppt.")
+                //print("Session gestoppt.")
             }
         }
     }
@@ -98,8 +98,12 @@ class CameraManager: NSObject, ObservableObject {
     func getPreviewLayer() -> AVCaptureVideoPreviewLayer {
         let previewLayer = AVCaptureVideoPreviewLayer(session: session)
         previewLayer.videoGravity = .resizeAspectFill
-        print("Preview Layer zurückgegeben")
+        //print("Preview Layer zurückgegeben")
         return previewLayer
+    }
+    
+    func isSessionRunning() -> Bool {
+        return session.isRunning
     }
 }
 

@@ -8,11 +8,20 @@
 import SwiftUI
 import AVFoundation
 
+
 struct BarCodeView: View {
     @EnvironmentObject var barCodeViewModel: BarCodeViewModel
+    @EnvironmentObject var mainViewModel: MainViewModel
     @Environment(\.dismiss) private var dismiss
+    
     @State private var isConfiguring = true
-
+    
+    // Alert
+    @State private var showCustomAlert = false
+    @State private var selectedFood: FoodItem?
+    @State private var quantity: String = ""
+    
+    var selectedDaytime: Int
     
     var body: some View {
         NavigationStack {
@@ -37,15 +46,61 @@ struct BarCodeView: View {
             .onDisappear {
                 barCodeViewModel.stopScanning()
             }
+            .onChange(of: barCodeViewModel.scannedBarcode) {
+                if let barcode = barCodeViewModel.scannedBarcode {
+                    barCodeViewModel.searchProductByBarcode(barcode: barcode) { foodItem in
+                        if let item = foodItem {
+                            selectedFood = item
+                            showCustomAlert = true
+                        } else {
+                            print("Kein Produkt gefunden.")
+                        }
+                    }
+                }
+            }
         }
+        .overlay(
+            Group {
+                if showCustomAlert {
+                    CustomAlertOFF(
+                        isPresented: $showCustomAlert,
+                        quantity: $quantity,
+                        foodItem: selectedFood, // Übergib das ausgewählte FoodItem
+                        onSave: {
+                            if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                                barCodeViewModel.OpenFoodFactsFoodToDB(name: selectedFood?.name ?? "", defaultQuantity: selectedFood?.defaultQuantity ?? 0, unit: selectedFood?.unit ?? "g", calories: selectedFood?.kcal ?? 0, carbs: selectedFood?.carbohydrate ?? 0, protein: selectedFood?.protein ?? 0, fat: selectedFood?.fat ?? 0, daytime: Int16(selectedDaytime), quantity: quantityValue)
+                                print("FoodItem \(food.name) mit Menge \(quantityValue) hinzugefügt!")
+                                mainViewModel.updateData()
+                                resetAlert()
+                                dismiss()
+                            }
+                        },
+                        onCancel: {
+                            resetAlert()
+                            dismiss()
+                        }
+                    )
+                    .transition(.opacity)
+                }
+            }
+        )
+        .animation(.easeInOut(duration: 0.2), value: showCustomAlert)
     }
     
     // Delay needed, otherwise camera initializes with black screen
     func configureCamera() {
         barCodeViewModel.startScanning()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             isConfiguring = false
         }
+    }
+    
+    private func resetAlert() {
+        withAnimation {
+            showCustomAlert = false
+        }
+        selectedFood = nil
+        quantity = ""
     }
 }
 
@@ -68,7 +123,7 @@ struct CameraPreviewView: UIViewRepresentable {
                 connection.isEnabled = true
                 print("PreviewLayer aktiviert.")
             } else if self.previewLayer.connection == nil {
-                print("Keine Verbindung zum PreviewLayer vorhanden.")
+                //print("Keine Verbindung zum PreviewLayer vorhanden.")
             }
         }
     }
@@ -76,6 +131,7 @@ struct CameraPreviewView: UIViewRepresentable {
 
 
 #Preview {
-    BarCodeView()
-        .environmentObject(BarCodeViewModel())
+    let context = PersistenceController.preview.container.viewContext
+    BarCodeView(selectedDaytime: 0)
+        .environmentObject(BarCodeViewModel(context: context))
 }
