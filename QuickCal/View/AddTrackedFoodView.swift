@@ -20,6 +20,8 @@ struct AddTrackedFoodView: View {
     @State private var quantity: String = ""
     @State private var selectedFood: Food?
     
+    // State für FullScreen-View
+    @State private var showBarcodeScanner = false
     
     var body: some View {
         NavigationStack {

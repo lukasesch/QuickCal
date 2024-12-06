@@ -10,90 +10,109 @@ import AVFoundation
 import Combine
 
 class CameraManager: NSObject, ObservableObject {
-    // Kamera Session
-    private let session = AVCaptureSession()
-    // Nebenlaeufige Queue damit UI nicht blockiert wird
+    // Camera Session
+    private var session = AVCaptureSession()
+    // Concurrent Thread
     private let sessionQueue = DispatchQueue(label: "cameraSessionQueue")
-    // Video Device aka Kamera
-    private var videoDevice: AVCaptureDevice?
-    // Output der Camera, Barcodes, ...
+    // Output of Camera Session
     private let metadataOutput = AVCaptureMetadataOutput()
-    // Combine Subscriptions, sodass ViewModel automatisch Daten beziehen kann
-    private var cancellables = Set<AnyCancellable>() // Combine-Subscriptions
-    // Erkannte Barcodes
-    @Published var scannedCode: String?
     
-    func configureSession() {
+    private var previewLayer: AVCaptureVideoPreviewLayer?
+    
+    // Scanned Barcode published to ViewModel
+    @Published var scannedCode: String?
+    // Session configured?
+    @Published var isSessionConfigured: Bool = false
+    
+    
+    // Create Session Configuration (camera type, barcode type, ...)
+    func configureSession(barcodeTypes: [AVMetadataObject.ObjectType] = [.ean13, .ean8], completion: @escaping (Bool) -> Void) {
+        guard !isSessionConfigured else {
+            completion(true)
+            return
+        }
+        
         sessionQueue.async { [weak self] in
             guard let self = self else { return }
             
             self.session.beginConfiguration()
-            //Lookup defer
             defer { self.session.commitConfiguration() }
             
+            // Config camera type
             guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
                   let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
-                  self.session.canAddInput(videoInput) else {
-                print("Error: VideoInput konnte nicht hinzugefügt werden.")
+                  session.canAddInput(videoInput) else {
+                print("Kamera-Input konnte nicht hinzugefügt werden.")
+                completion(false)
                 return
             }
-            self.session.addInput(videoInput)
-            self.videoDevice = videoDevice
+            session.addInput(videoInput)
             
-            //MetaData Output
-            guard self.session.canAddOutput(self.metadataOutput) else {
-                print("Error: Could not add metadata output.")
+            // Config output
+            if session.canAddOutput(metadataOutput) {
+                session.addOutput(metadataOutput)
+                metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+                metadataOutput.metadataObjectTypes = [.ean13, .ean8]
+            } else {
+                print("Metadata-Output konnte nicht hinzugefügt werden.")
+                completion(false)
                 return
             }
-            self.session.addOutput(self.metadataOutput)
             
-            // MetaData auf nebenlauefigem Thread und auf ean13 festlegen
-            self.metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-            self.metadataOutput.metadataObjectTypes = [.ean13, .ean8]
+            DispatchQueue.main.async {
+                self.isSessionConfigured = true
+                completion(true)
+                print("Kamera konfiguriert")
+            }
         }
     }
     
-    // Starten der Session
     func startSession() {
         sessionQueue.async { [weak self] in
-            guard let self = self else { return }
-            if !self.session.isRunning {
-                self.session.startRunning()
-            }
+            guard let self = self, !self.session.isRunning else { return }
+            self.session.startRunning()
+            print("Session running: \(session.isRunning)")
         }
     }
     
-    // Stoppen der Session
     func stopSession() {
         sessionQueue.async { [weak self] in
             guard let self = self else { return }
             if self.session.isRunning {
                 self.session.stopRunning()
+                print("Session gestoppt.")
             }
         }
     }
     
-    // PreviewLayer für SwiftUI
+    func resetSession() {
+        sessionQueue.async { [weak self] in
+            guard let self = self else { return }
+            self.session.stopRunning()
+            self.session.inputs.forEach { self.session.removeInput($0) }
+            self.session.outputs.forEach { self.session.removeOutput($0) }
+            self.isSessionConfigured = false
+        }
+    }
+    
     func getPreviewLayer() -> AVCaptureVideoPreviewLayer {
         let previewLayer = AVCaptureVideoPreviewLayer(session: session)
         previewLayer.videoGravity = .resizeAspectFill
+        print("Preview Layer zurückgegeben")
         return previewLayer
-    }
-    
-    // Cleanup Combine Subscriptions
-    deinit {
-        cancellables.removeAll()
     }
 }
 
-// Extension fuer Combine, sodass die Barcodes via Published veroeffentlicht werden
+
+// Extentension for Combine Framework to publish Data to ViewModel
 extension CameraManager: AVCaptureMetadataOutputObjectsDelegate {
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
               let stringValue = metadataObject.stringValue else { return }
         
         DispatchQueue.main.async {
-            self.scannedCode = stringValue // Veröffentlicht den Barcode
+            self.scannedCode = stringValue // Publishes BarCode
+            self.stopSession()
         }
     }
 }
