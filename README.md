@@ -13,10 +13,10 @@ This application is part of my project module at Trier University of Applied Sci
 ## Screenshots
 
 ### Main View
-![Main View](images/app_screenshot_main.jpg)
+<img src="images/app_screenshot_main.jpg" alt="Main View" width="500">
 
 ### Tracked View
-![Tracked View](images/app_screenshot_tracked.jpg)
+<img src="images/app_screenshot_tracked.jpg" alt="Tracked View" width="500">
 
 ### Barcode View
-![Barcode View](images/app_screenshot_barcode.jpg)
+<img src="images/app_screenshot_barcode.jpg" alt="Barcode View" width="500">
