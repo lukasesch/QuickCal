@@ -32,8 +32,18 @@ struct BarCodeView: View {
                         .foregroundColor(.gray)
                         .padding()
                 } else if barCodeViewModel.isSessionRunning {
-                    CameraPreviewView(previewLayer: barCodeViewModel.getPreviewLayer())
-                        .edgesIgnoringSafeArea(.all)
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.black.opacity(0.8))
+                            .frame(height: UIScreen.main.bounds.height * 0.8)
+                            .padding(.horizontal, 20)
+                            .overlay(
+                                CameraPreviewView(previewLayer: barCodeViewModel.getPreviewLayer())
+                                    .clipShape(RoundedRectangle(cornerRadius: 10)) 
+                            )
+                    }
+                    .padding()
+                    
                 } else {
                     Text("Kamera konnte nicht gestartet werden.")
                         .foregroundColor(.red)
