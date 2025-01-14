@@ -84,23 +84,20 @@ struct MainView: View {
                             ForEach(mainViewModel.trackedFood(forDaytime: 0)) { food in
                                 let portion = food.quantity
                                 let kcal = food.food?.kcal ?? 0
+                                let defaultQuantity = food.food?.defaultQuantity ?? 0
                                 let totalkcal = Float(kcal) * portion
                                 HStack {
                                     VStack(alignment: .leading) {
                                         HStack {
-                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")")
+                                            VStack(alignment: .leading) {
+                                                Text("\(food.food?.name ?? "Unknown Food")")
+                                                Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
+                                                    .font(.footnote)
+                                            }
+                                            Spacer()
+                                            Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                         }
-                                        Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
-                                             "\(Int(food.quantity))" :
-                                                "\(String(format: "%.1f", food.quantity))")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
                                     }
-                                    
-                                    Spacer()
-                                    
-                                    Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
-    
                                 }
                                 .contentShape(Rectangle())
                                 .onTapGesture {
@@ -151,22 +148,20 @@ struct MainView: View {
                             ForEach(mainViewModel.trackedFood(forDaytime: 1)) { food in
                                 let portion = food.quantity
                                 let kcal = food.food?.kcal ?? 0
+                                let defaultQuantity = food.food?.defaultQuantity ?? 0
                                 let totalkcal = Float(kcal) * portion
                                 HStack {
                                     VStack(alignment: .leading) {
                                         HStack {
-                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")")
+                                            VStack(alignment: .leading) {
+                                                Text("\(food.food?.name ?? "Unknown Food")")
+                                                Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
+                                                    .font(.footnote)
+                                            }
+                                            Spacer()
+                                            Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                         }
-                                        Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
-                                             "\(Int(food.quantity))" :
-                                                "\(String(format: "%.1f", food.quantity))")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
                                     }
-                                    
-                                    Spacer()
-                                    
-                                    Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                 }
                                 .contentShape(Rectangle())
                                 .onTapGesture {
@@ -216,22 +211,20 @@ struct MainView: View {
                             ForEach(mainViewModel.trackedFood(forDaytime: 2)) { food in
                                 let portion = food.quantity
                                 let kcal = food.food?.kcal ?? 0
+                                let defaultQuantity = food.food?.defaultQuantity ?? 0
                                 let totalkcal = Float(kcal) * portion
                                 HStack {
                                     VStack(alignment: .leading) {
                                         HStack {
-                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")")
+                                            VStack(alignment: .leading) {
+                                                Text("\(food.food?.name ?? "Unknown Food")")
+                                                Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
+                                                    .font(.footnote)
+                                            }
+                                            Spacer()
+                                            Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                         }
-                                        Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
-                                             "\(Int(food.quantity))" :
-                                                "\(String(format: "%.1f", food.quantity))")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
                                     }
-                                    
-                                    Spacer()
-                                    
-                                    Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                 }
                                 .contentShape(Rectangle())
                                 .onTapGesture {
@@ -280,22 +273,20 @@ struct MainView: View {
                             ForEach(mainViewModel.trackedFood(forDaytime: 3)) { food in
                                 let portion = food.quantity
                                 let kcal = food.food?.kcal ?? 0
+                                let defaultQuantity = food.food?.defaultQuantity ?? 0
                                 let totalkcal = Float(kcal) * portion
                                 HStack {
                                     VStack(alignment: .leading) {
                                         HStack {
-                                            Text("\(food.food?.name ?? "Unknown Food"), \(String(format: "%.0f", food.food?.defaultQuantity ?? 0)) \(food.food?.unit ?? "")") // Name des Lebensmittels
+                                            VStack(alignment: .leading) {
+                                                Text("\(food.food?.name ?? "Unknown Food")")
+                                                Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
+                                                    .font(.footnote)
+                                            }
+                                            Spacer()
+                                            Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                         }
-                                        Text(food.quantity.truncatingRemainder(dividingBy: 1) == 0 ?
-                                             "\(Int(food.quantity))" :
-                                                "\(String(format: "%.1f", food.quantity))")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
                                     }
-                                    
-                                    Spacer()
-                                    
-                                    Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                 }
                                 .contentShape(Rectangle())
                                 .onTapGesture {

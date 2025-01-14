@@ -98,7 +98,11 @@ struct AddTrackedFoodView: View {
                     ) {
                         ForEach(addTrackedFoodViewModel.foodItems) { food in
                             HStack {
-                                Text("\(food.name ?? "Unbekannt"), \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
+                                VStack(alignment: .leading) {
+                                    Text("\(food.name ?? "Unbekannt")")
+                                    Text("\(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
+                                        .font(.footnote)
+                                }
                                 Spacer()
                                 Text("\(food.kcal) kcal")
                             }

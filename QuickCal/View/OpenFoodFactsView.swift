@@ -26,7 +26,11 @@ struct OpenFoodFactsView: View {
                         Section(header: Text("OpenFoodFacts").font(.subheadline)) {
                             ForEach(openFoodFactsViewModel.products) { food in
                                 HStack {
-                                    Text("\(food.name), \(food.defaultQuantity, specifier: "%.0f") \(food.unit)")
+                                    VStack(alignment: .leading) {
+                                        Text("\(food.name)")
+                                        Text("\(food.defaultQuantity, specifier: "%.0f") \(food.unit)")
+                                            .font(.footnote)
+                                    }
                                     Spacer()
                                     Text("\(food.kcal) kcal")
                                 }
