@@ -13,10 +13,13 @@ This application is part of my project module at Trier University of Applied Sci
 ## Screenshots
 
 ### Main View
-<img src="images/app_screenshot_main.jpg" alt="Main View" width="500">
+<img src="images/app_screenshot_main.jpg" alt="Calorie overview" width="400">
+
+### Profile Creation
+<img src="images/app_screenshot_profilecreation.jpg" alt="Profile creation" width="400">
 
 ### Tracked View
-<img src="images/app_screenshot_tracked.jpg" alt="Tracked View" width="500">
+<img src="images/app_screenshot_tracked.jpg" alt="Add your food" width="400">
 
 ### Barcode View
-<img src="images/app_screenshot_barcode.jpg" alt="Barcode View" width="500">
+<img src="images/app_screenshot_barcode.jpg" alt="Scan product barcodes" width="400">
