@@ -375,7 +375,8 @@ struct MainView: View {
                     }
                     .sheet(isPresented: $mainViewModel.showAddTrackedFoodPanel) {
                         if let daytime = selectedDaytime {
-                            AddTrackedFoodView(showAddTrackedFoodPanel: $mainViewModel.showAddTrackedFoodPanel, selectedDaytime: daytime)
+                            AddTrackedFoodView(showAddTrackedFoodPanel: $mainViewModel.showAddTrackedFoodPanel, selectedDaytime: daytime, selectedDate: mainViewModel.selectedDate)
+                            
                         }
                     }
                     .listStyle(.grouped)

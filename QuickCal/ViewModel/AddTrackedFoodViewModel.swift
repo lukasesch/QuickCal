@@ -9,6 +9,7 @@ import SwiftUI
 import CoreData
 
 class AddTrackedFoodViewModel: ObservableObject {
+    
     private let context: NSManagedObjectContext
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -40,13 +41,13 @@ class AddTrackedFoodViewModel: ObservableObject {
         }
     }
     
-    func addTrackedFood(food: Food, quantity: Float, daytime: Int16) {
+    func addTrackedFood(food: Food, quantity: Float, daytime: Int16, selectedDate: Date) {
         let trackedFood = TrackedFood(context: context)
-        trackedFood.date = Date()
+        trackedFood.date = selectedDate
         trackedFood.daytime = daytime
         trackedFood.quantity = quantity
         trackedFood.food = food
-        food.lastUsed = Date()
+        food.lastUsed = selectedDate
         
         do {
             try context.save()

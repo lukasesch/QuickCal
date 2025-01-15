@@ -12,6 +12,7 @@ import AVFoundation
 import CoreData
 
 class BarCodeViewModel: ObservableObject {
+    @EnvironmentObject var mainViewModel: MainViewModel
     @Published var scannedBarcode: String? = nil
     @Published var product: FoodItem? = nil
     @Published var isSessionRunning: Bool = false
@@ -138,7 +139,7 @@ class BarCodeViewModel: ObservableObject {
     }
     
     
-    func OpenFoodFactsFoodToDB(name: String, defaultQuantity: Float, unit: String, calories: Int16, carbs: Float, protein: Float, fat: Float, daytime: Int16, quantity: Float) {
+    func OpenFoodFactsFoodToDB(name: String, defaultQuantity: Float, unit: String, calories: Int16, carbs: Float, protein: Float, fat: Float, daytime: Int16, quantity: Float, selectedDate: Date) {
         
         let food = Food(context: context)
         
@@ -153,7 +154,7 @@ class BarCodeViewModel: ObservableObject {
         food.lastUsed = Date()
         
         let trackedFood = TrackedFood(context: context)
-        trackedFood.date = Date()
+        trackedFood.date = selectedDate
         trackedFood.daytime = daytime
         trackedFood.quantity = quantity
         trackedFood.food = food

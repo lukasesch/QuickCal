@@ -22,6 +22,7 @@ struct BarCodeView: View {
     @State private var quantity: String = ""
     
     var selectedDaytime: Int
+    var selectedDate: Date
     
     var body: some View {
         NavigationStack {
@@ -78,7 +79,7 @@ struct BarCodeView: View {
                         foodItem: selectedFood, // Übergib das ausgewählte FoodItem
                         onSave: {
                             if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                                barCodeViewModel.OpenFoodFactsFoodToDB(name: selectedFood?.name ?? "", defaultQuantity: selectedFood?.defaultQuantity ?? 0, unit: selectedFood?.unit ?? "g", calories: selectedFood?.kcal ?? 0, carbs: selectedFood?.carbohydrate ?? 0, protein: selectedFood?.protein ?? 0, fat: selectedFood?.fat ?? 0, daytime: Int16(selectedDaytime), quantity: quantityValue)
+                                barCodeViewModel.OpenFoodFactsFoodToDB(name: selectedFood?.name ?? "", defaultQuantity: selectedFood?.defaultQuantity ?? 0, unit: selectedFood?.unit ?? "g", calories: selectedFood?.kcal ?? 0, carbs: selectedFood?.carbohydrate ?? 0, protein: selectedFood?.protein ?? 0, fat: selectedFood?.fat ?? 0, daytime: Int16(selectedDaytime), quantity: quantityValue, selectedDate: selectedDate)
                                 print("FoodItem \(food.name) mit Menge \(quantityValue) hinzugefügt!")
                                 mainViewModel.updateData()
                                 resetAlert()
@@ -142,6 +143,6 @@ struct CameraPreviewView: UIViewRepresentable {
 
 #Preview {
     let context = PersistenceController.preview.container.viewContext
-    BarCodeView(selectedDaytime: 0)
+    BarCodeView(selectedDaytime: 0, selectedDate: Date())
         .environmentObject(BarCodeViewModel(context: context))
 }

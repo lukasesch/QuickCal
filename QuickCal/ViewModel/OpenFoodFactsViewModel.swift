@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import SwiftUI
 import CoreData
 
 class OpenFoodFactsViewModel: ObservableObject {
+    @EnvironmentObject var mainViewModel: MainViewModel
     @Published var products: [FoodItem] = []
     private let context: NSManagedObjectContext
     init(context: NSManagedObjectContext) {
@@ -93,7 +95,7 @@ class OpenFoodFactsViewModel: ObservableObject {
         task.resume()
     }
     
-    func OpenFoodFactsFoodToDB(name: String, defaultQuantity: Float, unit: String, calories: Int16, carbs: Float, protein: Float, fat: Float, daytime: Int16, quantity: Float) {
+    func OpenFoodFactsFoodToDB(name: String, defaultQuantity: Float, unit: String, calories: Int16, carbs: Float, protein: Float, fat: Float, daytime: Int16, quantity: Float, selectedDate: Date) {
         
         let food = Food(context: context)
         
@@ -108,7 +110,7 @@ class OpenFoodFactsViewModel: ObservableObject {
         food.lastUsed = Date()
         
         let trackedFood = TrackedFood(context: context)
-        trackedFood.date = Date()
+        trackedFood.date = selectedDate
         trackedFood.daytime = daytime
         trackedFood.quantity = quantity
         trackedFood.food = food

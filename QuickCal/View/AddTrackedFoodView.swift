@@ -14,6 +14,7 @@ struct AddTrackedFoodView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
     @EnvironmentObject var openFoodFactsViewModel: OpenFoodFactsViewModel
     var selectedDaytime: Int
+    var selectedDate: Date
     
     @State private var searchText = ""
     @State private var showCustomAlert = false
@@ -59,7 +60,7 @@ struct AddTrackedFoodView: View {
                 .buttonStyle(.bordered)
             }
             HStack {
-                NavigationLink(destination: OpenFoodFactsView(selectedDaytime: selectedDaytime)) {
+                NavigationLink(destination: OpenFoodFactsView(selectedDaytime: selectedDaytime, selectedDate: selectedDate)) {
                     VStack {
                         Image(systemName: "square.and.arrow.up")
                             .font(.title3)
@@ -74,7 +75,7 @@ struct AddTrackedFoodView: View {
                 .padding(.leading)
                 .buttonStyle(.bordered)
                 
-                NavigationLink(destination: BarCodeView(selectedDaytime: selectedDaytime)) {
+                NavigationLink(destination: BarCodeView(selectedDaytime: selectedDaytime, selectedDate: selectedDate)) {
                     VStack {
                         Image(systemName: "barcode")
                             .font(.title)
@@ -167,7 +168,8 @@ struct AddTrackedFoodView: View {
                                 addTrackedFoodViewModel.addTrackedFood(
                                     food: food,
                                     quantity: quantityValue,
-                                    daytime: Int16(selectedDaytime)
+                                    daytime: Int16(selectedDaytime),
+                                    selectedDate: selectedDate
                                 )
                                 resetAlert()
                                 mainViewModel.updateData()
@@ -272,8 +274,9 @@ struct CustomAlert: View {
 
 #Preview {
     let context = PersistenceController.preview.container.viewContext
-    AddTrackedFoodView(showAddTrackedFoodPanel: .constant(false), selectedDaytime: 0)
+    AddTrackedFoodView(showAddTrackedFoodPanel: .constant(false), selectedDaytime: 0, selectedDate: Date())
         .environment(\.managedObjectContext, context)
+        .environmentObject(MainViewModel(context: context))
         .environmentObject(AddTrackedFoodViewModel(context: context))
         .environmentObject(OpenFoodFactsViewModel(context: context))
 }

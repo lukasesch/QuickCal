@@ -16,13 +16,6 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             VStack() {
-                NavigationLink(destination: OpenFoodFactsView(selectedDaytime: 0)) {
-                    Text("Go to OFF View")
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
                 Button(action: {
                     createPanelViewModel.createFood(name: "Apfel", defaultQuantity: "1", unit: "stück", calories: "52", carbs: "14", protein: "0.3", fat: "0.2")
                     createPanelViewModel.createFood(name: "Banane", defaultQuantity: "1", unit: "stück", calories: "89", carbs: "23", protein: "1.1", fat: "0.3")

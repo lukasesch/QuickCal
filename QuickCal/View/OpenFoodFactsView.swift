@@ -17,6 +17,7 @@ struct OpenFoodFactsView: View {
     @State private var quantity: String = ""
     
     var selectedDaytime: Int
+    var selectedDate: Date
     
     var body: some View {
         NavigationStack {
@@ -65,7 +66,7 @@ struct OpenFoodFactsView: View {
                         foodItem: selectedFood, // Übergib das ausgewählte FoodItem
                         onSave: {
                             if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                                openFoodFactsViewModel.OpenFoodFactsFoodToDB(name: selectedFood?.name ?? "", defaultQuantity: selectedFood?.defaultQuantity ?? 0, unit: selectedFood?.unit ?? "g", calories: selectedFood?.kcal ?? 0, carbs: selectedFood?.carbohydrate ?? 0, protein: selectedFood?.protein ?? 0, fat: selectedFood?.fat ?? 0, daytime: Int16(selectedDaytime), quantity: quantityValue)
+                                openFoodFactsViewModel.OpenFoodFactsFoodToDB(name: selectedFood?.name ?? "", defaultQuantity: selectedFood?.defaultQuantity ?? 0, unit: selectedFood?.unit ?? "g", calories: selectedFood?.kcal ?? 0, carbs: selectedFood?.carbohydrate ?? 0, protein: selectedFood?.protein ?? 0, fat: selectedFood?.fat ?? 0, daytime: Int16(selectedDaytime), quantity: quantityValue, selectedDate: selectedDate)
                                 print("FoodItem \(food.name) mit Menge \(quantityValue) hinzugefügt!")
                                 mainViewModel.updateData()
                                 resetAlert()
@@ -168,6 +169,6 @@ struct CustomAlertOFF: View {
 
 #Preview {
     let context = PersistenceController.preview.container.viewContext
-    OpenFoodFactsView(selectedDaytime: 0)
+    OpenFoodFactsView(selectedDaytime: 0, selectedDate: Date())
         .environmentObject(OpenFoodFactsViewModel(context: context)) // Ensure the EnvironmentObject is provided
 }
