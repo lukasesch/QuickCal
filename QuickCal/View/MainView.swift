@@ -28,15 +28,53 @@ struct MainView: View {
         NavigationStack {
             
                 VStack {
-                    HStack {
-                        Text("QuickCal")
-                            .font(.title)
-                            .fontWeight(.heavy)
-                            .multilineTextAlignment(.leading)
-                            .padding(.top, 5.0)
-                            .padding(.bottom, -2.0)
+                    HStack(alignment: .center) {
+                        Image("Icon")
+                            .resizable()
+                            .frame(width: 42, height: 42)
                         Spacer()
                         
+                        Text(
+                            Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date())
+                            ? "Heute"
+                            : Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
+                            ? "Gestern"
+                            : Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Calendar.current.date(byAdding: .day, value: -2, to: Date())!)
+                            ? "Vorgestern"
+                            : formattedDate(mainViewModel.selectedDate)
+                        )
+                        .font(.headline)
+                        .foregroundColor(.blue)
+                        .onTapGesture {
+                            mainViewModel.showingDatePicker.toggle()
+                        }
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(.blue)
+                            .onTapGesture {
+                                mainViewModel.showingDatePicker.toggle()
+                            }
+                        .sheet(isPresented: $mainViewModel.showingDatePicker) {
+                            VStack {
+                                DatePicker(
+                                    "Datum auswählen:",
+                                    selection: $mainViewModel.selectedDate,
+                                    displayedComponents: [.date]
+                                )
+                                .datePickerStyle(.graphical)
+                                .labelsHidden()
+                                .onChange(of: mainViewModel.selectedDate) {
+                                    mainViewModel.showingDatePicker = false
+                                    mainViewModel.updateData()
+                                }
+
+                                
+                            }
+                            .presentationDetents([.fraction(0.51)])
+                            .presentationDragIndicator(.hidden)
+                            Spacer()
+                        }
+                                                                
+                        Spacer()
                         Button(action: {
                             showingSettings.toggle()
                         }) {
@@ -47,9 +85,9 @@ struct MainView: View {
                         .sheet(isPresented: $showingSettings) {
                             SettingsView()
                         }
+                        .frame(width: 42, height: 42)
                     }
-                    .padding(.horizontal, 25.0)
-                    .padding(.top, 10)
+                    .padding(.horizontal, 15.0)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     
                     Spacer()
@@ -409,6 +447,13 @@ struct MainView: View {
         }
         selectedFood = nil
         quantity = ""
+    }
+    
+    func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "de_DE")
+        formatter.dateFormat = "d. MMMM" // Jahr weglassen
+        return formatter.string(from: date)
     }
     
 

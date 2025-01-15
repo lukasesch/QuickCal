@@ -41,6 +41,9 @@ class MainViewModel: ObservableObject {
     @Published var proteinSnacks: Double = 0
     @Published var fatSnacks: Double = 0
     
+    @Published var selectedDate: Date = Date()
+    @Published var showingDatePicker: Bool = false
+    
     
     private let context: NSManagedObjectContext
     init(context: NSManagedObjectContext) {
@@ -98,10 +101,11 @@ class MainViewModel: ObservableObject {
     func fetchTrackedFood() {
         let fetchRequest: NSFetchRequest<TrackedFood> = TrackedFood.fetchRequest()
         
-        // Filter for current day
-        let today = Calendar.current.startOfDay(for: Date())
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
-        fetchRequest.predicate = NSPredicate(format: "date >= %@ AND date < %@", today as NSDate, tomorrow as NSDate)
+        // Verwende das ausgewählte Datum anstelle des aktuellen Datums
+        let selectedDayStart = Calendar.current.startOfDay(for: selectedDate)
+        let nextDayStart = Calendar.current.date(byAdding: .day, value: 1, to: selectedDayStart)!
+        
+        fetchRequest.predicate = NSPredicate(format: "date >= %@ AND date < %@", selectedDayStart as NSDate, nextDayStart as NSDate)
         
         do {
             let trackedFoods = try context.fetch(fetchRequest)
