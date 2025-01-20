@@ -14,10 +14,13 @@ class AddTrackedFoodViewModel: ObservableObject {
     init(context: NSManagedObjectContext) {
         self.context = context
         fetchFoodItems()
+        fetchMealItems()
     }
     
     @Published var foodItems: [Food] = []
+    @Published var mealItems: [Meal] = []
     private var allFoodItems: [Food] = []
+    private var allMealItems: [Meal] = []
     
     func fetchFoodItems() {
         let request: NSFetchRequest<Food> = Food.fetchRequest()
@@ -28,6 +31,18 @@ class AddTrackedFoodViewModel: ObservableObject {
             foodItems = allFoodItems
         } catch {
             print("Failed to fetch food items: \(error)")
+        }
+    }
+    
+    func fetchMealItems() {
+        let request: NSFetchRequest<Meal> = Meal.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \Meal.lastUsed, ascending: false)]
+        
+        do {
+            allMealItems = try context.fetch(request)
+            mealItems = allMealItems
+        } catch {
+            print("Failed to fetch meal items: \(error)")
         }
     }
     

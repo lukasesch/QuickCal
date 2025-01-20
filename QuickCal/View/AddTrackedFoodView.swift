@@ -20,6 +20,7 @@ struct AddTrackedFoodView: View {
     @State private var showCustomAlert = false
     @State private var quantity: String = ""
     @State private var selectedFood: Food?
+    @State private var selectedMeal: Meal?
     
     // State für FullScreen-View
     @State private var showBarcodeScanner = false
@@ -27,96 +28,136 @@ struct AddTrackedFoodView: View {
     var body: some View {
         NavigationStack {
             HStack {
+                //Lebensmittel
                 NavigationLink(destination: CreatePanelView()) {
                     VStack {
-                        Image(systemName: "plus")
+                        Image(systemName: "leaf.fill")
                             .font(.title3)
                             .padding(.bottom, 2)
-                        Text("Lebensmittel")
+                            .foregroundColor(.blue)
+                        //Text("Lebensmittel")
                             .font(.caption)
                             .foregroundColor(.primary)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal)
+                    .frame(maxWidth: .infinity, maxHeight: 30)
                 }
                 .buttonStyle(.bordered)
-                .padding(.leading)
+                
+                //Gerichte
                 Button(action: {
                     // Aktion hier
                 }) {
                     VStack {
-                        Image(systemName: "plus")
+                        Image(systemName: "fork.knife")
                             .font(.title3)
                             .padding(.bottom, 2)
-                        Text("Gericht")
+                            .foregroundColor(.blue)
+                        //Text("Gericht")
                             .font(.caption)
                             .foregroundColor(.primary)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal)
-                    
+                    .frame(maxWidth: .infinity, maxHeight: 30)
                 }
-                .padding(.trailing)
-                .buttonStyle(.bordered)
-            }
-            HStack {
-                NavigationLink(destination: OpenFoodFactsView(selectedDaytime: selectedDaytime, selectedDate: selectedDate)) {
-                    VStack {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.title3)
-                            .padding(.bottom, 2)
-                        Text("OpenFoodFacts")
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal)
-                }
-                .padding(.leading)
                 .buttonStyle(.bordered)
                 
+                //OpenFoodFacts
+                NavigationLink(destination: OpenFoodFactsView(selectedDaytime: selectedDaytime, selectedDate: selectedDate)) {
+                    VStack {
+                        Image(systemName: "tray.and.arrow.down.fill")
+                            .font(.title3)
+                            .padding(.bottom, 2)
+                            .foregroundColor(.blue)
+                        //Text("OpenFoodFacts")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: 30)
+                }
+                .buttonStyle(.bordered)
+                
+                //Barcode
                 NavigationLink(destination: BarCodeView(selectedDaytime: selectedDaytime, selectedDate: selectedDate)) {
                     VStack {
                         Image(systemName: "barcode")
                             .font(.title)
-                            .padding(.bottom, 3)
-                        Text("Barcode")
-                            .font(.caption)
+                            .padding(.bottom, 2)
+                            .foregroundColor(.blue)
+                        //Text("Barcode")
+                            .font(.footnote)
                             .foregroundColor(.primary)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal)
-                }
-                .buttonStyle(.bordered)
-                .padding(.trailing)
-            }
-            
-            VStack(alignment: .leading) {
-                List {
-                    Section(header: Text("Zuletzt benutzte Lebensmittel:")
-                        .font(.subheadline)
-                        .textCase(.none)
-                    ) {
-                        ForEach(addTrackedFoodViewModel.foodItems) { food in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text("\(food.name ?? "Unbekannt")")
-                                    Text("\(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
-                                        .font(.footnote)
-                                }
-                                Spacer()
-                                Text("\(food.kcal) kcal")
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                selectedFood = food
-                                showCustomAlert = true // Trigger the custom alert
-                            }
-                        }
-                        .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
-                    }
+                    .frame(maxWidth: .infinity, maxHeight: 30)
                     
                 }
+                .buttonStyle(.bordered)
+                
+                
+            }
+            .padding([.top, .leading, .trailing])
+            
+            VStack(alignment: .leading) {
+                TabView {
+                    List {
+                        Section(header: Text("Zuletzt benutzte Lebensmittel:")
+                            .font(.subheadline)
+                            .textCase(.none)
+                        ) {
+                            ForEach(addTrackedFoodViewModel.foodItems) { food in
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text("\(food.name ?? "Unbekannt")")
+                                        Text("\(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
+                                            .font(.footnote)
+                                    }
+                                    Spacer()
+                                    Text("\(food.kcal) kcal")
+                                }
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    selectedFood = food
+                                    showCustomAlert = true // Trigger the custom alert
+                                }
+                            }
+                            .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
+                        }
+                        
+                    }
+                    .tabItem {
+                        Label("Lebensmittel", systemImage: "leaf")
+                    }
+                    
+                    List {
+                        Section(header: Text("Zuletzt benutzte Gerichte:")
+                            .font(.subheadline)
+                            .textCase(.none)
+                        ) {
+                            ForEach(addTrackedFoodViewModel.mealItems) { meal in
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text("\(meal.name ?? "Unbekannt")")
+                                        Text("\(String(format: "%.0f", meal.defaultQuantity)) \(meal.unit ?? "")")
+                                            .font(.footnote)
+                                    }
+                                    Spacer()
+                                    Text("\(meal.kcal) kcal")
+                                }
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    selectedMeal = meal
+                                    showCustomAlert = true // Trigger the custom alert
+                                }
+                            }
+                            .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
+                        }
+                        
+                    }
+                    .tabItem {
+                        Label("Gerichte", systemImage: "fork.knife")
+                    }
+                
+                }
+                //.tabViewStyle(.page)
+                
                 .listStyle(.grouped)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .shadow(radius: 5)
