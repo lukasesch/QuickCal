@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CreatePanelView: View {
+struct CreateFoodPanelView: View {
     @State private var nameTF = ""
     @State private var defaultQuantityTF = ""
     @State private var unit = "g"
@@ -201,5 +201,5 @@ struct CreatePanelView: View {
 }
 
 #Preview {
-    CreatePanelView()
+    CreateFoodPanelView()
 }

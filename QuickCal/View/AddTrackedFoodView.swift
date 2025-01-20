@@ -29,7 +29,7 @@ struct AddTrackedFoodView: View {
         NavigationStack {
             HStack {
                 //Lebensmittel
-                NavigationLink(destination: CreatePanelView()) {
+                NavigationLink(destination: CreateFoodPanelView()) {
                     VStack {
                         Image(systemName: "leaf.fill")
                             .font(.title3)
@@ -44,15 +44,13 @@ struct AddTrackedFoodView: View {
                 .buttonStyle(.bordered)
                 
                 //Gerichte
-                Button(action: {
-                    // Aktion hier
-                }) {
+                NavigationLink(destination: CreateMealPanelView()) {
                     VStack {
                         Image(systemName: "fork.knife")
                             .font(.title3)
                             .padding(.bottom, 2)
                             .foregroundColor(.blue)
-                        //Text("Gericht")
+                        //Text("Lebensmittel")
                             .font(.caption)
                             .foregroundColor(.primary)
                     }
