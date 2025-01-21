@@ -18,7 +18,7 @@ struct CreateFoodPanelView: View {
     
     @Environment(\.dismiss) private var dismiss
     
-    @EnvironmentObject var createPanelViewModel: CreatePanelViewModel
+    @EnvironmentObject var createPanelViewModel: CreateFoodPanelViewModel
         
     //NEW FocusState for tracking focused field
     @FocusState private var focusedField: Field?

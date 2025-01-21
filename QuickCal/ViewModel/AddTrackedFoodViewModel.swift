@@ -85,4 +85,18 @@ class AddTrackedFoodViewModel: ObservableObject {
             print("Failed to delete food item: \(error)")
         }
     }
+    
+    func deleteMealItem(at offsets: IndexSet) {
+        offsets.forEach { index in
+            let meal = mealItems[index]
+            context.delete(meal)
+        }
+        
+        do {
+            try context.save()
+            mealItems.remove(atOffsets: offsets)
+        } catch {
+            print("Failed to delete food item: \(error)")
+        }
+    }
 }

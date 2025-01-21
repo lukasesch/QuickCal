@@ -10,11 +10,12 @@ import SwiftUI
 struct CreateMealPanelView: View {
     @EnvironmentObject var createMealPanelViewModel: CreateMealPanelViewModel
     @State private var nameTF = ""
+    @State private var portionsTF = ""
     @Environment(\.dismiss) private var dismiss
     @FocusState private var focusedField: Field?
     
     enum Field: Int, CaseIterable {
-        case name
+        case name, portions
     }
     
     var body: some View {
@@ -39,6 +40,21 @@ struct CreateMealPanelView: View {
                         .padding(.vertical, 5.0)
                         .padding(.trailing, 16.0)
                 }
+                HStack {
+                    Text("Portionen:")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                    Spacer() // Füllt den verfügbaren Platz zwischen den Texten
+                    TextField("4", text: $portionsTF)
+                        .keyboardType(.numberPad)
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.trailing)
+                        .submitLabel(.done)
+                        .focused($focusedField, equals: .portions)
+                        .padding(.vertical, 5.0)
+                        .padding(.trailing, 16.0)
+                }
                 Divider()
                 List {
                     Section {
@@ -51,7 +67,7 @@ struct CreateMealPanelView: View {
                             let totalkcal = Float(kcal) * quantity
                             let displayQuantity = quantity * defaultQuantity
                             
-                            // Render the food item
+                            
                             HStack {
                                 VStack(alignment: .leading) {
                                     HStack {
@@ -104,8 +120,8 @@ struct CreateMealPanelView: View {
                 
                 HStack {
                     Button(action: {
+                        createMealPanelViewModel.saveMealToDB(name: nameTF, defaultQuantity: portionsTF)
                         dismiss()
-                        
                     }) {
                         Text("Erstellen")
                             .frame(maxWidth: .infinity)
@@ -130,14 +146,43 @@ struct CreateMealPanelView: View {
                 .padding(.top)
             }
             .padding()
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Button(action: { moveFocus(-1) }) {
+                        Image(systemName: "chevron.up")
+                    }
+                    .disabled(focusedField == .name)
+                    
+                    Button(action: { moveFocus(1) }) {
+                        Image(systemName: "chevron.down")
+                    }
+                    
+                    Spacer()
+                    
+                    Button("Fertig") {
+                        focusedField = nil
+                    }
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
         }
+    }
+    
+    // Function to move focus between fields
+    private func moveFocus(_ direction: Int) {
+        guard let current = focusedField,
+              let newIndex = Field.allCases.firstIndex(of: current)?.advanced(by: direction),
+              Field.allCases.indices.contains(newIndex) else {
+            return
+        }
+        focusedField = Field.allCases[newIndex]
     }
 }
 
 #Preview {
     let context = PersistenceController.preview.container.viewContext
     CreateMealPanelView()
-        .environmentObject(CreateMealPanelViewModel())
+        .environmentObject(CreateMealPanelViewModel(context: context))
         .environment(\.managedObjectContext, context)
         .environmentObject(AddTrackedFoodViewModel(context: context))
 }

@@ -134,7 +134,7 @@ struct AddTrackedFoodView: View {
                                 HStack {
                                     VStack(alignment: .leading) {
                                         Text("\(meal.name ?? "Unbekannt")")
-                                        Text("\(String(format: "%.0f", meal.defaultQuantity)) \(meal.unit ?? "")")
+                                        Text("\(meal.defaultQuantity) \(meal.unit ?? "")")
                                             .font(.footnote)
                                     }
                                     Spacer()
@@ -142,11 +142,11 @@ struct AddTrackedFoodView: View {
                                 }
                                 .contentShape(Rectangle())
                                 .onTapGesture {
-                                    selectedMeal = meal
-                                    showCustomAlert = true // Trigger the custom alert
+//                                    selectedMeal = meal
+//                                    showCustomAlert = true // Trigger the custom alert
                                 }
                             }
-                            .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
+                            .onDelete(perform: addTrackedFoodViewModel.deleteMealItem)
                         }
                         
                     }
@@ -170,16 +170,9 @@ struct AddTrackedFoodView: View {
             .padding([.top, .leading, .trailing])
             .onAppear {
                 addTrackedFoodViewModel.fetchFoodItems()
+                addTrackedFoodViewModel.fetchMealItems()
                 createMealPanelViewModel.clearStruct()
             }
-            
-//            .searchable(text: $searchText)
-//            .onChange(of: searchText) {
-//                addTrackedFoodViewModel.filterFoodItems(by: searchText)
-//            }
-//            .onSubmit(of: .search) {
-//                openFoodFactsViewModel.search(text: searchText)
-//            }
             
         }
         
@@ -312,5 +305,5 @@ struct CustomAlert: View {
         .environmentObject(MainViewModel(context: context))
         .environmentObject(AddTrackedFoodViewModel(context: context))
         .environmentObject(OpenFoodFactsViewModel(context: context))
-        .environmentObject(CreateMealPanelViewModel())
+        .environmentObject(CreateMealPanelViewModel(context: context))
 }

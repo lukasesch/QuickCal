@@ -11,7 +11,7 @@ struct SettingsView: View {
     @AppStorage("onboarding") private var onboardingDone = false
     @EnvironmentObject var settingsViewModel: SettingsViewModel
     @EnvironmentObject var mainViewModel: MainViewModel
-    @EnvironmentObject var createPanelViewModel: CreatePanelViewModel
+    @EnvironmentObject var createPanelViewModel: CreateFoodPanelViewModel
     
     var body: some View {
         NavigationStack {

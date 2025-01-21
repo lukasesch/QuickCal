@@ -27,7 +27,7 @@
     </entity>
     <entity name="Meal" representedClassName="Meal" syncable="YES" codeGenerationType="class">
         <attribute name="carbohydrate" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="defaultQuantity" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="defaultQuantity" optional="YES" attributeType="Integer 16" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="fat" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="kcal" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="lastUsed" optional="YES" attributeType="Date" usesScalarValueType="NO"/>

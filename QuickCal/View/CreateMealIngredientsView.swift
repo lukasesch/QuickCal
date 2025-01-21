@@ -110,5 +110,5 @@ struct CreateMealIngredientsView: View {
     CreateMealIngredientsView()
         .environment(\.managedObjectContext, context)
         .environmentObject(AddTrackedFoodViewModel(context: context))
-        .environmentObject(CreateMealPanelViewModel())
+        .environmentObject(CreateMealPanelViewModel(context: context))
 }

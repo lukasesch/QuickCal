@@ -6,10 +6,15 @@
 //
 
 import Foundation
+import CoreData
 
 class CreateMealPanelViewModel: ObservableObject {
-    @Published var mealFoods: [MealFoodStruct] = []
+    private let context: NSManagedObjectContext
+    init(context: NSManagedObjectContext) {
+        self.context = context
+    }
     
+    @Published var mealFoods: [MealFoodStruct] = []
     @Published var kcalTotal: Float = 0
     @Published var carbsTotal: Float = 0
     @Published var proteinTotal: Float = 0
@@ -46,6 +51,40 @@ class CreateMealPanelViewModel: ObservableObject {
         carbsTotal = 0
         proteinTotal = 0
         fatTotal = 0
+    }
+    
+    func saveMealToDB(name: String, defaultQuantity: String) {
+        let newMeal = Meal(context: context)
+        newMeal.name = name.isEmpty ? "Unbekanntes Gericht" : name
+        if let defaultQuantityValue = Int16(defaultQuantity.isEmpty ? "1" : defaultQuantity) {
+            newMeal.defaultQuantity = defaultQuantityValue
+        } else {
+            print("Ungültiger Wert für defaultQuantity: \(defaultQuantity)")
+            return
+        }
+        newMeal.lastUsed = Date()
+        newMeal.kcal = Int16(kcalTotal.rounded())
+        newMeal.carbohydrate = carbsTotal
+        newMeal.protein = proteinTotal
+        newMeal.fat = fatTotal
+        newMeal.unit = "Portion"
+        
+        
+        for mealFood in mealFoods {
+            let newMealFood = MealFood(context: context)
+            newMealFood.food = mealFood.food
+            newMealFood.quantity = mealFood.quantity
+            newMealFood.meal = newMeal
+        }
+        
+        //Speichern
+        do {
+            try context.save()
+            print("Gericht erfolgreich in DB gespeichert")
+            //print("\(newMeal.name), \(newMeal.defaultQuantity), \(newMeal.unit), \(newMeal.kcal), \(newMeal.carbohydrate), \(newMeal.protein), \(newMeal.fat)")
+        } catch {
+            print("Gericht konnte nicht gespeichert werden: \(error.localizedDescription)")
+        }
     }
     
     struct MealFoodStruct: Identifiable {

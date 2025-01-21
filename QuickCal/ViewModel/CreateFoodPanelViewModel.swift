@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-final class CreatePanelViewModel: ObservableObject {
+final class CreateFoodPanelViewModel: ObservableObject {
     private let context: NSManagedObjectContext
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -46,7 +46,7 @@ final class CreatePanelViewModel: ObservableObject {
             try context.save()
             print("Lebensmittel erfolgreich in DB gespeichert")
         } catch {
-            print("Benutzer konnte nicht gespeichert werden: \(error.localizedDescription)")
+            print("Lebensmittel konnte nicht gespeichert werden: \(error.localizedDescription)")
         }
     }
 }
