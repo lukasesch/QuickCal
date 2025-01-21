@@ -13,6 +13,7 @@ struct AddTrackedFoodView: View {
     @EnvironmentObject var addTrackedFoodViewModel: AddTrackedFoodViewModel
     @EnvironmentObject var mainViewModel: MainViewModel
     @EnvironmentObject var openFoodFactsViewModel: OpenFoodFactsViewModel
+    @EnvironmentObject var createMealPanelViewModel: CreateMealPanelViewModel
     var selectedDaytime: Int
     var selectedDate: Date
     
@@ -169,6 +170,7 @@ struct AddTrackedFoodView: View {
             .padding([.top, .leading, .trailing])
             .onAppear {
                 addTrackedFoodViewModel.fetchFoodItems()
+                createMealPanelViewModel.clearStruct()
             }
             
 //            .searchable(text: $searchText)
@@ -310,4 +312,5 @@ struct CustomAlert: View {
         .environmentObject(MainViewModel(context: context))
         .environmentObject(AddTrackedFoodViewModel(context: context))
         .environmentObject(OpenFoodFactsViewModel(context: context))
+        .environmentObject(CreateMealPanelViewModel())
 }

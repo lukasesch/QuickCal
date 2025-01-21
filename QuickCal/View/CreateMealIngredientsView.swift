@@ -9,6 +9,9 @@ import SwiftUI
 
 struct CreateMealIngredientsView: View {
     @EnvironmentObject var addTrackedFoodViewModel: AddTrackedFoodViewModel
+    @EnvironmentObject var createMealPanelViewModel: CreateMealPanelViewModel
+    
+    @Environment(\.dismiss) private var dismiss
     
     @State private var searchText = ""
     @State private var showCustomAlert = false
@@ -49,6 +52,14 @@ struct CreateMealIngredientsView: View {
             .onAppear {
                 addTrackedFoodViewModel.fetchFoodItems()
             }
+//            .searchable(text: $searchText)
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer(displayMode:.always)
+            )
+            .onChange(of: searchText) {
+                addTrackedFoodViewModel.filterFoodItems(by: searchText)
+            }
         }
         .overlay(
             Group {
@@ -66,6 +77,11 @@ struct CreateMealIngredientsView: View {
 //                                )
 //                                resetAlert()
 //                            }
+                            if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                                createMealPanelViewModel.addIngredient(food: food, quantity: quantityValue)
+                                resetAlert()
+                                dismiss()
+                            }
                         },
                         onCancel: {
                             resetAlert()
@@ -75,10 +91,7 @@ struct CreateMealIngredientsView: View {
                 }
             }
         )
-        .searchable(text: $searchText)
-        .onChange(of: searchText) {
-            addTrackedFoodViewModel.filterFoodItems(by: searchText)
-        }
+        
         .animation(.easeInOut(duration: 0.2), value: showCustomAlert) // Animation aktivieren
         
     }
@@ -97,4 +110,5 @@ struct CreateMealIngredientsView: View {
     CreateMealIngredientsView()
         .environment(\.managedObjectContext, context)
         .environmentObject(AddTrackedFoodViewModel(context: context))
+        .environmentObject(CreateMealPanelViewModel())
 }

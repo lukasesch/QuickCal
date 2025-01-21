@@ -42,17 +42,22 @@ struct CreateMealPanelView: View {
                 Divider()
                 List {
                     Section {
-                        ForEach(createMealPanelViewModel.mealFood) { food in
-                            let portion = food.quantity
-                            let kcal = food.food?.kcal ?? 0
-                            let defaultQuantity = food.food?.defaultQuantity ?? 0
-                            let totalkcal = Float(kcal) * portion
+                        ForEach(createMealPanelViewModel.mealFoods) { mealFood in
+                            let food = mealFood.food
+                            let kcal = food.kcal
+                            let defaultQuantity = food.defaultQuantity
+                            let unit = food.unit ?? ""
+                            let quantity = mealFood.quantity
+                            let totalkcal = Float(kcal) * quantity
+                            let displayQuantity = quantity * defaultQuantity
+                            
+                            // Render the food item
                             HStack {
                                 VStack(alignment: .leading) {
                                     HStack {
                                         VStack(alignment: .leading) {
-                                            Text("\(food.food?.name ?? "Unknown Food")")
-                                            Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
+                                            Text(food.name ?? "Unknown Food")
+                                            Text("\(String(format: "%.0f", displayQuantity)) \(unit)")
                                                 .font(.footnote)
                                         }
                                         Spacer()
@@ -63,7 +68,7 @@ struct CreateMealPanelView: View {
                             .contentShape(Rectangle())
                         }
                         .onDelete { offsets in
-                            createMealPanelViewModel.deleteTrackedFoodItem(at: offsets)
+                            createMealPanelViewModel.deleteIngredient(at: offsets)
                         }
                     } header: {
                         VStack {
