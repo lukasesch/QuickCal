@@ -91,7 +91,7 @@ struct AddTrackedFoodView: View {
                 
                 
             }
-            .padding([.top, .leading, .trailing])
+            .padding(.horizontal)
             
             VStack(alignment: .leading) {
                 TabView {
@@ -152,9 +152,10 @@ struct AddTrackedFoodView: View {
                     .tabItem {
                         Label("Gerichte", systemImage: "fork.knife")
                     }
-                
+                    
                 }
-                //.tabViewStyle(.page)
+
+                
                 
                 .listStyle(.grouped)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -163,38 +164,23 @@ struct AddTrackedFoodView: View {
                 Spacer()
                 Spacer()
                 Spacer()
-//                List {
-//                    Section(header:
-//                                Text("Gerichte").font(.subheadline)) {
-//                        ForEach(openFoodFactsViewModel.products) { product in
-//                            HStack {
-//                                Text("\(product.name), \(String(format: "%.0f", product.defaultQuantity)) \(product.unit)")
-//                                Spacer()
-//                                Text("\(product.kcal) kcal")
-//                            }
-//                            .contentShape(Rectangle())
-//                        }
-//                    }
-//                    
-//                }
-//                .listStyle(.grouped)
-//                .clipShape(RoundedRectangle(cornerRadius: 10))
-//                .shadow(radius: 5)
+
             }
             .padding([.top, .leading, .trailing])
             .onAppear {
                 addTrackedFoodViewModel.fetchFoodItems()
             }
             
-            .searchable(text: $searchText)
-            .onChange(of: searchText) {
-                addTrackedFoodViewModel.filterFoodItems(by: searchText)
-            }
-            .onSubmit(of: .search) {
-                openFoodFactsViewModel.search(text: searchText)
-            }
+//            .searchable(text: $searchText)
+//            .onChange(of: searchText) {
+//                addTrackedFoodViewModel.filterFoodItems(by: searchText)
+//            }
+//            .onSubmit(of: .search) {
+//                openFoodFactsViewModel.search(text: searchText)
+//            }
             
         }
+        
         .overlay(
             Group {
                 if showCustomAlert {
@@ -222,7 +208,15 @@ struct AddTrackedFoodView: View {
                 }
             }
         )
+        .searchable(text: $searchText)
+        .onChange(of: searchText) {
+            addTrackedFoodViewModel.filterFoodItems(by: searchText)
+        }
+        .onSubmit(of: .search) {
+            openFoodFactsViewModel.search(text: searchText)
+        }
         .animation(.easeInOut(duration: 0.2), value: showCustomAlert) // Animation aktivieren
+        
     }
     
     
@@ -233,6 +227,7 @@ struct AddTrackedFoodView: View {
         selectedFood = nil
         quantity = ""
     }
+    
 }
 
 // Custom alert view with fields for quantity input and displays food name and default quantity

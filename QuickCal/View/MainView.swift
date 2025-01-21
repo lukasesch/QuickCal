@@ -22,37 +22,37 @@ struct MainView: View {
     @State private var showCustomAlert = false
     @State private var selectedFood: TrackedFood?
     @State private var quantity: String = ""
-
-
+    
+    
     var body: some View {
         NavigationStack {
             
-                VStack {
-                    HStack(alignment: .center) {
-                        Image("Icon")
-                            .resizable()
-                            .frame(width: 42, height: 42)
-                        Spacer()
-                        
-                        Text(
-                            Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date())
-                            ? "Heute"
-                            : Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
-                            ? "Gestern"
-                            : Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Calendar.current.date(byAdding: .day, value: -2, to: Date())!)
-                            ? "Vorgestern"
-                            : formattedDate(mainViewModel.selectedDate)
-                        )
-                        .font(.headline)
+            VStack {
+                HStack(alignment: .center) {
+                    Image("Icon")
+                        .resizable()
+                        .frame(width: 42, height: 42)
+                    Spacer()
+                    
+                    Text(
+                        Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date())
+                        ? "Heute"
+                        : Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
+                        ? "Gestern"
+                        : Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Calendar.current.date(byAdding: .day, value: -2, to: Date())!)
+                        ? "Vorgestern"
+                        : formattedDate(mainViewModel.selectedDate)
+                    )
+                    .font(.headline)
+                    .foregroundColor(.blue)
+                    .onTapGesture {
+                        mainViewModel.showingDatePicker.toggle()
+                    }
+                    Image(systemName: "chevron.down")
                         .foregroundColor(.blue)
                         .onTapGesture {
                             mainViewModel.showingDatePicker.toggle()
                         }
-                        Image(systemName: "chevron.down")
-                            .foregroundColor(.blue)
-                            .onTapGesture {
-                                mainViewModel.showingDatePicker.toggle()
-                            }
                         .sheet(isPresented: $mainViewModel.showingDatePicker) {
                             VStack {
                                 DatePicker(
@@ -66,350 +66,350 @@ struct MainView: View {
                                     mainViewModel.showingDatePicker = false
                                     mainViewModel.updateData()
                                 }
-
+                                
                                 
                             }
                             .presentationDetents([.fraction(0.51)])
                             .presentationDragIndicator(.hidden)
                             Spacer()
                         }
-                                                                
-                        Spacer()
-                        Button(action: {
-                            showingSettings.toggle()
-                        }) {
-                            Image(systemName: "gearshape")
-                                .font(.title2)
-                                .foregroundColor(.blue)
-                        }
-                        .sheet(isPresented: $showingSettings) {
-                            SettingsView()
-                        }
-                        .frame(width: 42, height: 42)
-                    }
-                    .padding(.horizontal, 15.0)
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     
                     Spacer()
-                    Spacer()
-                    Spacer()
-                    //Spacer()
-                    
-                    HStack {
-                        Spacer()
-                        HalfCircularProgressView(barColor: .blue, barWidth: 18, progressPercentage: mainViewModel.kcalProgressPercentage)
-                            .frame(width: 180, height: 200)
-                            
-                        Spacer()
+                    Button(action: {
+                        showingSettings.toggle()
+                    }) {
+                        Image(systemName: "gearshape")
+                            .font(.title2)
+                            .foregroundColor(.blue)
                     }
-                    .padding(.bottom, -40)
-                    HStack {
-                        Spacer()
-                        Spacer()
-                        MacroBars(barColor: .green, barWidth: 90, barHeight: 12, goal: mainViewModel.carbsGoal, progressPercentage: mainViewModel.carbsProgressPercentage, barName: "Kohlenhydrate")
-                        Spacer()
-                        MacroBars(barColor: .orange, barWidth: 90, barHeight: 12, goal: mainViewModel.proteinGoal, progressPercentage: mainViewModel.proteinProgressPercentage, barName: "Protein")
-                        Spacer()
-                        MacroBars(barColor: .purple, barWidth: 90, barHeight: 12, goal: mainViewModel.fatGoal, progressPercentage: mainViewModel.fatProgressPercentage, barName: "Fett")
-                        Spacer()
-                        Spacer()
+                    .sheet(isPresented: $showingSettings) {
+                        SettingsView()
                     }
+                    .frame(width: 42, height: 42)
+                }
+                .padding(.horizontal, 15.0)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Spacer()
+                Spacer()
+                Spacer()
+                //Spacer()
+                
+                HStack {
+                    Spacer()
+                    HalfCircularProgressView(barColor: .blue, barWidth: 18, progressPercentage: mainViewModel.kcalProgressPercentage)
+                        .frame(width: 180, height: 200)
                     
                     Spacer()
-    
-                    List {
-                        Section {
-                            ForEach(mainViewModel.trackedFood(forDaytime: 0)) { food in
-                                let portion = food.quantity
-                                let kcal = food.food?.kcal ?? 0
-                                let defaultQuantity = food.food?.defaultQuantity ?? 0
-                                let totalkcal = Float(kcal) * portion
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text("\(food.food?.name ?? "Unknown Food")")
-                                                Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
-                                                    .font(.footnote)
-                                            }
-                                            Spacer()
-                                            Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
+                }
+                .padding(.bottom, -40)
+                HStack {
+                    Spacer()
+                    Spacer()
+                    MacroBars(barColor: .green, barWidth: 90, barHeight: 12, goal: mainViewModel.carbsGoal, progressPercentage: mainViewModel.carbsProgressPercentage, barName: "Kohlenhydrate")
+                    Spacer()
+                    MacroBars(barColor: .orange, barWidth: 90, barHeight: 12, goal: mainViewModel.proteinGoal, progressPercentage: mainViewModel.proteinProgressPercentage, barName: "Protein")
+                    Spacer()
+                    MacroBars(barColor: .purple, barWidth: 90, barHeight: 12, goal: mainViewModel.fatGoal, progressPercentage: mainViewModel.fatProgressPercentage, barName: "Fett")
+                    Spacer()
+                    Spacer()
+                }
+                
+                Spacer()
+                
+                List {
+                    Section {
+                        ForEach(mainViewModel.trackedFood(forDaytime: 0)) { food in
+                            let portion = food.quantity
+                            let kcal = food.food?.kcal ?? 0
+                            let defaultQuantity = food.food?.defaultQuantity ?? 0
+                            let totalkcal = Float(kcal) * portion
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            Text("\(food.food?.name ?? "Unknown Food")")
+                                            Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
+                                                .font(.footnote)
                                         }
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    selectedFood = food
-                                    quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
-                                    ? String(Int(food.quantity)) // Whole Number
-                                    : String(format: "%.1f", food.quantity) // Decimal Number
-                                    withAnimation {
-                                        showCustomAlert = true
+                                        Spacer()
+                                        Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                     }
                                 }
                             }
-                            .onDelete { offsets in
-                                mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 0)
-                            }
-                        } header: {
-                            VStack {
-                                HStack {
-                                    Text("Frühstück")
-                                        .fontWeight(.semibold)
-                                    Spacer()
-                                    Button(action: {
-                                        //print("Button pressed")
-                                        selectedDaytime = 0
-                                        mainViewModel.showAddTrackedFoodPanel.toggle()
-                                    }) {
-                                        Image(systemName: "plus")
-                                            .fontWeight(.semibold)
-                                    }
-                                    
-                                    
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedFood = food
+                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                ? String(Int(food.quantity)) // Whole Number
+                                : String(format: "%.1f", food.quantity) // Decimal Number
+                                withAnimation {
+                                    showCustomAlert = true
                                 }
-                                Divider()
-                                HStack {
-                                    Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalMorning))")
-                                    Spacer()
-                                    Text("C: \(String(format: "%.0f", mainViewModel.carbsMorning)) g")
-                                    Spacer()
-                                    Text("P: \(String(format: "%.0f", mainViewModel.proteinMorning)) g")
-                                    Spacer()
-                                    Text("F: \(String(format: "%.0f", mainViewModel.fatMorning)) g")
-                                    Spacer()
-                                }
-                                .font(.footnote)
                             }
                         }
-                        Section {
-                            ForEach(mainViewModel.trackedFood(forDaytime: 1)) { food in
-                                let portion = food.quantity
-                                let kcal = food.food?.kcal ?? 0
-                                let defaultQuantity = food.food?.defaultQuantity ?? 0
-                                let totalkcal = Float(kcal) * portion
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text("\(food.food?.name ?? "Unknown Food")")
-                                                Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
-                                                    .font(.footnote)
-                                            }
-                                            Spacer()
-                                            Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
-                                        }
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    selectedFood = food
-                                    quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
-                                    ? String(Int(food.quantity)) // Whole Number
-                                    : String(format: "%.1f", food.quantity) // Decimal Number
-                                    withAnimation {
-                                        showCustomAlert = true
-                                    }
-                                }
-                            }
-                            .onDelete { offsets in
-                                mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 1)
-                            }
-                        } header: {
-                            VStack {
-                                HStack {
-                                    Text("Mittagessen")
+                        .onDelete { offsets in
+                            mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 0)
+                        }
+                    } header: {
+                        VStack {
+                            HStack {
+                                Text("Frühstück")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                                Button(action: {
+                                    //print("Button pressed")
+                                    selectedDaytime = 0
+                                    mainViewModel.showAddTrackedFoodPanel.toggle()
+                                }) {
+                                    Image(systemName: "plus")
                                         .fontWeight(.semibold)
-                                    Spacer()
-                                    Button(action: {
-                                        //print("Button pressed")
-                                        selectedDaytime = 1
-                                        mainViewModel.showAddTrackedFoodPanel.toggle()
-                                    }) {
-                                        Image(systemName: "plus")
-                                            .fontWeight(.semibold)
+                                }
+                                
+                                
+                            }
+                            Divider()
+                            HStack {
+                                Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalMorning))")
+                                Spacer()
+                                Text("C: \(String(format: "%.0f", mainViewModel.carbsMorning)) g")
+                                Spacer()
+                                Text("P: \(String(format: "%.0f", mainViewModel.proteinMorning)) g")
+                                Spacer()
+                                Text("F: \(String(format: "%.0f", mainViewModel.fatMorning)) g")
+                                Spacer()
+                            }
+                            .font(.footnote)
+                        }
+                    }
+                    Section {
+                        ForEach(mainViewModel.trackedFood(forDaytime: 1)) { food in
+                            let portion = food.quantity
+                            let kcal = food.food?.kcal ?? 0
+                            let defaultQuantity = food.food?.defaultQuantity ?? 0
+                            let totalkcal = Float(kcal) * portion
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            Text("\(food.food?.name ?? "Unknown Food")")
+                                            Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
+                                                .font(.footnote)
+                                        }
+                                        Spacer()
+                                        Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                     }
-                                    
                                 }
-                                Divider()
-                                HStack {
-                                    Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalMidday))")
-                                    Spacer()
-                                    Text("C: \(String(format: "%.0f", mainViewModel.carbsMidday)) g")
-                                    Spacer()
-                                    Text("P: \(String(format: "%.0f", mainViewModel.proteinMidday)) g")
-                                    Spacer()
-                                    Text("F: \(String(format: "%.0f", mainViewModel.fatMidday)) g")
-                                    Spacer()
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedFood = food
+                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                ? String(Int(food.quantity)) // Whole Number
+                                : String(format: "%.1f", food.quantity) // Decimal Number
+                                withAnimation {
+                                    showCustomAlert = true
                                 }
-                                .font(.footnote)
                             }
                         }
-                        Section {
-                            ForEach(mainViewModel.trackedFood(forDaytime: 2)) { food in
-                                let portion = food.quantity
-                                let kcal = food.food?.kcal ?? 0
-                                let defaultQuantity = food.food?.defaultQuantity ?? 0
-                                let totalkcal = Float(kcal) * portion
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text("\(food.food?.name ?? "Unknown Food")")
-                                                Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
-                                                    .font(.footnote)
-                                            }
-                                            Spacer()
-                                            Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
-                                        }
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    selectedFood = food
-                                    quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
-                                    ? String(Int(food.quantity)) // Whole Number
-                                    : String(format: "%.1f", food.quantity) // Decimal Number
-                                    withAnimation {
-                                        showCustomAlert = true
-                                    }
-                                }
-                            }
-                            .onDelete { offsets in
-                                mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 2)
-                            }
-                        } header: {
-                            VStack {
-                                HStack {
-                                    Text("Abendessen")
+                        .onDelete { offsets in
+                            mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 1)
+                        }
+                    } header: {
+                        VStack {
+                            HStack {
+                                Text("Mittagessen")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                                Button(action: {
+                                    //print("Button pressed")
+                                    selectedDaytime = 1
+                                    mainViewModel.showAddTrackedFoodPanel.toggle()
+                                }) {
+                                    Image(systemName: "plus")
                                         .fontWeight(.semibold)
-                                    Spacer()
-                                    Button(action: {
-                                        //print("Button pressed")
-                                        selectedDaytime = 2
-                                        mainViewModel.showAddTrackedFoodPanel.toggle()
-                                    }) {
-                                        Image(systemName: "plus")
-                                            .fontWeight(.semibold)
-                                    }
-                                                                    }
-                                Divider()
-                                HStack {
-                                    Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalEvening))")
-                                    Spacer()
-                                    Text("C: \(String(format: "%.0f", mainViewModel.carbsEvening)) g")
-                                    Spacer()
-                                    Text("P: \(String(format: "%.0f", mainViewModel.proteinEvening)) g")
-                                    Spacer()
-                                    Text("F: \(String(format: "%.0f", mainViewModel.fatEvening)) g")
-                                    Spacer()
                                 }
-                                .font(.footnote)
+                                
+                            }
+                            Divider()
+                            HStack {
+                                Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalMidday))")
+                                Spacer()
+                                Text("C: \(String(format: "%.0f", mainViewModel.carbsMidday)) g")
+                                Spacer()
+                                Text("P: \(String(format: "%.0f", mainViewModel.proteinMidday)) g")
+                                Spacer()
+                                Text("F: \(String(format: "%.0f", mainViewModel.fatMidday)) g")
+                                Spacer()
+                            }
+                            .font(.footnote)
+                        }
+                    }
+                    Section {
+                        ForEach(mainViewModel.trackedFood(forDaytime: 2)) { food in
+                            let portion = food.quantity
+                            let kcal = food.food?.kcal ?? 0
+                            let defaultQuantity = food.food?.defaultQuantity ?? 0
+                            let totalkcal = Float(kcal) * portion
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            Text("\(food.food?.name ?? "Unknown Food")")
+                                            Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
+                                                .font(.footnote)
+                                        }
+                                        Spacer()
+                                        Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
+                                    }
+                                }
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedFood = food
+                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                ? String(Int(food.quantity)) // Whole Number
+                                : String(format: "%.1f", food.quantity) // Decimal Number
+                                withAnimation {
+                                    showCustomAlert = true
+                                }
                             }
                         }
-                        Section {
-                            ForEach(mainViewModel.trackedFood(forDaytime: 3)) { food in
-                                let portion = food.quantity
-                                let kcal = food.food?.kcal ?? 0
-                                let defaultQuantity = food.food?.defaultQuantity ?? 0
-                                let totalkcal = Float(kcal) * portion
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text("\(food.food?.name ?? "Unknown Food")")
-                                                Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
-                                                    .font(.footnote)
-                                            }
-                                            Spacer()
-                                            Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
-                                        }
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    selectedFood = food
-                                    quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
-                                    ? String(Int(food.quantity)) // Whole Number
-                                    : String(format: "%.1f", food.quantity) // Decimal Number
-                                    withAnimation {
-                                        showCustomAlert = true
-                                    }
-                                    
-                                }
-                            }
-                            .onDelete { offsets in
-                                mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 3)
-                            }
-                        } header: {
-                            VStack {
-                                HStack {
-                                    Text("Snacks")
+                        .onDelete { offsets in
+                            mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 2)
+                        }
+                    } header: {
+                        VStack {
+                            HStack {
+                                Text("Abendessen")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                                Button(action: {
+                                    //print("Button pressed")
+                                    selectedDaytime = 2
+                                    mainViewModel.showAddTrackedFoodPanel.toggle()
+                                }) {
+                                    Image(systemName: "plus")
                                         .fontWeight(.semibold)
-                                    Spacer()
-                                    Button(action: {
-                                        //print("Button pressed")
-                                        selectedDaytime = 3
-                                        mainViewModel.showAddTrackedFoodPanel.toggle()
-                                    }) {
-                                        Image(systemName: "plus")
-                                            .fontWeight(.semibold)
+                                }
+                            }
+                            Divider()
+                            HStack {
+                                Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalEvening))")
+                                Spacer()
+                                Text("C: \(String(format: "%.0f", mainViewModel.carbsEvening)) g")
+                                Spacer()
+                                Text("P: \(String(format: "%.0f", mainViewModel.proteinEvening)) g")
+                                Spacer()
+                                Text("F: \(String(format: "%.0f", mainViewModel.fatEvening)) g")
+                                Spacer()
+                            }
+                            .font(.footnote)
+                        }
+                    }
+                    Section {
+                        ForEach(mainViewModel.trackedFood(forDaytime: 3)) { food in
+                            let portion = food.quantity
+                            let kcal = food.food?.kcal ?? 0
+                            let defaultQuantity = food.food?.defaultQuantity ?? 0
+                            let totalkcal = Float(kcal) * portion
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            Text("\(food.food?.name ?? "Unknown Food")")
+                                            Text("\(String(format: "%.0f", (food.quantity * defaultQuantity))) \(food.food?.unit ?? "")")
+                                                .font(.footnote)
+                                        }
+                                        Spacer()
+                                        Text("\(String(format: "%.0f", totalkcal)) kcal") // Kalorien
                                     }
-                                    
                                 }
-                                Divider()
-                                HStack {
-                                    Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalSnacks))")
-                                    Spacer()
-                                    Text("C: \(String(format: "%.0f", mainViewModel.carbsSnacks)) g")
-                                    Spacer()
-                                    Text("P: \(String(format: "%.0f", mainViewModel.proteinSnacks)) g")
-                                    Spacer()
-                                    Text("F: \(String(format: "%.0f", mainViewModel.fatSnacks)) g")
-                                    Spacer()
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedFood = food
+                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                ? String(Int(food.quantity)) // Whole Number
+                                : String(format: "%.1f", food.quantity) // Decimal Number
+                                withAnimation {
+                                    showCustomAlert = true
                                 }
-                                .font(.footnote)
+                                
                             }
                         }
+                        .onDelete { offsets in
+                            mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 3)
+                        }
+                    } header: {
+                        VStack {
+                            HStack {
+                                Text("Snacks")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                                Button(action: {
+                                    //print("Button pressed")
+                                    selectedDaytime = 3
+                                    mainViewModel.showAddTrackedFoodPanel.toggle()
+                                }) {
+                                    Image(systemName: "plus")
+                                        .fontWeight(.semibold)
+                                }
+                                
+                            }
+                            Divider()
+                            HStack {
+                                Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalSnacks))")
+                                Spacer()
+                                Text("C: \(String(format: "%.0f", mainViewModel.carbsSnacks)) g")
+                                Spacer()
+                                Text("P: \(String(format: "%.0f", mainViewModel.proteinSnacks)) g")
+                                Spacer()
+                                Text("F: \(String(format: "%.0f", mainViewModel.fatSnacks)) g")
+                                Spacer()
+                            }
+                            .font(.footnote)
+                        }
+                    }
+                    
+                }
+                .sheet(isPresented: $mainViewModel.showAddTrackedFoodPanel) {
+                    if let daytime = selectedDaytime {
+                        AddTrackedFoodView(showAddTrackedFoodPanel: $mainViewModel.showAddTrackedFoodPanel, selectedDaytime: daytime, selectedDate: mainViewModel.selectedDate)
                         
                     }
-                    .sheet(isPresented: $mainViewModel.showAddTrackedFoodPanel) {
-                        if let daytime = selectedDaytime {
-                            AddTrackedFoodView(showAddTrackedFoodPanel: $mainViewModel.showAddTrackedFoodPanel, selectedDaytime: daytime, selectedDate: mainViewModel.selectedDate)
-                            
-                        }
-                    }
-                    .listStyle(.grouped)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .padding()
-                    .shadow(radius: 5)
-                    
-                    
-                    Spacer()
-                    Spacer()
-                    Spacer()
-                    Spacer()
-                    
-                    
-                    
                 }
-                .navigationBarBackButtonHidden(true)
-                .onAppear {
-                    //Preview debugging as no user exists here
-                    if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
-                        mainViewModel.kcalGoal = 2000
-                        mainViewModel.kcalReached = 0
-                        mainViewModel.carbsGoal = 200
-                        mainViewModel.proteinGoal = 100
-                        mainViewModel.fatGoal = 70
-                    } else {
-                        mainViewModel.checkAndCalculateDailyCalories()
-                        print("MainView: checkAndCalculateDailyCalories run!")
-                    }
-                    //mainViewModel.fetchTrackedFood()
-                    mainViewModel.updateData()
+                .listStyle(.grouped)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .padding()
+                .shadow(radius: 5)
+                
+                
+                Spacer()
+                Spacer()
+                Spacer()
+                Spacer()
+                
+                
+                
+            }
+            .navigationBarBackButtonHidden(true)
+            .onAppear {
+                //Preview debugging as no user exists here
+                if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+                    mainViewModel.kcalGoal = 2000
+                    mainViewModel.kcalReached = 0
+                    mainViewModel.carbsGoal = 200
+                    mainViewModel.proteinGoal = 100
+                    mainViewModel.fatGoal = 70
+                } else {
+                    mainViewModel.checkAndCalculateDailyCalories()
+                    print("MainView: checkAndCalculateDailyCalories run!")
                 }
-          
+                //mainViewModel.fetchTrackedFood()
+                mainViewModel.updateData()
+            }
+            
             .tabViewStyle(.page)
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
             .padding(.bottom, 10)
@@ -437,7 +437,7 @@ struct MainView: View {
                     .transition(.opacity)
                 }
             }
-            .animation(.easeInOut(duration: 0.2), value: showCustomAlert)
+                .animation(.easeInOut(duration: 0.2), value: showCustomAlert)
         )
         
     }
@@ -457,7 +457,7 @@ struct MainView: View {
         return formatter.string(from: date)
     }
     
-
+    
     struct HalfCircularProgressView: View {
         @EnvironmentObject var mainViewModel: MainViewModel
         var barColor: Color
@@ -509,7 +509,7 @@ struct MainView: View {
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                     .padding(.bottom)
-                } 
+                }
             }
         }
     }
