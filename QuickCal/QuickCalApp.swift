@@ -23,6 +23,7 @@ struct QuickCalApp: App {
                     .environmentObject(AddTrackedFoodViewModel(context: persistenceController.container.viewContext))
                     .environmentObject(CreatePanelViewModel(context: persistenceController.container.viewContext))
                     .environmentObject(CreateMealPanelViewModel())
+                    .environmentObject(CreateMealIngredientsViewModel())
                     .environmentObject(OpenFoodFactsViewModel(context: persistenceController.container.viewContext))
                     .environmentObject(BarCodeViewModel(context: persistenceController.container.viewContext))
             } else {
@@ -34,6 +35,7 @@ struct QuickCalApp: App {
                     .environmentObject(AddTrackedFoodViewModel(context: persistenceController.container.viewContext))
                     .environmentObject(CreatePanelViewModel(context: persistenceController.container.viewContext))
                     .environmentObject(CreateMealPanelViewModel())
+                    .environmentObject(CreateMealIngredientsViewModel())
                     .environmentObject(OpenFoodFactsViewModel(context: persistenceController.container.viewContext))
                     .environmentObject(BarCodeViewModel(context: persistenceController.container.viewContext))
             }

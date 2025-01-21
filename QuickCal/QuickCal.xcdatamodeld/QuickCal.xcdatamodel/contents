@@ -34,12 +34,12 @@
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="protein" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="unit" optional="YES" attributeType="String"/>
-        <relationship name="mealFoods" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MealFood" inverseName="meal" inverseEntity="MealFood"/>
+        <relationship name="mealFood" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MealFood" inverseName="meal" inverseEntity="MealFood"/>
     </entity>
     <entity name="MealFood" representedClassName="MealFood" syncable="YES" codeGenerationType="class">
         <attribute name="quantity" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="food" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Food" inverseName="mealFood" inverseEntity="Food"/>
-        <relationship name="meal" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Meal" inverseName="mealFoods" inverseEntity="Meal"/>
+        <relationship name="meal" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Meal" inverseName="mealFood" inverseEntity="Meal"/>
     </entity>
     <entity name="TrackedFood" representedClassName="TrackedFood" syncable="YES" codeGenerationType="class">
         <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>

@@ -212,9 +212,6 @@ struct AddTrackedFoodView: View {
         .onChange(of: searchText) {
             addTrackedFoodViewModel.filterFoodItems(by: searchText)
         }
-        .onSubmit(of: .search) {
-            openFoodFactsViewModel.search(text: searchText)
-        }
         .animation(.easeInOut(duration: 0.2), value: showCustomAlert) // Animation aktivieren
         
     }
