@@ -72,6 +72,25 @@ class AddTrackedFoodViewModel: ObservableObject {
         }
     }
     
+    func addTrackedMeal(meal: Meal, quantity: Float, daytime: Int16, selectedDate: Date) {
+        guard let mealFoods = meal.mealFood as? Set<MealFood> else {
+            print("No meal foods found for this meal.")
+            return
+        }
+        
+        for mealFood in mealFoods {
+            guard let food = mealFood.food else {
+                print("MealFood does not have an associated Food entity.")
+                continue
+            }
+            
+            let adjustedQuantity = (mealFood.quantity ?? 1) * quantity / Float(meal.defaultQuantity)
+            
+            // Rufe die addTrackedFood-Funktion auf
+            addTrackedFood(food: food, quantity: adjustedQuantity, daytime: daytime, selectedDate: selectedDate)
+        }
+    }
+    
     func deleteFoodItem(at offsets: IndexSet) {
         offsets.forEach { index in
             let food = foodItems[index]

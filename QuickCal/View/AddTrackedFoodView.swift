@@ -204,8 +204,16 @@ struct AddTrackedFoodView: View {
                 } else if showCustomMealAlert {
                     CustomMealAlert(isPresented: $showCustomMealAlert, quantity: $quantity, mealItem: selectedMeal,
                     onSave: {
-                        resetAlert()
-                        mainViewModel.updateData()
+                        if let meal = selectedMeal, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                            addTrackedFoodViewModel.addTrackedMeal(
+                                meal: meal,
+                                quantity: quantityValue,
+                                daytime: Int16(selectedDaytime),
+                                selectedDate: selectedDate
+                            )
+                            resetAlert()
+                            mainViewModel.updateData()
+                        }
                     }, onCancel: {
                         resetAlert()
                     }
