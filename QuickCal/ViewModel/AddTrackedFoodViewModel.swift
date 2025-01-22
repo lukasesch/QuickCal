@@ -66,6 +66,7 @@ class AddTrackedFoodViewModel: ObservableObject {
         
         do {
             try context.save()
+            fetchFoodItems()
             print("Tracked \(food.name ?? "Unbekannt") saved successfully!")
         } catch {
             print("Failed to save tracked food: \(error)")
@@ -84,11 +85,21 @@ class AddTrackedFoodViewModel: ObservableObject {
                 continue
             }
             
-            let adjustedQuantity = (mealFood.quantity ?? 1) * quantity / Float(meal.defaultQuantity)
-            
-            // Rufe die addTrackedFood-Funktion auf
+            let adjustedQuantity = (mealFood.quantity) * quantity / Float(meal.defaultQuantity)
             addTrackedFood(food: food, quantity: adjustedQuantity, daytime: daytime, selectedDate: selectedDate)
         }
+        
+        meal.lastUsed = selectedDate
+        
+        // Speichere die Änderungen
+        do {
+            try context.save()
+            fetchMealItems()
+            print("Meal lastUsed updated successfully!")
+        } catch {
+            print("Failed to update meal lastUsed: \(error)")
+        }
+    
     }
     
     func deleteFoodItem(at offsets: IndexSet) {
