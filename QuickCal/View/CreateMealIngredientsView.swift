@@ -64,7 +64,7 @@ struct CreateMealIngredientsView: View {
         .overlay(
             Group {
                 if showCustomAlert {
-                    CustomAlert(
+                    CustomFoodAlert(
                         isPresented: $showCustomAlert,
                         quantity: $quantity,
                         foodItem: selectedFood,

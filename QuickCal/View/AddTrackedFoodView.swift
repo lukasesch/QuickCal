@@ -18,7 +18,8 @@ struct AddTrackedFoodView: View {
     var selectedDate: Date
     
     @State private var searchText = ""
-    @State private var showCustomAlert = false
+    @State private var showCustomFoodAlert = false
+    @State private var showCustomMealAlert = false
     @State private var quantity: String = ""
     @State private var selectedFood: Food?
     @State private var selectedMeal: Meal?
@@ -114,7 +115,7 @@ struct AddTrackedFoodView: View {
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     selectedFood = food
-                                    showCustomAlert = true // Trigger the custom alert
+                                    showCustomFoodAlert = true // Trigger the custom alert
                                 }
                             }
                             .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
@@ -134,7 +135,7 @@ struct AddTrackedFoodView: View {
                                 HStack {
                                     VStack(alignment: .leading) {
                                         Text("\(meal.name ?? "Unbekannt")")
-                                        Text("\(meal.defaultQuantity) \(meal.unit ?? "")")
+                                        Text("\(meal.defaultQuantity) \(meal.unit == "Portion" && meal.defaultQuantity > 1 ? "Portionen" : meal.unit ?? "")")
                                             .font(.footnote)
                                     }
                                     Spacer()
@@ -142,8 +143,8 @@ struct AddTrackedFoodView: View {
                                 }
                                 .contentShape(Rectangle())
                                 .onTapGesture {
-//                                    selectedMeal = meal
-//                                    showCustomAlert = true // Trigger the custom alert
+                                    selectedMeal = meal
+                                    showCustomMealAlert = true // Trigger the custom alert
                                 }
                             }
                             .onDelete(perform: addTrackedFoodViewModel.deleteMealItem)
@@ -178,9 +179,9 @@ struct AddTrackedFoodView: View {
         
         .overlay(
             Group {
-                if showCustomAlert {
-                    CustomAlert(
-                        isPresented: $showCustomAlert,
+                if showCustomFoodAlert {
+                    CustomFoodAlert(
+                        isPresented: $showCustomFoodAlert,
                         quantity: $quantity,
                         foodItem: selectedFood,
                         onSave: {
@@ -200,6 +201,15 @@ struct AddTrackedFoodView: View {
                         }
                     )
                     .transition(.opacity) // Transition hinzufügen
+                } else if showCustomMealAlert {
+                    CustomMealAlert(isPresented: $showCustomMealAlert, quantity: $quantity, mealItem: selectedMeal,
+                    onSave: {
+                        resetAlert()
+                        mainViewModel.updateData()
+                    }, onCancel: {
+                        resetAlert()
+                    }
+                )
                 }
             }
         )
@@ -207,23 +217,25 @@ struct AddTrackedFoodView: View {
         .onChange(of: searchText) {
             addTrackedFoodViewModel.filterFoodItems(by: searchText)
         }
-        .animation(.easeInOut(duration: 0.2), value: showCustomAlert) // Animation aktivieren
+        .animation(.easeInOut(duration: 0.2), value: showCustomFoodAlert) // Animation aktivieren
         
     }
     
     
     private func resetAlert() {
         withAnimation {
-            showCustomAlert = false
+            showCustomFoodAlert = false
+            showCustomMealAlert = false
         }
         selectedFood = nil
+        selectedMeal = nil
         quantity = ""
     }
     
 }
 
 // Custom alert view with fields for quantity input and displays food name and default quantity
-struct CustomAlert: View {
+struct CustomFoodAlert: View {
     @Binding var isPresented: Bool
     @Binding var quantity: String
     var foodItem: Food? // Übergebe das gesamte Food-Objekt
@@ -269,6 +281,101 @@ struct CustomAlert: View {
                         Text("P: \(String(format: "%.1f", food.protein * portionAmount)) g")
                         Spacer()
                         Text("F: \(String(format: "%.1f", food.fat * portionAmount)) g")
+                        Spacer()
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    Divider()
+                    // Action buttons
+                    HStack {
+                        Button("Abbrechen") {
+                            onCancel()
+                        }
+                        .padding()
+                        
+                        Button("Hinzufügen") {
+                            onSave()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .padding()
+                    }
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
+                .shadow(radius: 10)
+                .frame(maxWidth: 300)
+            }
+        }
+    }
+}
+
+// Custom alert view with fields for quantity input and displays meal name and default quantity
+struct CustomMealAlert: View {
+    @Binding var isPresented: Bool
+    @Binding var quantity: String
+    var mealItem: Meal? // Übergebe das gesamte Meal-Objekt
+    var onSave: () -> Void
+    var onCancel: () -> Void
+    
+    private var portionAmount: Float {
+        guard let defaultQuantity = mealItem?.defaultQuantity else {
+            return Float(quantity.replacingOccurrences(of: ",", with: ".")) ?? 1.0
+        }
+        return Float(quantity.replacingOccurrences(of: ",", with: ".")) ?? Float(defaultQuantity)
+    }
+    
+    var body: some View {
+        if isPresented, let meal = mealItem {
+            ZStack {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 20) {
+                    // Display the name of the selected meal item
+                    Text(meal.name ?? "Unbekannt")
+                        .font(.headline)
+                        .padding(.top)
+                    
+                    // Display the default quantity of the meal item
+                    Text("Portionsgröße: \(meal.defaultQuantity) \(meal.unit == "Portion" && meal.defaultQuantity > 1 ? "Portionen" : meal.unit ?? "")")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    // Quantity input field
+                    TextField("Anzahl an Portionen: \(meal.defaultQuantity)", text: $quantity)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.decimalPad)
+                        .padding(.horizontal)
+                    
+                    Divider()
+                    
+                    VStack {
+                        Text("Zutaten:")
+                            .font(.subheadline)
+                        
+                        if let mealFoods = meal.mealFood as? Set<MealFood> {
+                            let foodNames = mealFoods.compactMap { $0.food?.name }.sorted()
+                            let foodList = foodNames.joined(separator: "\n- ")
+                            Text("- \(foodList)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
+                    
+                    Divider()
+                    
+                    Text("Kcal: \(String(format: "%.0f", Float(meal.kcal) / Float(meal.defaultQuantity) * portionAmount))")
+                        .font(.subheadline)
+                    
+                    HStack {
+                        Spacer()
+                        Text("C: \(String(format: "%.1f", meal.carbohydrate / Float(meal.defaultQuantity) * portionAmount)) g")
+                        Spacer()
+                        Text("P: \(String(format: "%.1f", meal.protein / Float(meal.defaultQuantity) * portionAmount)) g")
+                        Spacer()
+                        Text("F: \(String(format: "%.1f", meal.fat / Float(meal.defaultQuantity) * portionAmount)) g")
                         Spacer()
                     }
                     .font(.subheadline)
