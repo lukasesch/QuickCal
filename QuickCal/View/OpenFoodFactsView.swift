@@ -24,7 +24,7 @@ struct OpenFoodFactsView: View {
             VStack {
                 VStack(alignment: .leading) {
                     List {
-                        Section(header: Text("Importieren von Lebensmitteln aus OpenFoodFacts").font(.subheadline)) {
+                        Section(header: Text("Import von OpenFoodFacts").font(.subheadline)) {
                             ForEach(openFoodFactsViewModel.products) { food in
                                 HStack {
                                     VStack(alignment: .leading) {
