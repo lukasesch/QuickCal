@@ -68,6 +68,7 @@ class CreateMealPanelViewModel: ObservableObject {
         newMeal.protein = proteinTotal
         newMeal.fat = fatTotal
         newMeal.unit = "Portion"
+        newMeal.lastUsed = Date()
         
         
         for mealFood in mealFoods {

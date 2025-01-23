@@ -62,7 +62,7 @@ class AddTrackedFoodViewModel: ObservableObject {
         trackedFood.daytime = daytime
         trackedFood.quantity = quantity
         trackedFood.food = food
-        food.lastUsed = selectedDate
+        food.lastUsed = Date()
         
         do {
             try context.save()
@@ -89,7 +89,7 @@ class AddTrackedFoodViewModel: ObservableObject {
             addTrackedFood(food: food, quantity: adjustedQuantity, daytime: daytime, selectedDate: selectedDate)
         }
         
-        meal.lastUsed = selectedDate
+        meal.lastUsed = Date()
         
         // Speichere die Änderungen
         do {
