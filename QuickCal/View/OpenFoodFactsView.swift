@@ -23,37 +23,49 @@ struct OpenFoodFactsView: View {
         NavigationStack {
             VStack {
                 VStack(alignment: .leading) {
-                    List {
-                        Section(header: Text("Import von OpenFoodFacts").font(.subheadline)) {
-                            ForEach(openFoodFactsViewModel.products) { food in
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        Text("\(food.name)")
-                                        Text("\(food.defaultQuantity, specifier: "%.0f") \(food.unit)")
-                                            .font(.footnote)
+                    if openFoodFactsViewModel.isLoading {
+                        VStack {
+                            ProgressView("Laden...")
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .padding()
+                            Text("Bitte warten, Daten werden geladen.")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        List {
+                            Section(header: Text("Import von OpenFoodFacts").font(.subheadline)) {
+                                ForEach(openFoodFactsViewModel.products) { food in
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            Text("\(food.name)")
+                                            Text("\(food.defaultQuantity, specifier: "%.0f") \(food.unit)")
+                                                .font(.footnote)
+                                        }
+                                        Spacer()
+                                        Text("\(food.kcal) kcal")
                                     }
-                                    Spacer()
-                                    Text("\(food.kcal) kcal")
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    selectedFood = food
-                                    showCustomAlert = true // Trigger the custom alert
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        selectedFood = food
+                                        showCustomAlert = true // Trigger the custom alert
+                                    }
                                 }
                             }
+                            
+                        }
+                        .searchable(text: $textfield, placement: .navigationBarDrawer(displayMode: .always))
+                        .onSubmit(of: .search) {
+                            openFoodFactsViewModel.search(text: textfield)
                         }
                         
+                        .listStyle(.grouped)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .shadow(radius: 5)
+                        .textCase(.none)
+                        .padding()
                     }
-                    .searchable(text: $textfield, placement: .navigationBarDrawer(displayMode: .always))
-                    .onSubmit(of: .search) {
-                        openFoodFactsViewModel.search(text: textfield)
-                    }
-                    
-                    .listStyle(.grouped)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .shadow(radius: 5)
-                    .textCase(.none)
-                    .padding()
                 }
             }
         }

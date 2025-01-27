@@ -13,6 +13,7 @@ import CryptoKit
 class OpenFoodFactsViewModel: ObservableObject {
     @EnvironmentObject var mainViewModel: MainViewModel
     @Published var products: [FoodItem] = []
+    @Published var isLoading: Bool = false
     private let context: NSManagedObjectContext
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -20,11 +21,13 @@ class OpenFoodFactsViewModel: ObservableObject {
     
     func search(text query: String) {
         print("Search initiated for: \(query)")
+        isLoading = true
         
         let baseUrl = "https://de.openfoodfacts.org"
         let urlString = "\(baseUrl)/cgi/search.pl?search_terms=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&action=process&json=true"
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
+            isLoading = false
             return
         }
         
@@ -34,7 +37,8 @@ class OpenFoodFactsViewModel: ObservableObject {
             if let error = error {
                 print("Network error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
-                    self.products = [] 
+                    self.products = []
+                    self.isLoading = false
                 }
                 return
             }
@@ -43,6 +47,7 @@ class OpenFoodFactsViewModel: ObservableObject {
                 print("No data received")
                 DispatchQueue.main.async {
                     self.products = []
+                    self.isLoading = false
                 }
                 return
             }
@@ -54,6 +59,7 @@ class OpenFoodFactsViewModel: ObservableObject {
                     print("Invalid JSON structure")
                     DispatchQueue.main.async {
                         self.products = []
+                        self.isLoading = false
                     }
                     return
                 }
@@ -84,11 +90,13 @@ class OpenFoodFactsViewModel: ObservableObject {
                 
                 DispatchQueue.main.async {
                     self.products = foodItems // Update of UI
+                    self.isLoading = false
                 }
             } catch {
                 print("JSON Parsing error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     self.products = []
+                    self.isLoading = false
                 }
             }
         }
