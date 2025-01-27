@@ -8,6 +8,7 @@
         <attribute name="lastUsed" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="protein" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="uniqueID" optional="YES" attributeType="String"/>
         <attribute name="unit" optional="YES" attributeType="String"/>
         <relationship name="mealFood" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MealFood" inverseName="food" inverseEntity="MealFood"/>
         <relationship name="trackedFood" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TrackedFood" inverseName="food" inverseEntity="TrackedFood"/>

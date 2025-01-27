@@ -10,6 +10,7 @@ import Combine
 import SwiftUI
 import AVFoundation
 import CoreData
+import CryptoKit
 
 class BarCodeViewModel: ObservableObject {
     @EnvironmentObject var mainViewModel: MainViewModel
@@ -140,18 +141,47 @@ class BarCodeViewModel: ObservableObject {
     
     
     func OpenFoodFactsFoodToDB(name: String, defaultQuantity: Float, unit: String, calories: Int16, carbs: Float, protein: Float, fat: Float, daytime: Int16, quantity: Float, selectedDate: Date) {
+        // Unique Hash in Hexadezimal erstellen
+        let hashString = "\(name)\(defaultQuantity)\(unit)\(calories)\(carbs)\(protein)\(fat)"
+        let hash = SHA256.hash(data: Data(hashString.utf8))
+        let uniqueID = hash.compactMap { String(format: "%02x", $0) }.joined()
         
-        let food = Food(context: context)
+        // Existiert es bereits?
+        let fetchRequest: NSFetchRequest<Food> = Food.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "uniqueID == %@", uniqueID)
         
-        food.name = name
-        food.defaultQuantity = defaultQuantity
-        food.unit = unit
-        food.kcal = calories
-        food.carbohydrate = carbs
-        food.protein = protein
-        food.fat = fat
+        var food: Food?
+        do {
+            let existingFoods = try context.fetch(fetchRequest)
+            if let existingFood = existingFoods.first {
+                // Existiert bereits
+                print("Lebensmittel existiert bereits in der Datenbank: \(name)")
+                food = existingFood
+                food?.lastUsed = Date()
+            } else {
+                // Existiert noch nicht
+                food = Food(context: context)
+                food?.name = name
+                food?.defaultQuantity = defaultQuantity
+                food?.unit = unit
+                food?.kcal = calories
+                food?.carbohydrate = carbs
+                food?.protein = protein
+                food?.fat = fat
+                food?.uniqueID = uniqueID
+                food?.lastUsed = Date()
+                print("Neues Lebensmittel wurde erstellt: \(name)")
+            }
+        } catch {
+            print("Fehler beim Abrufen von Lebensmitteln: \(error.localizedDescription)")
+            return
+        }
         
-        food.lastUsed = Date()
+        // Neues TrackedFood-Objekt erstellen
+        guard let food = food else {
+            print("Fehler: Lebensmittel konnte nicht erstellt oder abgerufen werden.")
+            return
+        }
         
         let trackedFood = TrackedFood(context: context)
         trackedFood.date = selectedDate
@@ -159,13 +189,12 @@ class BarCodeViewModel: ObservableObject {
         trackedFood.quantity = quantity
         trackedFood.food = food
         
-        //Speichern
+        // Speichern in DB
         do {
             try context.save()
-            print("Lebensmittel erfolgreich in Food gespeichert")
-            print("Lebensmittel erfolgreich in TrackedFood gespeichert")
+            print("Lebensmittel erfolgreich aktualisiert (lastUsed) und in TrackedFood gespeichert")
         } catch {
-            print("Benutzer konnte nicht gespeichert werden: \(error.localizedDescription)")
+            print("Fehler beim Speichern: \(error.localizedDescription)")
         }
     }
 }
