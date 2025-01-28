@@ -69,14 +69,6 @@ struct CreateMealIngredientsView: View {
                         quantity: $quantity,
                         foodItem: selectedFood,
                         onSave: {
-                            // LOGIK FUER LEBENSMITTEL ZU MEAL
-//                            if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-//                                addTrackedFoodViewModel.addTrackedFood(
-//                                    food: food,
-//                                    quantity: quantityValue
-//                                )
-//                                resetAlert()
-//                            }
                             if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
                                 createMealPanelViewModel.addIngredient(food: food, quantity: quantityValue)
                                 resetAlert()

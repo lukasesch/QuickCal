@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import CryptoKit
 
 class AddTrackedFoodViewModel: ObservableObject {
     
@@ -127,5 +128,43 @@ class AddTrackedFoodViewModel: ObservableObject {
         } catch {
             print("Failed to delete food item: \(error)")
         }
+    }
+    
+    func updateFoodItemAttributes(food: Food, newName: String, newUnit: String, newDefaultQuantity: String, newCalories: String, newCarbs: String, newProtein: String, newFat: String) {
+        food.name = newName
+        food.unit = newUnit
+        
+        // Konvertieren der Strings zu CoreDate Datentypen
+        if let defaultQuantity = Float(newDefaultQuantity.replacingOccurrences(of: ",", with: ".")) {
+            food.defaultQuantity = defaultQuantity
+        }
+        if let calories = Int16(newCalories.replacingOccurrences(of: ",", with: ".")) {
+            food.kcal = calories
+        }
+        if let carbs = Float(newCarbs.replacingOccurrences(of: ",", with: ".")) {
+            food.carbohydrate = carbs
+        }
+        if let protein = Float(newProtein.replacingOccurrences(of: ",", with: ".")) {
+            food.protein = protein
+        }
+        if let fat = Float(newFat.replacingOccurrences(of: ",", with: ".")) {
+            food.fat = fat
+        }
+        
+        // Generate new UniqueID
+        let hashString = "\(newName)\(newDefaultQuantity)\(newUnit)\(newCalories)\(newCarbs)\(newProtein)\(newFat)"
+        let hash = SHA256.hash(data: Data(hashString.utf8))
+        let uniqueID = hash.compactMap { String(format: "%02x", $0) }.joined()
+        food.uniqueID = uniqueID
+        
+
+        do {
+            try context.save()
+            print("Food-Item '\(food.name ?? "Unknown")' erfolgreich aktualisiert!")
+        } catch {
+            print("Fehler beim Aktualisieren des Food-Items: \(error.localizedDescription)")
+        }
+        
+        fetchFoodItems()
     }
 }

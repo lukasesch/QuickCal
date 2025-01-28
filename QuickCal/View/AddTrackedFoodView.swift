@@ -20,10 +20,19 @@ struct AddTrackedFoodView: View {
     @State private var searchText = ""
     @State private var showCustomFoodAlert = false
     @State private var showCustomMealAlert = false
+    @State private var showCustomAlertEditAttributes = false
     @State private var quantity: String = ""
     @State private var selectedFood: Food?
     @State private var selectedMeal: Meal?
     
+    @State private var newName: String = ""
+    @State private var newUnit: String = ""
+    @State private var newDefaultQuantity: String = ""
+    @State private var newCalories: String = ""
+    @State private var newCarbs: String = ""
+    @State private var newProtein: String = ""
+    @State private var newFat: String = ""
+
     // State für FullScreen-View
     @State private var showBarcodeScanner = false
     
@@ -113,10 +122,17 @@ struct AddTrackedFoodView: View {
                                     Text("\(food.kcal) kcal")
                                 }
                                 .contentShape(Rectangle())
+                                .onLongPressGesture {
+                                    selectedFood = food
+                                    withAnimation {
+                                        showCustomAlertEditAttributes = true
+                                    }
+                                }
                                 .onTapGesture {
                                     selectedFood = food
                                     showCustomFoodAlert = true // Trigger the custom alert
                                 }
+                                
                             }
                             .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
                         }
@@ -176,7 +192,6 @@ struct AddTrackedFoodView: View {
             }
             
         }
-        
         .overlay(
             Group {
                 if showCustomFoodAlert {
@@ -201,23 +216,35 @@ struct AddTrackedFoodView: View {
                         }
                     )
                     .transition(.opacity) // Transition hinzufügen
-                } else if showCustomMealAlert {
-                    CustomMealAlert(isPresented: $showCustomMealAlert, quantity: $quantity, mealItem: selectedMeal,
-                    onSave: {
-                        if let meal = selectedMeal, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                            addTrackedFoodViewModel.addTrackedMeal(
-                                meal: meal,
-                                quantity: quantityValue,
-                                daytime: Int16(selectedDaytime),
-                                selectedDate: selectedDate
-                            )
+                    .animation(.easeInOut(duration: 0.2), value: showCustomFoodAlert)
+                }
+                
+                if showCustomMealAlert {
+                    CustomMealAlert(
+                        isPresented: $showCustomMealAlert,
+                        quantity: $quantity,
+                        mealItem: selectedMeal,
+                        onSave: {
+                            if let meal = selectedMeal, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                                addTrackedFoodViewModel.addTrackedMeal(
+                                    meal: meal,
+                                    quantity: quantityValue,
+                                    daytime: Int16(selectedDaytime),
+                                    selectedDate: selectedDate
+                                )
+                                resetAlert()
+                                mainViewModel.updateData()
+                            }
+                        }, onCancel: {
                             resetAlert()
-                            mainViewModel.updateData()
                         }
-                    }, onCancel: {
-                        resetAlert()
-                    }
-                )
+                    )
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.2), value: showCustomMealAlert)
+                }
+                
+                if showCustomAlertEditAttributes {
+                    buildCustomAlertEditAttributes()
                 }
             }
         )
@@ -225,15 +252,44 @@ struct AddTrackedFoodView: View {
         .onChange(of: searchText) {
             addTrackedFoodViewModel.filterFoodItems(by: searchText)
         }
-        .animation(.easeInOut(duration: 0.2), value: showCustomFoodAlert) // Animation aktivieren
+        
         
     }
     
+    private func buildCustomAlertEditAttributes() -> some View {
+        Group {
+            if let food = selectedFood {
+                CustomAlertEditFoodAttributes(
+                    isPresented: $showCustomAlertEditAttributes,
+                    newName: $newName,
+                    newUnit: $newUnit,
+                    newDefaultQuantity: $newDefaultQuantity,
+                    newCalories: $newCalories,
+                    newCarbs: $newCarbs,
+                    newProtein: $newProtein,
+                    newFat: $newFat,
+                    foodItem: food,
+                    onSave: {
+                        print("Funktion aufgerufen")
+                        addTrackedFoodViewModel.updateFoodItemAttributes(food: food, newName: newName, newUnit: newUnit, newDefaultQuantity: newDefaultQuantity, newCalories: newCalories, newCarbs: newCarbs, newProtein: newProtein, newFat: newFat)
+                        resetAlert()
+                        mainViewModel.updateData()
+                    },
+                    onCancel: {
+                        resetAlert()
+                    }
+                )
+            } else {
+                EmptyView()
+            }
+        }
+    }
     
     private func resetAlert() {
         withAnimation {
             showCustomFoodAlert = false
             showCustomMealAlert = false
+            showCustomAlertEditAttributes = false
         }
         selectedFood = nil
         selectedMeal = nil
@@ -316,6 +372,8 @@ struct CustomFoodAlert: View {
             }
         }
     }
+    
+    
 }
 
 // Custom alert view with fields for quantity input and displays meal name and default quantity
@@ -411,6 +469,174 @@ struct CustomMealAlert: View {
             }
         }
     }
+}
+
+//Custom Alert to edit entry
+struct CustomAlertEditFoodAttributes: View {
+    @Binding var isPresented: Bool
+    @Binding var newName: String
+    @Binding var newUnit: String
+    @Binding var newDefaultQuantity: String
+    @Binding var newCalories: String
+    @Binding var newCarbs: String
+    @Binding var newProtein: String
+    @Binding var newFat: String
+    var foodItem: Food? // Übergebe das gesamte Food-Objekt
+    var onSave: () -> Void
+    var onCancel: () -> Void
+
+    var body: some View {
+        if isPresented, let food = foodItem {
+            
+            ZStack {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 20) {
+
+                    HStack {
+                        Text("Name:")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        TextField("Neuer Name", text: $newName)
+                            .font(.headline)
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.trailing)
+                            .submitLabel(.done)
+                            .padding(.trailing, 16.0)
+                            .onAppear {
+                                newName = food.name ?? ""
+                            }
+                    }
+                    //Divider()
+                    HStack {
+                        Text("Portionsgröße:")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        TextField("100", text: $newDefaultQuantity)
+                            .keyboardType(.numberPad)
+                            .font(.headline)
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.trailing)
+                            .onAppear {
+                                newDefaultQuantity = String(food.defaultQuantity)
+                            }
+                            .submitLabel(.done)
+                            .padding(.trailing, 16.0)
+                        
+                        
+                    }
+                    HStack {
+                        Text("Einheit:")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        Picker("Einheit", selection: $newUnit) {
+                            Text("Gramm").tag("g")
+                            Text("Kilogramm").tag("kg")
+                            Text("Milliliter").tag("ml")
+                            Text("Liter").tag("l")
+                            Text("Stück").tag("Stück")
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .onAppear {
+                            newUnit = food.unit ?? "g"
+                        }
+                    }
+                    //Divider()
+                    HStack {
+                        Text("Kalorien (kcal):")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        TextField("83", text: $newCalories)
+                            .keyboardType(.decimalPad)
+                            .font(.headline)
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.trailing)
+                            .submitLabel(.done)
+                            .padding(.trailing, 16.0)
+                            .onAppear {
+                                newCalories = String(food.kcal)
+                            }
+                    }
+                    HStack {
+                        Text("Kohlenhydrate:")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        TextField("43", text: $newCarbs)
+                            .keyboardType(.decimalPad)
+                            .font(.headline)
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.trailing)
+                            .submitLabel(.done)
+                            .padding(.trailing, 16.0)
+                            .onAppear {
+                                newCarbs = String(food.carbohydrate)
+                            }
+                    }
+                    HStack {
+                        Text("Protein:")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        TextField("5.1", text: $newProtein)
+                            .keyboardType(.decimalPad)
+                            .font(.headline)
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.trailing)
+                            .submitLabel(.done)
+                            .padding(.trailing, 16.0)
+                            .onAppear {
+                                newProtein = String(food.protein)
+                            }
+                    }
+                    HStack {
+                        Text("Fett:")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        TextField("1.3", text: $newFat)
+                            .keyboardType(.decimalPad)
+                            .font(.headline)
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.trailing)
+                            .submitLabel(.done)
+                            .padding(.trailing, 16.0)
+                            .onAppear {
+                                newFat = String(food.fat)
+                            }
+                    }
+                    //Divider()
+                    HStack {
+                        Button("Abbrechen") {
+                            isPresented = false
+                            onCancel()
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Button("Speichern") {
+                            onSave()
+                            isPresented = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
+                .shadow(radius: 10)
+                .frame(maxWidth: 300)
+                
+                
+            }
+            
+        }
+    }
+    
 }
 
 #Preview {

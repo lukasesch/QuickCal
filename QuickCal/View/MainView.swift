@@ -9,20 +9,16 @@ import SwiftUI
 import CoreData
 
 struct MainView: View {
-    
     @EnvironmentObject var mainViewModel: MainViewModel
-    //@Environment(\.managedObjectContext) private var viewContext
     @AppStorage("onboarding") private var onboardingDone = false
-    //@State private var currentPage = 1
     @State private var showingSettings = false
-    //@State private var showAddTrackedFoodPanel = false
     @State private var selectedDaytime: Int? = nil
     
     //Custom Alert to edit entries
     @State private var showCustomAlert = false
+    @State private var showCustomAlertEditAttributes = false
     @State private var selectedFood: TrackedFood?
     @State private var quantity: String = ""
-    
     
     var body: some View {
         NavigationStack {
@@ -33,7 +29,6 @@ struct MainView: View {
                         .resizable()
                         .frame(width: 42, height: 42)
                     Spacer()
-                    
                     Text(
                         Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date())
                         ? "Heute"
@@ -93,8 +88,7 @@ struct MainView: View {
                 Spacer()
                 Spacer()
                 Spacer()
-                //Spacer()
-                
+
                 HStack {
                     Spacer()
                     HalfCircularProgressView(barColor: .blue, barWidth: 18, progressPercentage: mainViewModel.kcalProgressPercentage)
@@ -138,6 +132,7 @@ struct MainView: View {
                                 }
                             }
                             .contentShape(Rectangle())
+                            
                             .onTapGesture {
                                 selectedFood = food
                                 quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
@@ -147,6 +142,7 @@ struct MainView: View {
                                     showCustomAlert = true
                                 }
                             }
+                            
                         }
                         .onDelete { offsets in
                             mainViewModel.deleteTrackedFoodItem(at: offsets, forDaytime: 0)
@@ -383,15 +379,12 @@ struct MainView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .padding()
                 .shadow(radius: 5)
-                
-                
+
                 Spacer()
                 Spacer()
                 Spacer()
                 Spacer()
-                
-                
-                
+
             }
             .navigationBarBackButtonHidden(true)
             .onAppear {
@@ -406,7 +399,6 @@ struct MainView: View {
                     mainViewModel.checkAndCalculateDailyCalories()
                     print("MainView: checkAndCalculateDailyCalories run!")
                 }
-                //mainViewModel.fetchTrackedFood()
                 mainViewModel.updateData()
             }
             
@@ -435,11 +427,10 @@ struct MainView: View {
                         }
                     )
                     .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.2), value: showCustomAlert)
                 }
             }
-                .animation(.easeInOut(duration: 0.2), value: showCustomAlert)
         )
-        
     }
     
     private func resetAlert() {
@@ -456,8 +447,7 @@ struct MainView: View {
         formatter.dateFormat = "d. MMMM" // Jahr weglassen
         return formatter.string(from: date)
     }
-    
-    
+
     struct HalfCircularProgressView: View {
         @EnvironmentObject var mainViewModel: MainViewModel
         var barColor: Color
@@ -631,4 +621,5 @@ struct CustomAlertEdit: View {
         .environmentObject(MainViewModel(context: context))
         .environmentObject(SettingsViewModel(context: context))
         .environmentObject(AddTrackedFoodViewModel(context: context))
+        .environmentObject(CreateMealPanelViewModel(context: context))
 }
