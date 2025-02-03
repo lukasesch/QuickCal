@@ -69,6 +69,7 @@ struct BarCodeView: View {
                     }
                 }
             }
+            .navigationTitle("Barcode scannen")
         }
         .overlay(
             Group {

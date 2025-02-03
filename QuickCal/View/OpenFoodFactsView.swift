@@ -68,6 +68,7 @@ struct OpenFoodFactsView: View {
                     }
                 }
             }
+            .navigationTitle("Open Food Facts")
         }
         .overlay(
             Group {

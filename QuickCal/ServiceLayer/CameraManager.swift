@@ -76,22 +76,50 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     func stopSession() {
+        
+        //ALT
+//        sessionQueue.async { [weak self] in
+//            guard let self = self else { return }
+//            if self.session.isRunning {
+//                self.session.stopRunning()
+//                //print("Session gestoppt.")
+//            }
+//        }
         sessionQueue.async { [weak self] in
             guard let self = self else { return }
             if self.session.isRunning {
                 self.session.stopRunning()
-                //print("Session gestoppt.")
+                print("Session gestoppt.")
             }
+            // Entferne Outputs und Inputs nur, wenn die Session komplett beendet wird
+            self.session.inputs.forEach { self.session.removeInput($0) }
+            self.session.outputs.forEach { self.session.removeOutput($0) }
+            self.isSessionConfigured = false
         }
     }
     
     func resetSession() {
+        //ALT
+//        sessionQueue.async { [weak self] in
+//            guard let self = self else { return }
+//            self.session.stopRunning()
+//            self.session.inputs.forEach { self.session.removeInput($0) }
+//            self.session.outputs.forEach { self.session.removeOutput($0) }
+//            self.isSessionConfigured = false
+//        }
         sessionQueue.async { [weak self] in
             guard let self = self else { return }
             self.session.stopRunning()
             self.session.inputs.forEach { self.session.removeInput($0) }
             self.session.outputs.forEach { self.session.removeOutput($0) }
             self.isSessionConfigured = false
+            
+            // Entferne den Preview-Layer, falls er existiert
+            DispatchQueue.main.async {
+                self.previewLayer?.removeFromSuperlayer()
+                self.previewLayer = nil
+                print("Session und Preview-Layer zurückgesetzt.")
+            }
         }
     }
     

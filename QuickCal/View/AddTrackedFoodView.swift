@@ -190,8 +190,9 @@ struct AddTrackedFoodView: View {
                 addTrackedFoodViewModel.fetchMealItems()
                 createMealPanelViewModel.clearStruct()
             }
-            
+            .navigationTitle("Hinzufügen")
         }
+        
         .overlay(
             Group {
                 if showCustomFoodAlert {

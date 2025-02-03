@@ -34,14 +34,6 @@ struct ProfileView: View {
         NavigationStack{
             VStack(spacing: 20) {
                 
-                Spacer()
-                Text("Dein Profil:")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .multilineTextAlignment(.center)
-                
-                Spacer()
-                
                 HStack {
                     Button(action: { gender = "weiblich" }) {
                         Text("♀ Weiblich")
@@ -212,6 +204,7 @@ struct ProfileView: View {
             .alert(item: $profileviewModel.errorMessage) { errorMessage in
                 Alert(title: Text("Fehler"), message: Text(errorMessage.message), dismissButton: .default(Text("OK")))
             }
+            .navigationTitle("Dein Profil")
         }
     }
     

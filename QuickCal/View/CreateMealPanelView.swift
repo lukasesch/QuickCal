@@ -21,11 +21,6 @@ struct CreateMealPanelView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading) {
-                Text("Neues Gericht:")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .multilineTextAlignment(.leading)
-                Divider()
                 HStack {
                     Text("Name:")
                         .font(.headline)
@@ -164,7 +159,8 @@ struct CreateMealPanelView: View {
                     }
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
+            //.navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Gericht erstellen")
         }
     }
     

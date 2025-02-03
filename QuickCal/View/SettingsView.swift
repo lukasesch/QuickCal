@@ -16,6 +16,23 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             VStack() {
+                List {
+                    Section {
+                        NavigationLink(destination: ProfileView()) {
+                            Label("Mein Profil", systemImage: "person")
+                        }
+                        NavigationLink(destination: ProfileView()) {
+                            Label("Ziele", systemImage: "target")
+                        }
+                        NavigationLink(destination: ProfileView()) {
+                            Label("Erweiterte Einstellungen", systemImage: "gearshape")
+                        }
+                        NavigationLink(destination: ProfileView()) {
+                            Label("Hilfe", systemImage: "questionmark.circle")
+                        }
+                    }
+                }
+                .listStyle(.plain)
                 Button(action: {
                     createPanelViewModel.createFood(name: "Apfel", defaultQuantity: "1", unit: "stück", calories: "52", carbs: "14", protein: "0.3", fat: "0.2")
                     createPanelViewModel.createFood(name: "Banane", defaultQuantity: "1", unit: "stück", calories: "89", carbs: "23", protein: "1.1", fat: "0.3")
@@ -67,7 +84,10 @@ struct SettingsView: View {
                 }
                 
             }
+            .padding()
+            .navigationTitle("Einstellungen")
         }
+        
     }
 }
 
