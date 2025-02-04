@@ -14,6 +14,7 @@ struct AddTrackedFoodView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
     @EnvironmentObject var openFoodFactsViewModel: OpenFoodFactsViewModel
     @EnvironmentObject var createMealPanelViewModel: CreateMealPanelViewModel
+    @EnvironmentObject var barCodeViewModel: BarCodeViewModel
     var selectedDaytime: Int
     var selectedDate: Date
     
@@ -208,6 +209,7 @@ struct AddTrackedFoodView: View {
                 addTrackedFoodViewModel.fetchFoodItems()
                 addTrackedFoodViewModel.fetchMealItems()
                 createMealPanelViewModel.clearStruct()
+                barCodeViewModel.reset()
             }
             .navigationTitle("Hinzufügen")
         }
@@ -667,4 +669,5 @@ struct CustomAlertEditFoodAttributes: View {
         .environmentObject(AddTrackedFoodViewModel(context: context))
         .environmentObject(OpenFoodFactsViewModel(context: context))
         .environmentObject(CreateMealPanelViewModel(context: context))
+        .environmentObject(BarCodeViewModel(context: context))
 }

@@ -197,4 +197,9 @@ class BarCodeViewModel: ObservableObject {
             print("Fehler beim Speichern: \(error.localizedDescription)")
         }
     }
+    
+    func reset() {
+        startScanning()
+        stopScanning()
+    }
 }

@@ -83,15 +83,6 @@ struct BarCodeView: View {
                     Spacer()
                 }
             }
-            .onReceive(barCodeViewModel.$isSessionRunning) { isRunning in
-                if !isRunning && !isConfiguring {
-                    // Versuche die Kamera erneut zu starten
-//                    print("reset")
-//                    barCodeViewModel.stopScanning()
-//                    barCodeViewModel.startScanning()
-                    barCodeViewModel.clearPreviewLayer()
-                }
-            }
             .onAppear {
                 configureCamera()
             }
