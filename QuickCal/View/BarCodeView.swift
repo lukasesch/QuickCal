@@ -26,29 +26,61 @@ struct BarCodeView: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
+            ZStack {
                 if isConfiguring {
                     Text("Kamera wird vorbereitet...")
                         .font(.headline)
                         .foregroundColor(.gray)
                         .padding()
                 } else if barCodeViewModel.isSessionRunning {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.black.opacity(0.8))
-                            .frame(height: UIScreen.main.bounds.height * 0.8)
-                            .padding(.horizontal, 20)
-                            .overlay(
-                                CameraPreviewView(previewLayer: barCodeViewModel.getPreviewLayer())
-                                    .clipShape(RoundedRectangle(cornerRadius: 10)) 
-                            )
-                    }
-                    .padding()
+                    CameraPreviewView(previewLayer: barCodeViewModel.getPreviewLayer())
+                        .edgesIgnoringSafeArea(.all)
                     
+                    VStack {
+                        Spacer()
+                        
+                        // Fester Bereich für den Barcode-Scan
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white, lineWidth: 4) // Weißer Rahmen
+                                .frame(width: 300, height: 180) // Größe des Scanbereichs
+                            
+                            VStack {
+                                Spacer()
+                                Spacer()
+                                Text("Barcode")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding(.top, 20)
+                                Spacer()
+                            }
+                        }
+                        .padding(.bottom, 100) // Abstand nach unten, damit es nicht ganz in der Mitte ist
+                        
+                        Spacer()
+                    }
                 } else {
                     Text("Kamera konnte nicht gestartet werden.")
                         .foregroundColor(.red)
                         .padding()
+                }
+                
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            dismiss()
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.title)
+                                .padding()
+                                .background(Color.black.opacity(0.6))
+                                .clipShape(Circle())
+                                .foregroundColor(.white)
+                        }
+                        .padding()
+                    }
+                    Spacer()
                 }
             }
             .onAppear {
@@ -59,6 +91,7 @@ struct BarCodeView: View {
             }
             .onChange(of: barCodeViewModel.scannedBarcode) {
                 if let barcode = barCodeViewModel.scannedBarcode {
+                    barCodeViewModel.scannedBarcode = nil
                     barCodeViewModel.searchProductByBarcode(barcode: barcode) { foodItem in
                         if let item = foodItem {
                             selectedFood = item
@@ -69,7 +102,7 @@ struct BarCodeView: View {
                     }
                 }
             }
-            .navigationTitle("Barcode scannen")
+            .navigationBarHidden(true)
         }
         .overlay(
             Group {
@@ -89,6 +122,7 @@ struct BarCodeView: View {
                         },
                         onCancel: {
                             resetAlert()
+                            barCodeViewModel.scannedBarcode = nil
                             dismiss()
                         }
                     )

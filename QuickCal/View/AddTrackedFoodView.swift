@@ -32,6 +32,9 @@ struct AddTrackedFoodView: View {
     @State private var newCarbs: String = ""
     @State private var newProtein: String = ""
     @State private var newFat: String = ""
+    
+    //State für FullScreenView
+    @State private var showFullScreenBarCodeView = false
 
     // State für FullScreen-View
     @State private var showBarcodeScanner = false
@@ -84,21 +87,37 @@ struct AddTrackedFoodView: View {
                 }
                 .buttonStyle(.bordered)
                 
-                //Barcode
-                NavigationLink(destination: BarCodeView(selectedDaytime: selectedDaytime, selectedDate: selectedDate)) {
+                // Barcode Button
+                Button(action: {
+                    showFullScreenBarCodeView.toggle()
+                }) {
                     VStack {
                         Image(systemName: "barcode")
                             .font(.title)
                             .padding(.bottom, 2)
                             .foregroundColor(.blue)
-                        //Text("Barcode")
-                            .font(.footnote)
-                            .foregroundColor(.primary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: 30)
-                    
                 }
                 .buttonStyle(.bordered)
+                .fullScreenCover(isPresented: $showFullScreenBarCodeView) {
+                    BarCodeView(selectedDaytime: selectedDaytime, selectedDate: selectedDate)
+                }
+//                //Barcode
+//                NavigationLink(destination: BarCodeView(selectedDaytime: selectedDaytime, selectedDate: selectedDate)) {
+//                    VStack {
+//                        Image(systemName: "barcode")
+//                            .font(.title)
+//                            .padding(.bottom, 2)
+//                            .foregroundColor(.blue)
+//                        //Text("Barcode")
+//                            .font(.footnote)
+//                            .foregroundColor(.primary)
+//                    }
+//                    .frame(maxWidth: .infinity, maxHeight: 30)
+//                    
+//                }
+//                .buttonStyle(.bordered)
                 
                 
             }
