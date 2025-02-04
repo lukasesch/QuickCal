@@ -61,7 +61,7 @@ class BarCodeViewModel: ObservableObject {
         }
         cameraManager.stopSession()
         isSessionRunning = false
-        clearPreviewLayer()
+        //clearPreviewLayer()
     }
     
     func getPreviewLayer() -> AVCaptureVideoPreviewLayer {

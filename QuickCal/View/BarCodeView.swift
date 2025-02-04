@@ -83,6 +83,15 @@ struct BarCodeView: View {
                     Spacer()
                 }
             }
+            .onReceive(barCodeViewModel.$isSessionRunning) { isRunning in
+                if !isRunning && !isConfiguring {
+                    // Versuche die Kamera erneut zu starten
+//                    print("reset")
+//                    barCodeViewModel.stopScanning()
+//                    barCodeViewModel.startScanning()
+                    barCodeViewModel.clearPreviewLayer()
+                }
+            }
             .onAppear {
                 configureCamera()
             }
@@ -136,7 +145,7 @@ struct BarCodeView: View {
     // Delay needed, otherwise camera initializes with black screen
     func configureCamera() {
         barCodeViewModel.startScanning()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        DispatchQueue.main.asyncAfter(deadline: .now()) {
             isConfiguring = false
         }
     }

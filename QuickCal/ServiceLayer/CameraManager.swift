@@ -71,20 +71,11 @@ class CameraManager: NSObject, ObservableObject {
         sessionQueue.async { [weak self] in
             guard let self = self, !self.session.isRunning else { return }
             self.session.startRunning()
-            //print("Session running: \(session.isRunning)")
+            print("Session gestartet.")
         }
     }
     
     func stopSession() {
-        
-        //ALT
-        //        sessionQueue.async { [weak self] in
-        //            guard let self = self else { return }
-        //            if self.session.isRunning {
-        //                self.session.stopRunning()
-        //                //print("Session gestoppt.")
-        //            }
-        //        }
         sessionQueue.async { [weak self] in
             guard let self = self else { return }
             if self.session.isRunning {
@@ -92,21 +83,13 @@ class CameraManager: NSObject, ObservableObject {
                 print("Session gestoppt.")
             }
             // Entferne Outputs und Inputs nur, wenn die Session komplett beendet wird
-            self.session.inputs.forEach { self.session.removeInput($0) }
-            self.session.outputs.forEach { self.session.removeOutput($0) }
-            self.isSessionConfigured = false
+//            self.session.inputs.forEach { self.session.removeInput($0) }
+//            self.session.outputs.forEach { self.session.removeOutput($0) }
+//            self.isSessionConfigured = false
         }
     }
     
     func resetSession() {
-        //ALT
-        //        sessionQueue.async { [weak self] in
-        //            guard let self = self else { return }
-        //            self.session.stopRunning()
-        //            self.session.inputs.forEach { self.session.removeInput($0) }
-        //            self.session.outputs.forEach { self.session.removeOutput($0) }
-        //            self.isSessionConfigured = false
-        //        }
         sessionQueue.async { [weak self] in
             guard let self = self else { return }
             self.session.stopRunning()
