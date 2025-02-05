@@ -26,7 +26,9 @@ struct CreateFoodPanelView: View {
     enum Field: Int, CaseIterable {
         case name, defaultQuantity, kcal, carbs, protein, fat
     }
-    
+    init() {
+        UILabel.appearance(whenContainedInInstancesOf: [UINavigationBar.self]).adjustsFontSizeToFitWidth = true
+    }
     var body: some View {
         
             VStack(alignment: .leading) {
@@ -181,12 +183,8 @@ struct CreateFoodPanelView: View {
                     }
                 }
             }
-            //.navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("Lebensmittel erstellen")
-        
-        
-        
-        
+
+            .navigationTitle("Lebensmittel +")
     }
     // Function to move focus between fields
     private func moveFocus(_ direction: Int) {

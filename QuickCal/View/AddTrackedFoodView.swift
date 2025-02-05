@@ -47,7 +47,7 @@ struct AddTrackedFoodView: View {
                     //Lebensmittel
                     NavigationLink(destination: CreateFoodPanelView()) {
                         VStack {
-                            Image(systemName: "leaf.fill")
+                            Image(systemName: "carrot.fill")
                                 .font(.title3)
                                 .padding(.bottom, 2)
                                 .foregroundColor(.blue)
@@ -160,7 +160,7 @@ struct AddTrackedFoodView: View {
                             
                         }
                         .tabItem {
-                            Label("Lebensmittel", systemImage: "leaf")
+                            Label("Lebensmittel", systemImage: "carrot.fill")
                         }
                         
                         List {
@@ -212,7 +212,6 @@ struct AddTrackedFoodView: View {
                     createMealPanelViewModel.clearStruct()
                     barCodeViewModel.reset()
                 }
-                
             }
             .navigationTitle("Hinzufügen")
         }
