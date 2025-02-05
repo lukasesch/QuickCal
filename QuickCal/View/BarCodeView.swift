@@ -12,6 +12,7 @@ import AVFoundation
 struct BarCodeView: View {
     @EnvironmentObject var barCodeViewModel: BarCodeViewModel
     @EnvironmentObject var mainViewModel: MainViewModel
+    @EnvironmentObject var addTrackedFoodViewModel: AddTrackedFoodViewModel
     @Environment(\.dismiss) private var dismiss
     
     @State private var isConfiguring = true
@@ -60,8 +61,9 @@ struct BarCodeView: View {
                         Spacer()
                     }
                 } else {
-                    Text("Kamera konnte nicht gestartet werden.")
-                        .foregroundColor(.red)
+                    Text("Kamera wird vorbereitet...")
+                        .font(.headline)
+                        .foregroundColor(.gray)
                         .padding()
                 }
                 
@@ -84,6 +86,7 @@ struct BarCodeView: View {
                 }
             }
             .onAppear {
+                barCodeViewModel.startScanning()
                 configureCamera()
             }
             .onDisappear {
@@ -116,6 +119,8 @@ struct BarCodeView: View {
                                 barCodeViewModel.OpenFoodFactsFoodToDB(name: selectedFood?.name ?? "", defaultQuantity: selectedFood?.defaultQuantity ?? 0, unit: selectedFood?.unit ?? "g", calories: selectedFood?.kcal ?? 0, carbs: selectedFood?.carbohydrate ?? 0, protein: selectedFood?.protein ?? 0, fat: selectedFood?.fat ?? 0, daytime: Int16(selectedDaytime), quantity: quantityValue, selectedDate: selectedDate)
                                 print("FoodItem \(food.name) mit Menge \(quantityValue) hinzugefügt!")
                                 mainViewModel.updateData()
+                                addTrackedFoodViewModel.fetchFoodItems()
+                                addTrackedFoodViewModel.fetchMealItems()
                                 resetAlert()
                                 dismiss()
                             }

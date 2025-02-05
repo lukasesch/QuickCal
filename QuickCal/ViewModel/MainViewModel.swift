@@ -90,12 +90,14 @@ class MainViewModel: ObservableObject {
             //App needs to check if user already exists - for now while testing it always gets the last user
             if let lastUser = users.last {
                 self.user = lastUser
+                
             } else {
                 print("No user found")
             }
         } catch {
             print("Failed to fetch user: \(error)")
         }
+        print(user?.name ?? "Kein Benutzername gefunden")
     }
     
     func fetchTrackedFood() {
@@ -126,8 +128,9 @@ class MainViewModel: ObservableObject {
         
         do {
             let results = try context.fetch(fetchRequest)
-            if let dailyKcal = results.first {
+            if let dailyKcal = results.last {
                 assignDailyKcalValues(dailyKcal)
+                print(dailyKcal.kcalGoal)
             } else {
                 if let user = user {
                     calculateAndSaveDailyKcal(for: user, date: date)
@@ -136,6 +139,7 @@ class MainViewModel: ObservableObject {
         } catch {
             print("Failed to fetch daily kcal: \(error)")
         }
+        
     }
     
     
@@ -217,6 +221,7 @@ class MainViewModel: ObservableObject {
     
     @MainActor
     func checkAndCalculateDailyCalories() {
+        print("checkAndCalculateDailyCalories ausgeführt")
         // Make sure its the current user
         fetchOrCreateUser()
         // Current Date
@@ -261,5 +266,19 @@ class MainViewModel: ObservableObject {
         carbs = filteredFoods.reduce(0.0) { $0 + Double($1.food?.carbohydrate ?? 0) * Double($1.quantity) }
         protein = filteredFoods.reduce(0.0) { $0 + Double($1.food?.protein ?? 0) * Double($1.quantity) }
         fat = filteredFoods.reduce(0.0) { $0 + Double($1.food?.fat ?? 0) * Double($1.quantity) }
+    }
+    
+    //NEU
+    @MainActor
+    func recalculateCalories() {
+        fetchOrCreateUser()
+        guard let user = user else {
+            print("Kein Benutzer gefunden, Kalorien können nicht berechnet werden")
+            return
+        }
+        let date = Date()
+        calculateAndSaveDailyKcal(for: user, date: date)
+        print("Kalorien wurden neu berechnet für den Benutzer: \(user.name ?? "Unbekannt")")
+        print(kcalGoal)
     }
 }

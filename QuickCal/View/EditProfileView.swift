@@ -1,17 +1,18 @@
 //
-//  ProfileView.swift
+//  EditProfileView.swift
 //  QuickCal
 //
-//  Created by Lukas Esch on 09.10.24.
+//  Created by Lukas Esch on 05.02.25.
 //
 
 import SwiftUI
-import CoreData
 
-struct ProfileView: View {
-    @EnvironmentObject private var profileviewModel: ProfileViewModel
+struct EditProfileView: View {
+    @EnvironmentObject private var editProfileViewModel: EditProfileViewModel
+    @EnvironmentObject var mainViewModel: MainViewModel
+    @Environment(\.dismiss) private var dismiss
+    
     @FocusState private var focusedField: Field?
-    @AppStorage("onboarding") private var onboardingDone = false
     
     @State private var gender: String = "weiblich"
     @State private var nameTF: String = ""
@@ -21,15 +22,15 @@ struct ProfileView: View {
     @State private var bodyFatTF: String = ""
     @State private var activityLevel: String = "etwas"
     @State private var goal: String = "halten"
-
+    
     enum Field: Int, CaseIterable {
         case name, age, weight, height, bodyFat
     }
-
-    //Body
+    
+    
     var body: some View {
         NavigationStack{
-            ScrollView{
+            ScrollView {
                 VStack(spacing: 20) {
                     
                     HStack {
@@ -151,16 +152,22 @@ struct ProfileView: View {
                     Spacer()
                     
                     Button(action: {
-                        if profileviewModel.validateInput(name: nameTF, age: ageTF, weight: weightTF, height: heightTF) {
-                            let bodyFatValue = bodyFatTF.isEmpty ? nil : bodyFatTF
-                            profileviewModel.updateUser(gender: gender, name: nameTF, age: ageTF, weight: weightTF, height: heightTF, bodyFat: bodyFatValue, activityLevel: activityLevel, goal: goal)
-                            onboardingDone = true
-                        } else {
-                            // Inputs incorrect
-                            print("Eingaben sind ungültig")
+                        if editProfileViewModel.validateInput(name: nameTF, age: ageTF, weight: weightTF, height: heightTF) {
+                            editProfileViewModel.updateUser(
+                                gender: gender,
+                                name: nameTF,
+                                age: ageTF,
+                                weight: weightTF,
+                                height: heightTF,
+                                bodyFat: bodyFatTF.isEmpty ? nil : bodyFatTF,
+                                activityLevel: activityLevel,
+                                goal: goal
+                            )
                         }
+                        mainViewModel.recalculateCalories()
+                        dismiss()
                     }) {
-                        Text("Weiter")
+                        Text("Aktualisieren")
                             .frame(maxWidth: .infinity)
                             .fontWeight(.bold)
                             .padding()
@@ -174,6 +181,10 @@ struct ProfileView: View {
                 .onTapGesture {
                     focusedField = nil
                 }
+                .onAppear {
+                    loadProfileData()
+                }
+                
                 .toolbar {
                     ToolbarItemGroup(placement: .keyboard) {
                         Button(action: { moveFocus(-1) }) {
@@ -193,16 +204,10 @@ struct ProfileView: View {
                         }
                     }
                 }
-                .navigationBarBackButtonHidden(true)
-                .navigationDestination(isPresented: $profileviewModel.navigateToMainView) {
-                    MainView() // Ziel-View, die nach Navigation angezeigt wird
-                        .environmentObject(profileviewModel)
-                    
-                }
-                .alert(item: $profileviewModel.errorMessage) { errorMessage in
+                .alert(item: $editProfileViewModel.errorMessage) { errorMessage in
                     Alert(title: Text("Fehler"), message: Text(errorMessage.message), dismissButton: .default(Text("OK")))
                 }
-                .navigationTitle("Dein Profil")
+                .navigationTitle("Profil bearbeiten")
             }
         }
     }
@@ -216,12 +221,39 @@ struct ProfileView: View {
         }
         focusedField = Field.allCases[newIndex]
     }
+    
+    private func loadProfileData() {
+        guard let user = editProfileViewModel.user else { return }
+        gender = user.gender ?? "weiblich"
+        nameTF = user.name ?? ""
+        ageTF = String(user.age)
+        weightTF = String(user.weight)
+        heightTF = String(user.height)
+        bodyFatTF = user.bodyfat == 0.0 ? "" : String(user.bodyfat)
+        activityLevel = mapActivityLevel(user.activity)
+        goal = mapGoal(user.goal)
+    }
+    
+    private func mapActivityLevel(_ value: Float) -> String {
+        switch value {
+        case 1.3: return "wenig"
+        case 1.5: return "etwas"
+        case 1.7: return "aktiv"
+        case 1.9: return "sehr aktiv"
+        default: return "etwas"
+        }
+    }
+    
+    private func mapGoal(_ value: Int16) -> String {
+        switch value {
+        case 0: return "abnehmen"
+        case 1: return "halten"
+        case 2: return "zunehmen"
+        default: return "halten" // Standardwert
+        }
+    }
 }
 
-
 #Preview {
-    let context = PersistenceController.preview.container.viewContext
-    ProfileView()
-        .environment(\.managedObjectContext, context)
-        .environmentObject(ProfileViewModel(context: context))
+    EditProfileView()
 }

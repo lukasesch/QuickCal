@@ -22,7 +22,10 @@ struct MainView: View {
     
     var body: some View {
         NavigationStack {
-            
+//            Button("Neu Berechnen") {
+//                mainViewModel.recalculateCalories()
+//                mainViewModel.updateData()
+//            }
             VStack {
                 HStack(alignment: .center) {
                     Image("Icon")

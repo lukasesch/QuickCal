@@ -26,6 +26,8 @@ struct QuickCalApp: App {
                     .environmentObject(CreateMealIngredientsViewModel())
                     .environmentObject(OpenFoodFactsViewModel(context: persistenceController.container.viewContext))
                     .environmentObject(BarCodeViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(AdvancedSettingsViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(EditProfileViewModel(context: persistenceController.container.viewContext, mainViewModel: MainViewModel(context: persistenceController.container.viewContext)))
             } else {
                 WelcomeView()
                     .environment(\.managedObjectContext, persistenceController.container.viewContext)
@@ -38,6 +40,8 @@ struct QuickCalApp: App {
                     .environmentObject(CreateMealIngredientsViewModel())
                     .environmentObject(OpenFoodFactsViewModel(context: persistenceController.container.viewContext))
                     .environmentObject(BarCodeViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(AdvancedSettingsViewModel(context: persistenceController.container.viewContext))
+                    .environmentObject(EditProfileViewModel(context: persistenceController.container.viewContext, mainViewModel: MainViewModel(context: persistenceController.container.viewContext)))
             }
             
         }

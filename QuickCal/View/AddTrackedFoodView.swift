@@ -155,7 +155,10 @@ struct AddTrackedFoodView: View {
                                     }
                                     
                                 }
-                                .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
+                                .onDelete { offsets in
+                                    addTrackedFoodViewModel.deleteFoodItem(at: offsets)
+                                    mainViewModel.updateData()
+                                }
                             }
                             
                         }
@@ -210,7 +213,12 @@ struct AddTrackedFoodView: View {
                     addTrackedFoodViewModel.fetchFoodItems()
                     addTrackedFoodViewModel.fetchMealItems()
                     createMealPanelViewModel.clearStruct()
-                    barCodeViewModel.reset()
+                    //barCodeViewModel.reset()
+                    
+                    barCodeViewModel.stopScanning()
+                }
+                .onDisappear {
+                    barCodeViewModel.stopScanning()
                 }
             }
             .navigationTitle("Hinzufügen")

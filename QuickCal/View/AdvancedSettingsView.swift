@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AdvancedSettingsView: View {
-    @AppStorage("onboardingDone") private var onboardingDone: Bool = true
+    @AppStorage("onboarding") private var onboardingDone = false
     @EnvironmentObject var advancedSettingsViewModel: AdvancedSettingsViewModel
     @EnvironmentObject var mainViewModel: MainViewModel
     
@@ -48,6 +48,8 @@ struct AdvancedSettingsView: View {
                 // Reset All Food Entries Button
                 Button(action: {
                     advancedSettingsViewModel.deleteAllEntries(for: "Food")
+                    advancedSettingsViewModel.deleteAllEntries(for: "Meal")
+                    advancedSettingsViewModel.deleteAllEntries(for: "MealFood")
                     advancedSettingsViewModel.deleteAllEntries(for: "TrackedFood")
                     mainViewModel.fetchTrackedFood()
                     mainViewModel.updateData()
@@ -64,10 +66,14 @@ struct AdvancedSettingsView: View {
                 // Reset everything
                 Button(action: {
                     advancedSettingsViewModel.deleteAllEntries(for: "Food")
+                    advancedSettingsViewModel.deleteAllEntries(for: "Meal")
+                    advancedSettingsViewModel.deleteAllEntries(for: "MealFood")
                     advancedSettingsViewModel.deleteAllEntries(for: "TrackedFood")
                     advancedSettingsViewModel.deleteAllEntries(for: "User")
                     advancedSettingsViewModel.deleteAllEntries(for: "Kcal")
+                    PersistenceController.deletePersistentStore()
                     onboardingDone = false
+                    exit(0)
                 }) {
                     Label("App zurücksetzen", systemImage: "exclamationmark.triangle")
                         .padding()
@@ -91,6 +97,7 @@ struct AdvancedSettingsView: View {
             }
             
         }
+        .navigationTitle("Datenverwaltung")
         .padding()
     }
 }
