@@ -184,7 +184,7 @@ struct CreateFoodPanelView: View {
                 }
             }
 
-            .navigationTitle("Lebensmittel +")
+            .navigationTitle("Neues L.Mittel")
     }
     // Function to move focus between fields
     private func moveFocus(_ direction: Int) {

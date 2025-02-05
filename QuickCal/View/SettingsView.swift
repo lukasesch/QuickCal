@@ -19,72 +19,94 @@ struct SettingsView: View {
                 List {
                     Section {
                         NavigationLink(destination: ProfileView()) {
-                            Label("Mein Profil", systemImage: "person")
+                            Label("Profil bearbeiten", systemImage: "person")
                         }
                         NavigationLink(destination: ProfileView()) {
-                            Label("Ziele", systemImage: "target")
+                            Label("Ziel ändern", systemImage: "target")
+                        }
+                        NavigationLink(destination: ProfileView()) {
+                            Label("Kalorien & Makronährstoffe anpassen", systemImage: "slider.vertical.3")
                         }
                         NavigationLink(destination: ProfileView()) {
                             Label("Erweiterte Einstellungen", systemImage: "gearshape")
                         }
-                        NavigationLink(destination: ProfileView()) {
+                        NavigationLink(destination: HelpView()) {
                             Label("Hilfe", systemImage: "questionmark.circle")
+                        }
+                        NavigationLink(destination: AboutQuickCalView()) {
+                            Label("Über QuickCal", systemImage: "info.circle")
+                        }
+                    }
+                    Spacer()
+                    Section {
+                        HStack {
+                            Spacer()
+                            VStack {
+                                Text("© 2025 Lukas Esch. Alle Rechte vorbehalten.")
+                                    .font(.footnote)
+                                    .foregroundColor(.gray)
+                                Text("QuickCal Version 1.0.0")
+                                    .font(.footnote)
+                                    .foregroundColor(.gray)
+                            }
+                            Spacer()
                         }
                     }
                 }
+                
                 .listStyle(.plain)
-                Button(action: {
-                    createPanelViewModel.createFood(name: "Apfel", defaultQuantity: "1", unit: "stück", calories: "52", carbs: "14", protein: "0.3", fat: "0.2")
-                    createPanelViewModel.createFood(name: "Banane", defaultQuantity: "1", unit: "stück", calories: "89", carbs: "23", protein: "1.1", fat: "0.3")
-                    createPanelViewModel.createFood(name: "Hähnchenbrust", defaultQuantity: "100", unit: "g", calories: "165", carbs: "0", protein: "31", fat: "3.6")
-                    createPanelViewModel.createFood(name: "Reis", defaultQuantity: "100", unit: "g", calories: "130", carbs: "28", protein: "2.4", fat: "0.3")
-                    createPanelViewModel.createFood(name: "Olivenöl", defaultQuantity: "5", unit: "ml", calories: "119", carbs: "0", protein: "0", fat: "13.5")
-                }) {
-                    Text("Create Dummy Food Entries")
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                Divider()
-                Button(action: {
-                    settingsViewModel.deleteAllEntries(for: "User")
-                    settingsViewModel.deleteAllEntries(for: "Kcal")
-                    
-                    onboardingDone = false
-                }) {
-                    Text("Reset Profile")
-                        .padding()
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                Button(action: {
-                    settingsViewModel.deleteAllEntries(for: "TrackedFood")
-                    mainViewModel.fetchTrackedFood()
-                    mainViewModel.updateData()
-                }) {
-                    Text("Reset Food Entries")
-                        .padding()
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                Button(action: {
-                    settingsViewModel.deleteAllEntries(for: "Food")
-                    settingsViewModel.deleteAllEntries(for: "TrackedFood")
-                    mainViewModel.fetchTrackedFood()
-                    mainViewModel.updateData()
-                }) {
-                    Text("Reset All Food-Related Entries")
-                        .padding()
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
+//                Button(action: {
+//                    createPanelViewModel.createFood(name: "Apfel", defaultQuantity: "1", unit: "stück", calories: "52", carbs: "14", protein: "0.3", fat: "0.2")
+//                    createPanelViewModel.createFood(name: "Banane", defaultQuantity: "1", unit: "stück", calories: "89", carbs: "23", protein: "1.1", fat: "0.3")
+//                    createPanelViewModel.createFood(name: "Hähnchenbrust", defaultQuantity: "100", unit: "g", calories: "165", carbs: "0", protein: "31", fat: "3.6")
+//                    createPanelViewModel.createFood(name: "Reis", defaultQuantity: "100", unit: "g", calories: "130", carbs: "28", protein: "2.4", fat: "0.3")
+//                    createPanelViewModel.createFood(name: "Olivenöl", defaultQuantity: "5", unit: "ml", calories: "119", carbs: "0", protein: "0", fat: "13.5")
+//                }) {
+//                    Text("Create Dummy Food Entries")
+//                        .padding()
+//                        .background(Color.blue)
+//                        .foregroundColor(.white)
+//                        .cornerRadius(8)
+//                }
+//                Divider()
+//                Button(action: {
+//                    settingsViewModel.deleteAllEntries(for: "User")
+//                    settingsViewModel.deleteAllEntries(for: "Kcal")
+//                    
+//                    onboardingDone = false
+//                }) {
+//                    Text("Reset Profile")
+//                        .padding()
+//                        .background(Color.red)
+//                        .foregroundColor(.white)
+//                        .cornerRadius(8)
+//                }
+//                Button(action: {
+//                    settingsViewModel.deleteAllEntries(for: "TrackedFood")
+//                    mainViewModel.fetchTrackedFood()
+//                    mainViewModel.updateData()
+//                }) {
+//                    Text("Reset Food Entries")
+//                        .padding()
+//                        .background(Color.red)
+//                        .foregroundColor(.white)
+//                        .cornerRadius(8)
+//                }
+//                Button(action: {
+//                    settingsViewModel.deleteAllEntries(for: "Food")
+//                    settingsViewModel.deleteAllEntries(for: "TrackedFood")
+//                    mainViewModel.fetchTrackedFood()
+//                    mainViewModel.updateData()
+//                }) {
+//                    Text("Reset All Food-Related Entries")
+//                        .padding()
+//                        .background(Color.red)
+//                        .foregroundColor(.white)
+//                        .cornerRadius(8)
+//                }
                 
             }
-            .padding()
+            .padding([.top, .trailing])
             .navigationTitle("Einstellungen")
         }
         

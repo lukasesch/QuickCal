@@ -160,7 +160,7 @@ struct CreateMealPanelView: View {
                 }
             }
             //.navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("Gericht +")
+            .navigationTitle("Neues Gericht")
         
     }
     
