@@ -28,9 +28,18 @@ struct OpenFoodFactsView: View {
                             ProgressView("Laden...")
                                 .progressViewStyle(CircularProgressViewStyle())
                                 .padding()
-                            Text("Bitte warten, Daten werden geladen.")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                            Button(action: {
+                                openFoodFactsViewModel.isLoading = false
+                                openFoodFactsViewModel.products.removeAll() // Suchergebnisse löschen
+                                textfield = "" // Suchtextfeld leeren
+                            }) {
+                                Text("Abbrechen")
+                                    .foregroundColor(.gray)
+                                    .padding()
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(8)
+                            }
+                            .padding(.top, -10)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
