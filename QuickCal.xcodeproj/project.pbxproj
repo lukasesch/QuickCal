@@ -187,11 +187,11 @@
 				};
 			};
 			buildConfigurationList = 1B07F0082CB6AA430008E59F /* Build configuration list for PBXProject "QuickCal" */;
-			developmentRegion = en;
+			developmentRegion = de;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				de,
 			);
 			mainGroup = 1B07F0042CB6AA430008E59F;
 			minimizedProjectReferenceProxies = 1;

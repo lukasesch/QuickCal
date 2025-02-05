@@ -28,7 +28,7 @@ struct CreateFoodPanelView: View {
     }
     
     var body: some View {
-        NavigationStack {
+        
             VStack(alignment: .leading) {
                 HStack {
                     Text("Name:")
@@ -183,7 +183,7 @@ struct CreateFoodPanelView: View {
             }
             //.navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Lebensmittel erstellen")
-        }
+        
         
         
         

@@ -19,7 +19,7 @@ struct CreateMealPanelView: View {
     }
     
     var body: some View {
-        NavigationStack {
+    
             VStack(alignment: .leading) {
                 HStack {
                     Text("Name:")
@@ -161,7 +161,7 @@ struct CreateMealPanelView: View {
             }
             //.navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Gericht erstellen")
-        }
+        
     }
     
     // Function to move focus between fields
