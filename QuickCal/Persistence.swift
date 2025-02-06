@@ -37,18 +37,36 @@ class PersistenceController {
         exampleFood.carbohydrate = 23.0
         exampleFood.defaultQuantity = 100.0
         exampleFood.unit = "g"
-        //Should run itself because of .onAppear modifier?
-        //viewModel.checkAndCalculateDailyCalories(context: viewContext)
         
         // Create TrackedFood Entry
         let exampleTrackedFood = TrackedFood(context: viewContext)
         exampleTrackedFood.date = Date() // Setzt das aktuelle Datum
         exampleTrackedFood.daytime = 0 // 0 könnte für Frühstück stehen
-        exampleTrackedFood.quantity = 1.5 // Beispielmenge in Gramm
+        exampleTrackedFood.quantity = 3.0 // Beispielmenge in Gramm
         
         // Verknüpfe TrackedFood mit Food und User
         exampleTrackedFood.food = exampleFood
         exampleTrackedFood.user = exampleUser
+        
+        // Zweites Nahrungsmittel mit Fetten
+        let exampleFood2 = Food(context: viewContext)
+        exampleFood2.name = "Avocado"
+        exampleFood2.kcal = 160
+        exampleFood2.protein = 2.0
+        exampleFood2.fat = 15.0
+        exampleFood2.carbohydrate = 9.0
+        exampleFood2.defaultQuantity = 100.0
+        exampleFood2.unit = "g"
+        
+        // Create TrackedFood Entry für Avocado
+        let exampleTrackedFood2 = TrackedFood(context: viewContext)
+        exampleTrackedFood2.date = Date()
+        exampleTrackedFood2.daytime = 1 // 1 könnte für Mittagessen stehen
+        exampleTrackedFood2.quantity = 4 // Beispielmenge in Gramm
+        
+        // Verknüpfe TrackedFood mit Food und User
+        exampleTrackedFood2.food = exampleFood2
+        exampleTrackedFood2.user = exampleUser
         
         // Save context to persist data for the preview
         do {

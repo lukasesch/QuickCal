@@ -22,10 +22,6 @@ struct MainView: View {
     
     var body: some View {
         NavigationStack {
-//            Button("Neu Berechnen") {
-//                mainViewModel.recalculateCalories()
-//                mainViewModel.updateData()
-//            }
             VStack {
                 HStack(alignment: .center) {
                     Image("Icon")
@@ -90,11 +86,11 @@ struct MainView: View {
                 
                 Spacer()
                 Spacer()
-                Spacer()
+                
 
                 HStack {
                     Spacer()
-                    HalfCircularProgressView(barColor: .blue, barWidth: 18, progressPercentage: mainViewModel.kcalProgressPercentage)
+                    HalfCircularProgressView(barColor: .blue, barWidth: 14, progressPercentage: mainViewModel.kcalProgressPercentage)
                         .frame(width: 180, height: 200)
                     
                     Spacer()
@@ -103,11 +99,11 @@ struct MainView: View {
                 HStack {
                     Spacer()
                     Spacer()
-                    MacroBars(barColor: .green, barWidth: 90, barHeight: 12, goal: mainViewModel.carbsGoal, progressPercentage: mainViewModel.carbsProgressPercentage, barName: "Kohlenhydrate")
+                    MacroBars(barColor: .green, barWidth: 90, barHeight: 9, goal: mainViewModel.carbsGoal, progressPercentage: mainViewModel.carbsProgressPercentage, barName: "Kohlenhydrate")
                     Spacer()
-                    MacroBars(barColor: .orange, barWidth: 90, barHeight: 12, goal: mainViewModel.proteinGoal, progressPercentage: mainViewModel.proteinProgressPercentage, barName: "Protein")
+                    MacroBars(barColor: .orange, barWidth: 90, barHeight: 9, goal: mainViewModel.proteinGoal, progressPercentage: mainViewModel.proteinProgressPercentage, barName: "Protein")
                     Spacer()
-                    MacroBars(barColor: .purple, barWidth: 90, barHeight: 12, goal: mainViewModel.fatGoal, progressPercentage: mainViewModel.fatProgressPercentage, barName: "Fett")
+                    MacroBars(barColor: .purple, barWidth: 90, barHeight: 9, goal: mainViewModel.fatGoal, progressPercentage: mainViewModel.fatProgressPercentage, barName: "Fett")
                     Spacer()
                     Spacer()
                 }
@@ -372,6 +368,7 @@ struct MainView: View {
                     }
                     
                 }
+                
                 .sheet(isPresented: $mainViewModel.showAddTrackedFoodPanel) {
                     if let daytime = selectedDaytime {
                         AddTrackedFoodView(showAddTrackedFoodPanel: $mainViewModel.showAddTrackedFoodPanel, selectedDaytime: daytime, selectedDate: mainViewModel.selectedDate)
@@ -379,6 +376,7 @@ struct MainView: View {
                     }
                 }
                 .listStyle(.grouped)
+                
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .padding()
                 .shadow(radius: 5)
@@ -389,6 +387,18 @@ struct MainView: View {
                 Spacer()
 
             }
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color.white,
+                        Color.gray.opacity(0.05)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .background(Color(UIColor.systemGroupedBackground))
+                .ignoresSafeArea()
+            )
             .navigationBarBackButtonHidden(true)
             .onAppear {
                 //Preview debugging as no user exists here
@@ -409,7 +419,6 @@ struct MainView: View {
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
             .padding(.bottom, 10)
             .ignoresSafeArea(.container, edges: .bottom)
-            
         }
         .overlay(
             Group {
@@ -434,6 +443,7 @@ struct MainView: View {
                 }
             }
         )
+        
     }
     
     private func resetAlert() {
@@ -453,6 +463,7 @@ struct MainView: View {
 
     struct HalfCircularProgressView: View {
         @EnvironmentObject var mainViewModel: MainViewModel
+        let darkBlue = Color(red: 15/255, green: 32/255, blue: 85/255)
         var barColor: Color
         var barWidth: CGFloat
         var progressPercentage: CGFloat
@@ -464,11 +475,18 @@ struct MainView: View {
                         barColor.opacity(0.25),
                         style: StrokeStyle(lineWidth: barWidth, lineCap: .round))
                     .rotationEffect(Angle(degrees: 157))
+//                    .shadow(radius: 5)
                 Circle()
                     .trim(from: 0, to: 0.63 * min(progressPercentage, 1.0))
                     .stroke(
-                        barColor,
-                        style: StrokeStyle(lineWidth: barWidth, lineCap: .round))
+                        AngularGradient(
+                            gradient: Gradient(colors: [barColor, darkBlue]),
+                            center: .center,
+                            startAngle: .degrees(0), // Dynamischer Startwinkel
+                            endAngle: .degrees(227)
+                        ),
+                        style: StrokeStyle(lineWidth: barWidth, lineCap: .round)
+                        )
                     .rotationEffect(Angle(degrees: 157))
                 // Calories overrreached, red transition
                 if progressPercentage > 1.0 {
@@ -486,24 +504,43 @@ struct MainView: View {
                         .rotationEffect(Angle(degrees: 157))
                 }
                 
-                VStack {
-                    Text("""
-                        \(String(format: "%.0f", mainViewModel.kcalReached))
-                        """)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .multilineTextAlignment(.center)
+                VStack(spacing: 4) {
+                    Text("\(String(format: "%.0f", mainViewModel.kcalReached))")
+                        .font(.system(size: 42, weight: .heavy, design: .rounded))
+                        .padding(.top, -15.0)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [darkBlue, modifiedColor(base: barColor)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                     
-                    Text("""
-                        von
-                         \(String(format: "%.0f", mainViewModel.kcalGoal)) kcal
-                        """)
-                    .font(.subheadline)
-                    .fontWeight(.bold)
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom)
+                    Text("/ \(String(format: "%.0f", mainViewModel.kcalGoal)) kcal")
+                        .font(.system(.subheadline, design: .rounded))
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary.opacity(0.8)) // Höherer Kontrast
+                        .shadow(color: .white.opacity(0.3), radius: 2, x: 0, y: 1) // Textumriss
                 }
             }
+        }
+        
+        // Farbanpassung (unverändert)
+        private func modifiedColor(base: Color) -> Color {
+            let uiColor = UIColor(base)
+            var hue: CGFloat = 0
+            var saturation: CGFloat = 0
+            var brightness: CGFloat = 0
+            var alpha: CGFloat = 0
+            
+            uiColor.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
+            
+            return Color(
+                hue: Double(hue),
+                saturation: Double(min(saturation * 1.3, 1.0)),
+                brightness: Double(min(brightness * 1.2, 1.0)),
+                opacity: Double(alpha)
+            )
         }
     }
     
@@ -528,7 +565,16 @@ struct MainView: View {
                         .clipShape(.capsule)
                     Rectangle()
                         .frame(width: barWidth * min(progressPercentage, 1.0), height: barHeight)
-                        .foregroundStyle(barColor)
+                        .foregroundStyle(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    barColor,
+                                    barColor.darker(by: 0.2)
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                         .clipShape(.capsule)
                 }
                 Text("\(String(format: "%.0f", (Double(goal) * progressPercentage))) / \(goal) g")
@@ -538,6 +584,7 @@ struct MainView: View {
                 
             }
         }
+        
     }
 }
 
@@ -625,4 +672,51 @@ struct CustomAlertEdit: View {
         .environmentObject(SettingsViewModel(context: context))
         .environmentObject(AddTrackedFoodViewModel(context: context))
         .environmentObject(CreateMealPanelViewModel(context: context))
+        .environmentObject(BarCodeViewModel(context: context))
+}
+
+extension Color {
+    func darker(by percentage: CGFloat) -> Color {
+        let uiColor = UIColor(self)
+        var hue: CGFloat = 0
+        var saturation: CGFloat = 0
+        var brightness: CGFloat = 0
+        var alpha: CGFloat = 0
+        
+        uiColor.getHue(
+            &hue,
+            saturation: &saturation,
+            brightness: &brightness,
+            alpha: &alpha
+        )
+        
+        return Color(
+            hue: Double(hue),
+            saturation: Double(saturation),
+            brightness: Double(max(brightness - percentage, 0)),
+            opacity: Double(alpha)
+        )
+    }
+    
+    func lighter(by percentage: CGFloat) -> Color {
+        let uiColor = UIColor(self)
+        var hue: CGFloat = 0
+        var saturation: CGFloat = 0
+        var brightness: CGFloat = 0
+        var alpha: CGFloat = 0
+        
+        uiColor.getHue(
+            &hue,
+            saturation: &saturation,
+            brightness: &brightness,
+            alpha: &alpha
+        )
+        
+        return Color(
+            hue: Double(hue),
+            saturation: Double(saturation),
+            brightness: Double(max(brightness + percentage, 0)),
+            opacity: Double(alpha)
+        )
+    }
 }
