@@ -10,6 +10,7 @@ import SwiftUI
 struct CalorieMacroView: View {
     @EnvironmentObject var calorieMacroViewModel: CalorieMacroViewModel
     @EnvironmentObject var mainViewModel: MainViewModel
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -20,7 +21,7 @@ struct CalorieMacroView: View {
             }
             
             Divider()
-            Text("\(calorieMacroViewModel.carbsGrams) \(calorieMacroViewModel.proteinsGrams) \(calorieMacroViewModel.fatsGrams)")
+
             Group {
                 // Kohlenhydrate
                 VStack(alignment: .leading) {
@@ -57,6 +58,7 @@ struct CalorieMacroView: View {
             Button(action: {
                 calorieMacroViewModel.saveCalorieData()
                 mainViewModel.checkAndCalculateDailyCalories()
+                dismiss()
             }) {
                 Text("Speichern")
                     .frame(maxWidth: .infinity)
