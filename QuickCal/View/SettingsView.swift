@@ -21,7 +21,7 @@ struct SettingsView: View {
                         NavigationLink(destination: EditProfileView()) {
                             Label("Profil & Ziel bearbeiten", systemImage: "person")
                         }
-                        NavigationLink(destination: ProfileView()) {
+                        NavigationLink(destination: CalorieMacroView()) {
                             Label("Kalorien & Makronährstoffe anpassen", systemImage: "slider.vertical.3")
                         }
                         NavigationLink(destination: AdvancedSettingsView()) {
@@ -50,23 +50,7 @@ struct SettingsView: View {
                         }
                     }
                 }
-                
                 .listStyle(.plain)
-                //                Button(action: {
-                //                    createPanelViewModel.createFood(name: "Apfel", defaultQuantity: "1", unit: "stück", calories: "52", carbs: "14", protein: "0.3", fat: "0.2")
-                //                    createPanelViewModel.createFood(name: "Banane", defaultQuantity: "1", unit: "stück", calories: "89", carbs: "23", protein: "1.1", fat: "0.3")
-                //                    createPanelViewModel.createFood(name: "Hähnchenbrust", defaultQuantity: "100", unit: "g", calories: "165", carbs: "0", protein: "31", fat: "3.6")
-                //                    createPanelViewModel.createFood(name: "Reis", defaultQuantity: "100", unit: "g", calories: "130", carbs: "28", protein: "2.4", fat: "0.3")
-                //                    createPanelViewModel.createFood(name: "Olivenöl", defaultQuantity: "5", unit: "ml", calories: "119", carbs: "0", protein: "0", fat: "13.5")
-                //                }) {
-                //                    Text("Create Dummy Food Entries")
-                //                        .padding()
-                //                        .background(Color.blue)
-                //                        .foregroundColor(.white)
-                //                        .cornerRadius(8)
-                //                }
-                
-                
             }
             
             .padding([.top, .trailing])

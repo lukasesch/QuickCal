@@ -255,5 +255,9 @@ struct EditProfileView: View {
 }
 
 #Preview {
+    let context = PersistenceController.preview.container.viewContext
     EditProfileView()
+        .environment(\.managedObjectContext, context)
+        .environmentObject(EditProfileViewModel(context: context, mainViewModel: MainViewModel(context: context)))
+        .environmentObject(MainViewModel(context: context))
 }

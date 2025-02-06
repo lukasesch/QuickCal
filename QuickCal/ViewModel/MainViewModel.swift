@@ -125,10 +125,11 @@ class MainViewModel: ObservableObject {
     func fetchOrCreateDailyKcal(for date: Date) {
         let fetchRequest: NSFetchRequest<Kcal> = Kcal.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "date >= %@ AND date < %@", date as NSDate, Calendar.current.date(byAdding: .day, value: 1, to: date)! as NSDate)
-        
+        // Sortierung: Nach Datum absteigend, damit der neueste Eintrag oben steht
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Kcal.date, ascending: false)]
         do {
             let results = try context.fetch(fetchRequest)
-            if let dailyKcal = results.last {
+            if let dailyKcal = results.first {
                 assignDailyKcalValues(dailyKcal)
                 print(dailyKcal.kcalGoal)
             } else {
