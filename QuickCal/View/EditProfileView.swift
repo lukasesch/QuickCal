@@ -167,7 +167,7 @@ struct EditProfileView: View {
                         mainViewModel.recalculateCalories()
                         dismiss()
                     }) {
-                        Text("Aktualisieren")
+                        Text("Neu berechnen")
                             .frame(maxWidth: .infinity)
                             .fontWeight(.bold)
                             .padding()

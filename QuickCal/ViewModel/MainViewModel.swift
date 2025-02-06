@@ -156,8 +156,34 @@ class MainViewModel: ObservableObject {
     }
     
     func calculateAndSaveDailyKcal(for user: User, date: Date) {
-        calculateKcal(for: user)
-        saveKcalDB(date: date, calories: kcalGoal, carbs: carbsGoal, protein: proteinGoal, fat: fatGoal)
+        // Hole den neuesten existierenden Kcal-Eintrag (egal welches Datum)
+        let fetchRequest: NSFetchRequest<Kcal> = Kcal.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Kcal.date, ascending: false)]
+        fetchRequest.fetchLimit = 1
+        
+        do {
+            if let latestTemplate = try context.fetch(fetchRequest).first {
+                // Verwende die Werte des letzten Eintrags als Vorlage
+                kcalGoal = latestTemplate.kcalGoal
+                carbsGoal = Int(latestTemplate.carbsGoal)
+                proteinGoal = Int(latestTemplate.proteinGoal)
+                fatGoal = Int(latestTemplate.fatGoal)
+            } else {
+                // Fallback: Neuberechnung aus Benutzerdaten
+                calculateKcal(for: user)
+            }
+        } catch {
+            calculateKcal(for: user) // Fehlerfall
+        }
+        
+        // Speichere den neuen Tageseintrag
+        saveKcalDB(
+            date: date,
+            calories: kcalGoal,
+            carbs: carbsGoal,
+            protein: proteinGoal,
+            fat: fatGoal
+        )
     }
     
     func calculateKcal(for user: User) {
@@ -278,7 +304,15 @@ class MainViewModel: ObservableObject {
             return
         }
         let date = Date()
-        calculateAndSaveDailyKcal(for: user, date: date)
+//        calculateAndSaveDailyKcal(for: user, date: date)
+        calculateKcal(for: user)
+        saveKcalDB(
+            date: date,
+            calories: kcalGoal,
+            carbs: carbsGoal,
+            protein: proteinGoal,
+            fat: fatGoal
+        )
         print("Kalorien wurden neu berechnet für den Benutzer: \(user.name ?? "Unbekannt")")
         print(kcalGoal)
     }
