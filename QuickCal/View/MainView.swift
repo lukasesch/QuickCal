@@ -14,6 +14,11 @@ struct MainView: View {
     @State private var showingSettings = false
     @State private var selectedDaytime: Int? = nil
     
+    //Easter Egg
+    @State private var tapCount = 0
+    @State private var isWobbling = false
+    @State private var resetTimer: Timer?
+    
     //Custom Alert to edit entries
     @State private var showCustomAlert = false
     @State private var showCustomAlertEditAttributes = false
@@ -27,6 +32,11 @@ struct MainView: View {
                     Image("Icon")
                         .resizable()
                         .frame(width: 42, height: 42)
+                        .rotationEffect(.degrees(isWobbling ? -15 : 0))
+                        .scaleEffect(isWobbling ? 1.2 : 1)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: isWobbling)
+                        .onTapGesture(perform: handleIconTap)
+                    
                     Spacer()
                     Text(
                         Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date())
@@ -380,12 +390,12 @@ struct MainView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .padding()
                 .shadow(radius: 5)
-
+                
                 Spacer()
                 Spacer()
                 Spacer()
                 Spacer()
-
+                
             }
             .background(
                 LinearGradient(
@@ -445,6 +455,31 @@ struct MainView: View {
         )
         
     }
+    private func handleIconTap() {
+        tapCount += 1
+        resetTimer?.invalidate()
+        
+        if tapCount == 3 {
+            triggerWobble()
+            tapCount = 0
+        } else {
+            resetTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+                tapCount = 0
+            }
+        }
+    }
+    
+    private func triggerWobble() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.4, blendDuration: 0.2)) {
+            isWobbling = true
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation {
+                isWobbling = false
+            }
+        }
+    }
     
     private func resetAlert() {
         withAnimation {
@@ -460,7 +495,7 @@ struct MainView: View {
         formatter.dateFormat = "d. MMMM" // Jahr weglassen
         return formatter.string(from: date)
     }
-
+    
     struct HalfCircularProgressView: View {
         @EnvironmentObject var mainViewModel: MainViewModel
         let darkBlue = Color(red: 15/255, green: 32/255, blue: 85/255)
@@ -475,7 +510,7 @@ struct MainView: View {
                         barColor.opacity(0.25),
                         style: StrokeStyle(lineWidth: barWidth, lineCap: .round))
                     .rotationEffect(Angle(degrees: 157))
-//                    .shadow(radius: 5)
+                //                    .shadow(radius: 5)
                 Circle()
                     .trim(from: 0, to: 0.63 * min(progressPercentage, 1.0))
                     .stroke(
@@ -486,7 +521,7 @@ struct MainView: View {
                             endAngle: .degrees(227)
                         ),
                         style: StrokeStyle(lineWidth: barWidth, lineCap: .round)
-                        )
+                    )
                     .rotationEffect(Angle(degrees: 157))
                 // Calories overrreached, red transition
                 if progressPercentage > 1.0 {
