@@ -138,7 +138,7 @@ struct CustomAlertOFF: View {
                         .padding(.top)
                     
                     // Display the default quantity of the food item
-                    Text("Portionsgröße: \(String(format: "%.0f", food.defaultQuantity)) \(food.unit)")
+                    Text("Portionsgröße: \(String(format: "%.1f", food.defaultQuantity)) \(food.unit)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -155,7 +155,7 @@ struct CustomAlertOFF: View {
                     
                     HStack {
                         Spacer()
-                        Text("C: \(String(format: "%.1f", food.carbohydrate * portionAmount)) g")
+                        Text("K: \(String(format: "%.1f", food.carbohydrate * portionAmount)) g")
                         Spacer()
                         Text("P: \(String(format: "%.1f", food.protein * portionAmount)) g")
                         Spacer()

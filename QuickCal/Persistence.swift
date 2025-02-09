@@ -31,10 +31,10 @@ class PersistenceController {
         //Create Food Entry
         let exampleFood = Food(context: viewContext)
         exampleFood.name = "Banana"
-        exampleFood.kcal = 89
+        exampleFood.kcal = 93
         exampleFood.protein = 1.1
-        exampleFood.fat = 0.3
-        exampleFood.carbohydrate = 23.0
+        exampleFood.fat = 0.1
+        exampleFood.carbohydrate = 20.0
         exampleFood.defaultQuantity = 100.0
         exampleFood.unit = "g"
         
@@ -106,11 +106,11 @@ class PersistenceController {
             let count = try context.count(for: fetchRequest)
             if count == 0 { // Nur laden, wenn noch keine Daten existieren
                 let foods = [
-                    ("Apfel", 1.0, "stück", 52, 14, 0.3, 0.2),
-                    ("Banane", 1.0, "stück", 89, 23, 1.1, 0.3),
-                    ("Hähnchenbrust", 100.0, "g", 165, 0, 31, 3.6),
-                    ("Reis", 100.0, "g", 130, 28, 2.4, 0.3),
-                    ("Olivenöl", 5.0, "ml", 119, 0, 0, 13.5)
+                    ("Apfel", 1.0, "stück", 84, 18.7, 0.4, 0.1),
+                    ("Banane", 1.0, "stück", 140, 30.0, 1.7, 0.3),
+                    ("Hähnchenbrust", 100.0, "g", 108, 1.0, 21.0, 2.0),
+                    ("Reis", 100.0, "g", 355, 76.8, 7.4, 1.1),
+                    ("Olivenöl", 15.0, "ml", 133, 0.1, 0.0, 15.0)
                 ]
                 
                 for (name, quantity, unit, kcal, carbs, protein, fat) in foods {

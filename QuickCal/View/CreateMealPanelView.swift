@@ -68,7 +68,7 @@ struct CreateMealPanelView: View {
                                     HStack {
                                         VStack(alignment: .leading) {
                                             Text(food.name ?? "Unknown Food")
-                                            Text("\(String(format: "%.0f", displayQuantity)) \(unit)")
+                                            Text("\(String(format: "%.1f", displayQuantity)) \(unit)")
                                                 .font(.footnote)
                                         }
                                         Spacer()
@@ -96,7 +96,7 @@ struct CreateMealPanelView: View {
                             HStack {
                                 Text("Kcal: \(String(format: "%.0f", createMealPanelViewModel.kcalTotal))")
                                 Spacer()
-                                Text("C: \(String(format: "%.0f", createMealPanelViewModel.carbsTotal)) g")
+                                Text("K: \(String(format: "%.0f", createMealPanelViewModel.carbsTotal)) g")
                                 Spacer()
                                 Text("P: \(String(format: "%.0f", createMealPanelViewModel.proteinTotal)) g")
                                 Spacer()

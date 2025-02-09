@@ -29,7 +29,7 @@ struct CreateMealIngredientsView: View {
                         HStack {
                             VStack(alignment: .leading) {
                                 Text("\(food.name ?? "Unbekannt")")
-                                Text("\(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
+                                Text("\(String(format: "%.1f", food.defaultQuantity)) \(food.unit ?? "")")
                                     .font(.footnote)
                             }
                             Spacer()

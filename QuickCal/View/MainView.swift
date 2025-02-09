@@ -177,7 +177,7 @@ struct MainView: View {
                             HStack {
                                 Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalMorning))")
                                 Spacer()
-                                Text("C: \(String(format: "%.0f", mainViewModel.carbsMorning)) g")
+                                Text("K: \(String(format: "%.0f", mainViewModel.carbsMorning)) g")
                                 Spacer()
                                 Text("P: \(String(format: "%.0f", mainViewModel.proteinMorning)) g")
                                 Spacer()
@@ -240,7 +240,7 @@ struct MainView: View {
                             HStack {
                                 Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalMidday))")
                                 Spacer()
-                                Text("C: \(String(format: "%.0f", mainViewModel.carbsMidday)) g")
+                                Text("K: \(String(format: "%.0f", mainViewModel.carbsMidday)) g")
                                 Spacer()
                                 Text("P: \(String(format: "%.0f", mainViewModel.proteinMidday)) g")
                                 Spacer()
@@ -302,7 +302,7 @@ struct MainView: View {
                             HStack {
                                 Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalEvening))")
                                 Spacer()
-                                Text("C: \(String(format: "%.0f", mainViewModel.carbsEvening)) g")
+                                Text("K: \(String(format: "%.0f", mainViewModel.carbsEvening)) g")
                                 Spacer()
                                 Text("P: \(String(format: "%.0f", mainViewModel.proteinEvening)) g")
                                 Spacer()
@@ -366,7 +366,7 @@ struct MainView: View {
                             HStack {
                                 Text("Kcal: \(String(format: "%.0f", mainViewModel.kcalSnacks))")
                                 Spacer()
-                                Text("C: \(String(format: "%.0f", mainViewModel.carbsSnacks)) g")
+                                Text("K: \(String(format: "%.0f", mainViewModel.carbsSnacks)) g")
                                 Spacer()
                                 Text("P: \(String(format: "%.0f", mainViewModel.proteinSnacks)) g")
                                 Spacer()
@@ -648,7 +648,7 @@ struct CustomAlertEdit: View {
                         .padding(.top)
                     
                     // Display the default quantity of the food item
-                    Text("Portionsgröße: \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
+                    Text("Portionsgröße: \(String(format: "%.1f", food.defaultQuantity)) \(food.unit ?? "")")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -665,7 +665,7 @@ struct CustomAlertEdit: View {
                     
                     HStack {
                         Spacer()
-                        Text("C: \(String(format: "%.1f", food.carbohydrate * portionAmount)) g")
+                        Text("K: \(String(format: "%.1f", food.carbohydrate * portionAmount)) g")
                         Spacer()
                         Text("P: \(String(format: "%.1f", food.protein * portionAmount)) g")
                         Spacer()
