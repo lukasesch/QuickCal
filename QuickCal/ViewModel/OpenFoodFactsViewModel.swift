@@ -70,7 +70,16 @@ class OpenFoodFactsViewModel: ObservableObject {
                     let brand = product["brands"] as? String ?? "Unbekannte Marke"
                     let name = product["product_name"] as? String ?? "Unbekanntes Produkt"
                     
-                    let unit = (product["nutriments_unit"] as? String) ?? "g" // Fallback auf "g"
+                    var unit = "g" // Standard
+                    if let servingQuantityUnit = product["serving_quantity_unit"] as? String {
+                        unit = servingQuantityUnit
+                    } else if let servingSize = product["product_quantity_unit"] as? String {
+                        if servingSize.lowercased().contains("ml") {
+                            unit = "ml"
+                        } else if servingSize.lowercased().contains("g") {
+                            unit = "g"
+                        }
+                    }
                     let kcal = (product["nutriments"] as? [String: Any])?["energy-kcal_100g"] as? Int16 ?? 10
                     let fat = (product["nutriments"] as? [String: Any])?["fat_100g"] as? Double ?? 0.0
                     let carbohydrate = (product["nutriments"] as? [String: Any])?["carbohydrates_100g"] as? Double ?? 0.0
