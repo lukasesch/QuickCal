@@ -1,12 +1,11 @@
 # QuickCal
-QuickCal is an iOS app designed to help users track their nutrition and calculate personalized calorie and macronutrient goals. The app is built using the SwiftUI framework, follows the MVVM architectural pattern, and stores user data with Core Data. By integrating external food databases via REST APIs (OpenFoodFacts), users can easily search for foods and scan barcodes, supported by the AVFoundation framework.
-User privacy is a top priority — no personal data ever leaves the app, ensuring complete data security.
-
+QuickCal is an iOS app designed to help users track their nutrition and calculate personalized calorie and macronutrient goals. The app is built using the **SwiftUI** framework, follows the **MVVM** architectural pattern, and stores user data with **Core Data**. By integrating external food databases via **REST APIs** (**OpenFoodFacts**), users can easily search for foods and scan barcodes, supported by the **AVFoundation** framework.<br>
+<br>
+User privacy is a top priority—no personal data ever leaves the app, ensuring complete data security.
 
 
 ## 🛠 Development Phase
 This app is part of my project work for the Master's program in Computer Science at Trier University of Applied Sciences and is currently in beta. Future updates will bring new features and improvements.
-
 
 
 ## 🌍 Data Source
@@ -15,12 +14,10 @@ QuickCal operates using the open-source database **OpenFoodFacts**, which contai
 [Learn more about OpenFoodFacts](https://world.openfoodfacts.org/)
 
 
-
 ## 💡 Feedback
 Since QuickCal is still in development, **suggestions and feedback** are always welcome! 🚀 If you're interested in testing QuickCal via TestFlight, feel free to contact me directly.
 
 The official release is planned for March to April 2025.
-
 
 
 ## 🧰 Frameworks
@@ -28,7 +25,6 @@ The official release is planned for March to April 2025.
 - Core Data
 - AVFoundation
 - Combine
-
 
 
 ## 📸 Screenshots
