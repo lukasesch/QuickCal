@@ -316,4 +316,37 @@ class MainViewModel: ObservableObject {
         print("Kalorien wurden neu berechnet für den Benutzer: \(user.name ?? "Unbekannt")")
         print(kcalGoal)
     }
+    
+    func copyEntriesToCurrentDate(fromSourceDaytime sourceDaytime: Int, toTargetDaytime targetDaytime: Int) {
+        let fromDate = selectedDate  // Datum, von dem kopiert werden soll
+        let toDate = Date()          // Aktueller Tag
+        
+        let fetchRequest: NSFetchRequest<TrackedFood> = TrackedFood.fetchRequest()
+        // Filtere nach Datum, Benutzer und dem Quell-Tagesabschnitt
+        fetchRequest.predicate = NSPredicate(
+            format: "date == %@ AND user == %@ AND daytime == %d",
+            fromDate as NSDate,
+            user ?? NSNull(),
+            sourceDaytime
+        )
+        
+        do {
+            let itemsToCopy = try context.fetch(fetchRequest)
+            
+            for item in itemsToCopy {
+                let newItem = TrackedFood(context: context)
+                newItem.date = toDate
+                newItem.daytime = Int16(targetDaytime)
+                newItem.quantity = item.quantity
+                newItem.food = item.food
+                newItem.user = item.user
+                
+            }
+            
+            try context.save()
+            updateData()
+        } catch {
+            print("Fehler beim Kopieren der TrackedFood-Einträge: \(error)")
+        }
+    }
 }
