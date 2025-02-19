@@ -31,7 +31,7 @@ struct SettingsView: View {
                             Label("Hilfe", systemImage: "questionmark.circle")
                         }
                         NavigationLink(destination: AboutQuickCalView()) {
-                            Label("Über QuickCal", systemImage: "info.circle")
+                            Label("Über QuickCalorie", systemImage: "info.circle")
                         }
                     }
                     Spacer()
@@ -42,7 +42,7 @@ struct SettingsView: View {
                                 Text("© 2025 Lukas Esch. Alle Rechte vorbehalten.")
                                     .font(.footnote)
                                     .foregroundColor(.gray)
-                                Text("QuickCal Version 1.0.0")
+                                Text("QuickCalorie Version 1.0.0")
                                     .font(.footnote)
                                     .foregroundColor(.gray)
                             }

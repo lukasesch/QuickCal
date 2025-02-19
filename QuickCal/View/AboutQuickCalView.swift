@@ -12,7 +12,7 @@ struct AboutQuickCalView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 // Beschreibung
-                Text("**QuickCal** ist eine Ernährungs-Tracking-App, die eine **einfache und schnelle Möglichkeit** bietet, Lebensmittel und Mahlzeiten zu erfassen.")
+                Text("**QuickCalorie** ist eine Ernährungs-Tracking-App, die eine **einfache und schnelle Möglichkeit** bietet, Lebensmittel und Mahlzeiten zu erfassen.")
                 
                 Divider()
                 
@@ -26,7 +26,7 @@ struct AboutQuickCalView: View {
                 // OpenFoodFacts-Integration
                 Text("🌍 **Datenquelle**")
                     .font(.headline)
-                Text("Für Nährwertangaben nutzt QuickCal die Open-Source-Datenbank **OpenFoodFacts**. Diese Datenbank enthält eine Vielzahl von Lebensmitteln, die von der Community gepflegt und erweitert werden.")
+                Text("Für Nährwertangaben nutzt QuickCalorie die Open-Source-Datenbank **OpenFoodFacts**. Diese Datenbank enthält eine Vielzahl von Lebensmitteln, die von der Community gepflegt und erweitert werden.")
                 
                 // Link zu OpenFoodFacts
                 Link("Mehr zu OpenFoodFacts", destination: URL(string: "https://world.openfoodfacts.org/")!)
@@ -38,7 +38,7 @@ struct AboutQuickCalView: View {
                 // Feedback
                 Text("💡 **Feedback**")
                     .font(.headline)
-                Text("Da sich QuickCal noch in der Entwicklungsphase befindet, sind **Anregungen und Feedback** jederzeit willkommen! 🚀")
+                Text("Da sich QuickCalorie noch in der Entwicklungsphase befindet, sind **Anregungen und Feedback** jederzeit willkommen! 🚀")
                 
                 Spacer()
                 
@@ -48,7 +48,7 @@ struct AboutQuickCalView: View {
                     Text("© 2025 Lukas Esch. Alle Rechte vorbehalten.")
                         .font(.footnote)
                         .foregroundColor(.gray)
-                    Text("QuickCal Version 1.0.0")
+                    Text("QuickCalorie Version 1.0.0")
                         .font(.footnote)
                         .foregroundColor(.gray)
                 }
@@ -56,7 +56,7 @@ struct AboutQuickCalView: View {
             }
             .padding()
         }
-        .navigationTitle("Über QuickCal")
+        .navigationTitle("Über QuickCalorie")
     }
 }
 

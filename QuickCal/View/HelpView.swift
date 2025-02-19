@@ -13,7 +13,7 @@ struct HelpView: View {
             VStack(alignment: .leading, spacing: 16) {
                
                 // Beschreibung
-                Text("QuickCal erleichtert dir das Tracking deiner Ernährung mit einer intuitiven Bedienung. Hier erfährst du, wie du die wichtigsten Funktionen nutzt.")
+                Text("QuickCalorie erleichtert dir das Tracking deiner Ernährung mit einer intuitiven Bedienung. Hier erfährst du, wie du die wichtigsten Funktionen nutzt.")
                 
                 Divider()
                 
@@ -63,7 +63,7 @@ struct HelpView: View {
                     Text("© 2025 Lukas Esch. Alle Rechte vorbehalten.")
                         .font(.footnote)
                         .foregroundColor(.gray)
-                    Text("QuickCal Version 1.0.0")
+                    Text("QuickCalorie Version 1.0.0")
                         .font(.footnote)
                         .foregroundColor(.gray)
                 }

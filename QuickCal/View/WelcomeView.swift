@@ -17,7 +17,7 @@ struct WelcomeView: View {
                 Spacer()
                 Text("Willkommen bei")
                     .font(.subheadline)
-                Text("QuickCal")
+                Text("QuickCalorie")
                     .font(.largeTitle)
                     .fontWeight(.heavy)
                     .multilineTextAlignment(.center)
