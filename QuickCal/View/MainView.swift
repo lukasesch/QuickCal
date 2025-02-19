@@ -144,9 +144,10 @@ struct MainView: View {
                             
                             .onTapGesture {
                                 selectedFood = food
-                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
-                                ? String(Int(food.quantity)) // Whole Number
-                                : String(format: "%.1f", food.quantity) // Decimal Number
+                                quantity = String(format: "%g", food.quantity)
+                                //                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                //                                ? String(Int(food.quantity)) // Whole Number
+                                //                                : String(format: "%.2f", food.quantity) // Decimal Number
                                 withAnimation {
                                     showCustomAlert = true
                                 }
@@ -162,11 +163,10 @@ struct MainView: View {
                                 Text("Frühstück")
                                     .fontWeight(.semibold)
                                 Spacer()
-                                if !Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date()) {
-                                    CopyMenuView(sourceDaytime: 0)
-                                        .padding(.trailing, 5.0)
-                                }
-                
+                                
+                                CopyMenuView(sourceDaytime: 0)
+                                    .padding(.trailing, 5.0)
+                                
                                 Button(action: {
                                     
                                     selectedDaytime = 0
@@ -214,9 +214,10 @@ struct MainView: View {
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 selectedFood = food
-                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
-                                ? String(Int(food.quantity)) // Whole Number
-                                : String(format: "%.1f", food.quantity) // Decimal Number
+                                quantity = String(format: "%g", food.quantity)
+                                //                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                //                                ? String(Int(food.quantity)) // Whole Number
+                                //                                : String(format: "%.2f", food.quantity) // Decimal Number
                                 withAnimation {
                                     showCustomAlert = true
                                 }
@@ -231,10 +232,8 @@ struct MainView: View {
                                 Text("Mittagessen")
                                     .fontWeight(.semibold)
                                 Spacer()
-                                if !Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date()) {
-                                    CopyMenuView(sourceDaytime: 1)
-                                        .padding(.trailing, 5.0)
-                                }
+                                CopyMenuView(sourceDaytime: 1)
+                                    .padding(.trailing, 5.0)
                                 Button(action: {
                                     //print("Button pressed")
                                     selectedDaytime = 1
@@ -281,9 +280,10 @@ struct MainView: View {
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 selectedFood = food
-                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
-                                ? String(Int(food.quantity)) // Whole Number
-                                : String(format: "%.1f", food.quantity) // Decimal Number
+                                quantity = String(format: "%g", food.quantity)
+                                //                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+                                //                                ? String(Int(food.quantity)) // Whole Number
+                                //                                : String(format: "%.2f", food.quantity) // Decimal Number
                                 withAnimation {
                                     showCustomAlert = true
                                 }
@@ -298,10 +298,8 @@ struct MainView: View {
                                 Text("Abendessen")
                                     .fontWeight(.semibold)
                                 Spacer()
-                                if !Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date()) {
-                                    CopyMenuView(sourceDaytime: 2)
-                                        .padding(.trailing, 5.0)
-                                }
+                                CopyMenuView(sourceDaytime: 2)
+                                    .padding(.trailing, 5.0)
                                 Button(action: {
                                     //print("Button pressed")
                                     selectedDaytime = 2
@@ -347,9 +345,10 @@ struct MainView: View {
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 selectedFood = food
-                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
-                                ? String(Int(food.quantity)) // Whole Number
-                                : String(format: "%.1f", food.quantity) // Decimal Number
+                                quantity = String(format: "%g", food.quantity)
+//                                quantity = food.quantity.truncatingRemainder(dividingBy: 1) == 0
+//                                ? String(Int(food.quantity)) // Whole Number
+//                                : String(format: "%.2f", food.quantity) // Decimal Number
                                 withAnimation {
                                     showCustomAlert = true
                                 }
@@ -365,10 +364,8 @@ struct MainView: View {
                                 Text("Snacks")
                                     .fontWeight(.semibold)
                                 Spacer()
-                                if !Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date()) {
-                                    CopyMenuView(sourceDaytime: 3)
-                                        .padding(.trailing, 5.0)
-                                }
+                                CopyMenuView(sourceDaytime: 3)
+                                    .padding(.trailing, 5.0)
                                 Button(action: {
                                     //print("Button pressed")
                                     selectedDaytime = 3
@@ -600,7 +597,7 @@ struct MainView: View {
         var barColor: Color
         var barWidth: CGFloat
         var barHeight: CGFloat
-        var goal: Int
+        var goal: Double
         var progressPercentage: Double
         var barName: String
         var body: some View {
@@ -629,7 +626,7 @@ struct MainView: View {
                         )
                         .clipShape(.capsule)
                 }
-                Text("\(String(format: "%.0f", (Double(goal) * progressPercentage))) / \(goal) g")
+                Text("\(String(format: "%.0f", (goal * progressPercentage))) / \(String(format: "%.0f", goal)) g")
                     .font(.footnote)
                     .fontWeight(.regular)
                     .multilineTextAlignment(.center)
@@ -665,7 +662,7 @@ struct CustomAlertEdit: View {
                         .padding(.top)
                     
                     // Display the default quantity of the food item
-                    Text("Portionsgröße: \(String(format: "%.1f", food.defaultQuantity)) \(food.unit ?? "")")
+                    Text("Portionsgröße: \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -682,11 +679,11 @@ struct CustomAlertEdit: View {
                     
                     HStack {
                         Spacer()
-                        Text("K: \(String(format: "%.1f", food.carbohydrate * portionAmount)) g")
+                        Text("K: \(String(format: "%.0f", food.carbohydrate * portionAmount)) g")
                         Spacer()
-                        Text("P: \(String(format: "%.1f", food.protein * portionAmount)) g")
+                        Text("P: \(String(format: "%.0f", food.protein * portionAmount)) g")
                         Spacer()
-                        Text("F: \(String(format: "%.1f", food.fat * portionAmount)) g")
+                        Text("F: \(String(format: "%.0f", food.fat * portionAmount)) g")
                         Spacer()
                     }
                     .font(.subheadline)

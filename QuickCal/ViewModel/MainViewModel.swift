@@ -11,12 +11,12 @@ import CoreData
 class MainViewModel: ObservableObject {
     @Published var kcalGoal: Double = 0
     @Published var kcalReached: Double = 0
-    @Published var carbsGoal: Int = 0
-    @Published var carbsReached: Int = 0
-    @Published var proteinGoal: Int = 0
-    @Published var proteinReached: Int = 0
-    @Published var fatGoal: Int = 0
-    @Published var fatReached: Int = 0
+    @Published var carbsGoal: Double = 0
+    @Published var carbsReached: Double = 0
+    @Published var proteinGoal: Double = 0
+    @Published var proteinReached: Double = 0
+    @Published var fatGoal: Double = 0
+    @Published var fatReached: Double = 0
     @Published var user: User?
     @Published var trackedFood: [TrackedFood] = []
     @Published var showAddTrackedFoodPanel: Bool = false
@@ -70,9 +70,9 @@ class MainViewModel: ObservableObject {
     func updateData() {
         fetchTrackedFood()
         self.kcalReached = trackedFood.reduce(0.0) { $0 + Double($1.food?.kcal ?? 0) * Double($1.quantity) }
-        self.carbsReached = trackedFood.reduce(0) { $0 + Int(Double($1.food?.carbohydrate ?? 0) * Double($1.quantity)) }
-        self.proteinReached = trackedFood.reduce(0) { $0 + Int(Double($1.food?.protein ?? 0) * Double($1.quantity)) }
-        self.fatReached = trackedFood.reduce(0) { $0 + Int(Double($1.food?.fat ?? 0) * Double($1.quantity)) }
+        self.carbsReached = trackedFood.reduce(0.0) { $0 + Double($1.food?.carbohydrate ?? 0) * Double($1.quantity) }
+        self.proteinReached = trackedFood.reduce(0.0) { $0 + Double($1.food?.protein ?? 0) * Double($1.quantity) }
+        self.fatReached = trackedFood.reduce(0.0) { $0 + Double($1.food?.fat ?? 0) * Double($1.quantity) }
         
         calculateAggregates(forDaytime: 0, into: &kcalMorning, &carbsMorning, &proteinMorning, &fatMorning)
         calculateAggregates(forDaytime: 1, into: &kcalMidday, &carbsMidday, &proteinMidday, &fatMidday)
@@ -147,14 +147,13 @@ class MainViewModel: ObservableObject {
     private func assignDailyKcalValues(_ dailyKcal: Kcal) {
         kcalGoal = dailyKcal.kcalGoal
         kcalReached = dailyKcal.kcalReached
-        carbsGoal = Int(dailyKcal.carbsGoal)
-        carbsReached = Int(dailyKcal.carbsReached)
-        proteinGoal = Int(dailyKcal.proteinGoal)
-        proteinReached = Int(dailyKcal.proteinReached)
-        fatGoal = Int(dailyKcal.fatGoal)
-        fatReached = Int(dailyKcal.fatReached)
+        carbsGoal = Double(dailyKcal.carbsGoal)
+        carbsReached = Double(dailyKcal.carbsReached)
+        proteinGoal = Double(dailyKcal.proteinGoal)
+        proteinReached = Double(dailyKcal.proteinReached)
+        fatGoal = Double(dailyKcal.fatGoal)
+        fatReached = Double(dailyKcal.fatReached)
     }
-    
     func calculateAndSaveDailyKcal(for user: User, date: Date) {
         // Hole den neuesten existierenden Kcal-Eintrag (egal welches Datum)
         let fetchRequest: NSFetchRequest<Kcal> = Kcal.fetchRequest()
@@ -165,9 +164,9 @@ class MainViewModel: ObservableObject {
             if let latestTemplate = try context.fetch(fetchRequest).first {
                 // Verwende die Werte des letzten Eintrags als Vorlage
                 kcalGoal = latestTemplate.kcalGoal
-                carbsGoal = Int(latestTemplate.carbsGoal)
-                proteinGoal = Int(latestTemplate.proteinGoal)
-                fatGoal = Int(latestTemplate.fatGoal)
+                carbsGoal = Double(latestTemplate.carbsGoal)
+                proteinGoal = Double(latestTemplate.proteinGoal)
+                fatGoal = Double(latestTemplate.fatGoal)
             } else {
                 // Fallback: Neuberechnung aus Benutzerdaten
                 calculateKcal(for: user)
@@ -220,21 +219,21 @@ class MainViewModel: ObservableObject {
         }
         
         //Calculate Macros (rounded as accuracy not needed)
-        carbsGoal = Int((kcalGoal * 0.40 / 4).rounded())
-        proteinGoal = Int((kcalGoal * 0.30 / 4).rounded())
-        fatGoal = Int((kcalGoal * 0.30 / 9).rounded())
+        carbsGoal = (kcalGoal * 0.40 / 4)
+        proteinGoal = (kcalGoal * 0.30 / 4)
+        fatGoal = (kcalGoal * 0.30 / 9)
     }
     
-    func saveKcalDB(date: Date, calories: Double, carbs: Int, protein: Int, fat: Int) {
+    func saveKcalDB(date: Date, calories: Double, carbs: Double, protein: Double, fat: Double) {
         let newKcal = Kcal(context: context)
         newKcal.date = date
         newKcal.kcalGoal = calories
         newKcal.kcalReached = 0 // Set to 0 again as new day in Kcal DB
-        newKcal.carbsGoal = Int16(carbs)
+        newKcal.carbsGoal = carbs
         newKcal.carbsReached = 0
-        newKcal.proteinGoal = Int16(protein)
+        newKcal.proteinGoal = protein
         newKcal.proteinReached = 0
-        newKcal.fatGoal = Int16(fat)
+        newKcal.fatGoal = fat
         newKcal.fatReached = 0
         
         

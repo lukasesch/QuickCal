@@ -15,7 +15,7 @@ struct CalorieMacroView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             
-            Stepper(value: $calorieMacroViewModel.calories, in: 1000...5000, step: 50) {
+            Stepper(value: $calorieMacroViewModel.calories, in: 1000...5000, step: 1) {
                 Text("Kalorien: **\(Int(calorieMacroViewModel.calories))** kcal")
                     .font(.title3)
             }

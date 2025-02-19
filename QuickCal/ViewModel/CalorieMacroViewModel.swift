@@ -96,9 +96,9 @@ class CalorieMacroViewModel: ObservableObject {
         
         let newEntry = Kcal(context: context)
         newEntry.kcalGoal = calories
-        newEntry.carbsGoal = Int16(carbsGrams)
-        newEntry.proteinGoal = Int16(proteinsGrams)
-        newEntry.fatGoal = Int16(fatsGrams)
+        newEntry.carbsGoal = Double(carbsGrams)
+        newEntry.proteinGoal = Double(proteinsGrams)
+        newEntry.fatGoal = Double(fatsGrams)
         newEntry.date = Date()
         
         do {
