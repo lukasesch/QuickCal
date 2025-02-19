@@ -163,36 +163,8 @@ struct MainView: View {
                                     .fontWeight(.semibold)
                                 Spacer()
                                 if !Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date()) {
-                                    Menu {
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 0, toTargetDaytime: 0)
-                                        } label: {
-                                            Text("Kopieren zu 'Frühstück' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 0, toTargetDaytime: 1)
-                                        } label: {
-                                            Text("Kopieren zu 'Mittagessen' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 0, toTargetDaytime: 2)
-                                        } label: {
-                                            Text("Kopieren zu 'Abendessen' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 0, toTargetDaytime: 3)
-                                        } label: {
-                                            Text("Kopieren zu 'Snacks' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                    } label: {
-                                        Image(systemName: "doc.on.doc")
-                                            .font(.system(size: 14, weight: .semibold))
-                                    }
-                                    .padding(.leading)
+                                    CopyMenuView(sourceDaytime: 0)
+                                        .padding(.trailing, 5.0)
                                 }
                 
                                 Button(action: {
@@ -260,36 +232,8 @@ struct MainView: View {
                                     .fontWeight(.semibold)
                                 Spacer()
                                 if !Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date()) {
-                                    Menu {
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 1, toTargetDaytime: 0)
-                                        } label: {
-                                            Text("Kopieren zu 'Frühstück' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 1, toTargetDaytime: 1)
-                                        } label: {
-                                            Text("Kopieren zu 'Mittagessen' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 1, toTargetDaytime: 2)
-                                        } label: {
-                                            Text("Kopieren zu 'Abendessen' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 1, toTargetDaytime: 3)
-                                        } label: {
-                                            Text("Kopieren zu 'Snacks' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                    } label: {
-                                        Image(systemName: "doc.on.doc")
-                                            .font(.system(size: 14, weight: .semibold))
-                                    }
-                                    .padding(.leading)
+                                    CopyMenuView(sourceDaytime: 1)
+                                        .padding(.trailing, 5.0)
                                 }
                                 Button(action: {
                                     //print("Button pressed")
@@ -355,36 +299,8 @@ struct MainView: View {
                                     .fontWeight(.semibold)
                                 Spacer()
                                 if !Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date()) {
-                                    Menu {
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 2, toTargetDaytime: 0)
-                                        } label: {
-                                            Text("Kopieren zu 'Frühstück' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 2, toTargetDaytime: 1)
-                                        } label: {
-                                            Text("Kopieren zu 'Mittagessen' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 2, toTargetDaytime: 2)
-                                        } label: {
-                                            Text("Kopieren zu 'Abendessen' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 2, toTargetDaytime: 3)
-                                        } label: {
-                                            Text("Kopieren zu 'Snacks' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                    } label: {
-                                        Image(systemName: "doc.on.doc")
-                                            .font(.system(size: 14, weight: .semibold))
-                                    }
-                                    .padding(.leading)
+                                    CopyMenuView(sourceDaytime: 2)
+                                        .padding(.trailing, 5.0)
                                 }
                                 Button(action: {
                                     //print("Button pressed")
@@ -450,36 +366,8 @@ struct MainView: View {
                                     .fontWeight(.semibold)
                                 Spacer()
                                 if !Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: Date()) {
-                                    Menu {
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 3, toTargetDaytime: 0)
-                                        } label: {
-                                            Text("Kopieren zu 'Frühstück' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 3, toTargetDaytime: 1)
-                                        } label: {
-                                            Text("Kopieren zu 'Mittagessen' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 3, toTargetDaytime: 2)
-                                        } label: {
-                                            Text("Kopieren zu 'Abendessen' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                        Button {
-                                            mainViewModel.copyEntriesToCurrentDate(fromSourceDaytime: 3, toTargetDaytime: 3)
-                                        } label: {
-                                            Text("Kopieren zu 'Snacks' (Heute)")
-                                                .textCase(nil)
-                                        }
-                                    } label: {
-                                        Image(systemName: "doc.on.doc")
-                                            .font(.system(size: 14, weight: .semibold))
-                                    }
-                                    .padding(.leading)
+                                    CopyMenuView(sourceDaytime: 3)
+                                        .padding(.trailing, 5.0)
                                 }
                                 Button(action: {
                                     //print("Button pressed")
@@ -884,3 +772,52 @@ extension Color {
         )
     }
 }
+
+struct CopyMenuView: View {
+    @EnvironmentObject var mainViewModel: MainViewModel
+    let sourceDaytime: Int
+    
+    var dayTimeName: String {
+        switch sourceDaytime {
+        case 0: return "Frühstück"
+        case 1: return "Mittagessen"
+        case 2: return "Abendessen"
+        case 3: return "Snacks"
+        default: return "Unbekannt"
+        }
+    }
+    
+    var body: some View {
+        Menu {
+            // Überschrift des Menüs
+            Section("Kopiere zu") {
+                Button {
+                    if let targetDate = Calendar.current.date(byAdding: .day, value: -1, to: Date()) {
+                        mainViewModel.copyEntriesToDate(fromSourceDaytime: sourceDaytime, toTargetDaytime: sourceDaytime, toTargetDate: targetDate)
+                    }
+                } label: {
+                    Text("\(dayTimeName) (gestern)")
+                }
+                
+                Button {
+                    mainViewModel.copyEntriesToDate(fromSourceDaytime: sourceDaytime, toTargetDaytime: sourceDaytime, toTargetDate: Date())
+                } label: {
+                    Text("\(dayTimeName) (heute)")
+                }
+                
+                Button {
+                    if let targetDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
+                        mainViewModel.copyEntriesToDate(fromSourceDaytime: sourceDaytime, toTargetDaytime: sourceDaytime, toTargetDate: targetDate)
+                    }
+                } label: {
+                    Text("\(dayTimeName) (morgen)")
+                }
+            }
+            .textCase(nil)
+        } label: {
+            Image(systemName: "doc.on.doc")
+                .font(.system(size: 14, weight: .semibold))
+        }
+    }
+}
+

@@ -317,9 +317,9 @@ class MainViewModel: ObservableObject {
         print(kcalGoal)
     }
     
-    func copyEntriesToCurrentDate(fromSourceDaytime sourceDaytime: Int, toTargetDaytime targetDaytime: Int) {
+    func copyEntriesToDate(fromSourceDaytime sourceDaytime: Int, toTargetDaytime targetDaytime: Int, toTargetDate targetDate: Date) {
         let fromDate = selectedDate  // Datum, von dem kopiert werden soll
-        let toDate = Date()          // Aktueller Tag
+        let toDate = targetDate        // Vom Aufrufer angegebenes Zieldatum
         
         let fetchRequest: NSFetchRequest<TrackedFood> = TrackedFood.fetchRequest()
         // Filtere nach Datum, Benutzer und dem Quell-Tagesabschnitt
@@ -340,7 +340,6 @@ class MainViewModel: ObservableObject {
                 newItem.quantity = item.quantity
                 newItem.food = item.food
                 newItem.user = item.user
-                
             }
             
             try context.save()
