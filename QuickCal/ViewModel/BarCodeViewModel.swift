@@ -64,6 +64,12 @@ class BarCodeViewModel: ObservableObject {
         //clearPreviewLayer()
     }
     
+    func pauseScanning() {
+        guard cameraManager.isSessionRunning() else { return }
+        cameraManager.pauseSession()
+        isSessionRunning = false
+    }
+    
     func getPreviewLayer() -> AVCaptureVideoPreviewLayer {
         return cameraManager.getPreviewLayer()
     }
@@ -198,8 +204,23 @@ class BarCodeViewModel: ObservableObject {
         }
     }
     
-    func reset() {
-        startScanning()
-        stopScanning()
+    func restartSession() {
+        // Zuerst die bestehende Session komplett zurücksetzen:
+        cameraManager.resetSession()
+        
+        // Anschließend die Session neu konfigurieren:
+        cameraManager.configureSession { [weak self] success in
+            guard let self = self else { return }
+            if success {
+                // Sobald die Konfiguration erfolgreich war, die Session starten:
+                self.cameraManager.startSession()
+                DispatchQueue.main.async {
+                    self.isSessionRunning = true
+                }
+                print("Session wurde erfolgreich neu gestartet.")
+            } else {
+                print("Kamera-Konfiguration fehlgeschlagen beim Neustart.")
+            }
+        }
     }
 }

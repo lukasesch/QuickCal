@@ -786,35 +786,47 @@ struct CopyMenuView: View {
     
     var body: some View {
         Menu {
-            // Überschrift des Menüs
-            Section("Kopiere zu") {
-                Button {
-                    if let targetDate = Calendar.current.date(byAdding: .day, value: -1, to: Date()) {
-                        mainViewModel.copyEntriesToDate(fromSourceDaytime: sourceDaytime, toTargetDaytime: sourceDaytime, toTargetDate: targetDate)
-                    }
-                } label: {
-                    Text("\(dayTimeName) (gestern)")
-                }
-                
-                Button {
-                    mainViewModel.copyEntriesToDate(fromSourceDaytime: sourceDaytime, toTargetDaytime: sourceDaytime, toTargetDate: Date())
-                } label: {
-                    Text("\(dayTimeName) (heute)")
-                }
-                
-                Button {
-                    if let targetDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
-                        mainViewModel.copyEntriesToDate(fromSourceDaytime: sourceDaytime, toTargetDaytime: sourceDaytime, toTargetDate: targetDate)
-                    }
-                } label: {
-                    Text("\(dayTimeName) (morgen)")
-                }
+            // Gestern
+            let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+            Button {
+                mainViewModel.copyEntriesToDate(fromSourceDaytime: sourceDaytime,
+                                                toTargetDaytime: sourceDaytime,
+                                                toTargetDate: yesterday)
+            } label: {
+                Text("\(dayTimeName) (gestern)")
             }
-            .textCase(nil)
+            .disabled(Calendar.current.isDate(yesterday, inSameDayAs: mainViewModel.selectedDate))
+            .opacity(Calendar.current.isDate(yesterday, inSameDayAs: mainViewModel.selectedDate) ? 0.5 : 1)
+            
+            // Heute
+            let today = Date()
+            Button {
+                mainViewModel.copyEntriesToDate(fromSourceDaytime: sourceDaytime,
+                                                toTargetDaytime: sourceDaytime,
+                                                toTargetDate: today)
+            } label: {
+                Text("\(dayTimeName) (heute)")
+            }
+            .disabled(Calendar.current.isDate(today, inSameDayAs: mainViewModel.selectedDate))
+            .opacity(Calendar.current.isDate(today, inSameDayAs: mainViewModel.selectedDate) ? 0.5 : 1)
+            
+            // Morgen
+            let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+            Button {
+                mainViewModel.copyEntriesToDate(fromSourceDaytime: sourceDaytime,
+                                                toTargetDaytime: sourceDaytime,
+                                                toTargetDate: tomorrow)
+            } label: {
+                Text("\(dayTimeName) (morgen)")
+            }
+            .disabled(Calendar.current.isDate(tomorrow, inSameDayAs: mainViewModel.selectedDate))
+            .opacity(Calendar.current.isDate(tomorrow, inSameDayAs: mainViewModel.selectedDate) ? 0.5 : 1)
+            
         } label: {
             Image(systemName: "doc.on.doc")
                 .font(.system(size: 14, weight: .semibold))
         }
+        .textCase(nil)
     }
 }
 

@@ -215,10 +215,10 @@ struct AddTrackedFoodView: View {
                     createMealPanelViewModel.clearStruct()
                     //barCodeViewModel.reset()
                     
-                    barCodeViewModel.stopScanning()
+                    //barCodeViewModel.stopScanning()
                 }
                 .onDisappear {
-                    barCodeViewModel.stopScanning()
+                    //barCodeViewModel.stopScanning()
                 }
             }
             .navigationTitle("Hinzufügen")

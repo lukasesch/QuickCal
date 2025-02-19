@@ -38,15 +38,41 @@ class CameraManager: NSObject, ObservableObject {
             self.session.beginConfiguration()
             defer { self.session.commitConfiguration() }
             
-            // Config camera type
-            guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-                  let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
-                  session.canAddInput(videoInput) else {
-                print("Kamera-Input konnte nicht hinzugefügt werden.")
+            guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
+                print("Kein passendes Kameragerät gefunden.")
                 completion(false)
                 return
             }
-            session.addInput(videoInput)
+            
+            // Prüfe, ob die Session schon einen Input hat
+            if !self.session.inputs.isEmpty {
+                print("Session hat bereits Inputs: \(self.session.inputs)")
+                DispatchQueue.main.async {
+                    self.isSessionConfigured = true
+                    if self.previewLayer == nil {
+                        let newLayer = AVCaptureVideoPreviewLayer(session: self.session)
+                        newLayer.videoGravity = .resizeAspectFill
+                        self.previewLayer = newLayer
+                    }
+                    completion(true)
+                }
+                return
+            }
+            
+            do {
+                let videoInput = try AVCaptureDeviceInput(device: videoDevice)
+                if self.session.canAddInput(videoInput) {
+                    self.session.addInput(videoInput)
+                } else {
+                    print("Session kann den Kamera-Input nicht hinzufügen.")
+                    completion(false)
+                    return
+                }
+            } catch {
+                print("Fehler beim Erstellen des Kamera-Inputs: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
             
             // Config output
             if session.canAddOutput(metadataOutput) {
@@ -82,10 +108,11 @@ class CameraManager: NSObject, ObservableObject {
                 self.session.stopRunning()
                 print("Session gestoppt.")
             }
-            // Entferne Outputs und Inputs nur, wenn die Session komplett beendet wird
-//            self.session.inputs.forEach { self.session.removeInput($0) }
-//            self.session.outputs.forEach { self.session.removeOutput($0) }
-//            self.isSessionConfigured = false
+            // Optionalen Preview Layer ggf entfernen
+            DispatchQueue.main.async {
+                self.previewLayer?.removeFromSuperlayer()
+                self.previewLayer = nil
+            }
         }
     }
     
@@ -107,14 +134,28 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     func getPreviewLayer() -> AVCaptureVideoPreviewLayer {
-        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
-        previewLayer.videoGravity = .resizeAspectFill
-        //print("Preview Layer zurückgegeben")
-        return previewLayer
+        if let existingLayer = previewLayer {
+            return existingLayer
+        } else {
+            let newLayer = AVCaptureVideoPreviewLayer(session: session)
+            newLayer.videoGravity = .resizeAspectFill
+            previewLayer = newLayer
+            return newLayer
+        }
     }
     
     func isSessionRunning() -> Bool {
         return session.isRunning
+    }
+    
+    func pauseSession() {
+        sessionQueue.async { [weak self] in
+            guard let self = self else { return }
+            if self.session.isRunning {
+                self.session.stopRunning()
+                print("Session pausiert.")
+            }
+        }
     }
 }
 
@@ -127,7 +168,8 @@ extension CameraManager: AVCaptureMetadataOutputObjectsDelegate {
         
         DispatchQueue.main.async {
             self.scannedCode = stringValue // Publishes BarCode
-            self.stopSession()
+            self.pauseSession()  
+            
         }
     }
 }

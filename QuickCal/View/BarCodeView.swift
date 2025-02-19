@@ -71,6 +71,7 @@ struct BarCodeView: View {
                     HStack {
                         Spacer()
                         Button(action: {
+                            barCodeViewModel.pauseScanning()
                             dismiss()
                         }) {
                             Image(systemName: "xmark")
@@ -86,11 +87,19 @@ struct BarCodeView: View {
                 }
             }
             .onAppear {
-                barCodeViewModel.startScanning()
-                configureCamera()
+                checkCameraAuthorization { granted in
+                    if granted {
+                        print("Kamerazugriff erteilt.")
+                        barCodeViewModel.startScanning()
+                        configureCamera()
+                    } else {
+                        print("Kamerazugriff verweigert.")
+                        // Hier kannst du ggf. eine Fehlermeldung anzeigen oder andere Maßnahmen ergreifen.
+                    }
+                }
             }
             .onDisappear {
-                barCodeViewModel.stopScanning()
+                
             }
             .onChange(of: barCodeViewModel.scannedBarcode) {
                 if let barcode = barCodeViewModel.scannedBarcode {
@@ -104,6 +113,7 @@ struct BarCodeView: View {
                         }
                     }
                 }
+                
             }
             .navigationBarHidden(true)
         }
@@ -127,7 +137,6 @@ struct BarCodeView: View {
                         },
                         onCancel: {
                             resetAlert()
-                            barCodeViewModel.scannedBarcode = nil
                             dismiss()
                         }
                     )
@@ -153,6 +162,21 @@ struct BarCodeView: View {
         selectedFood = nil
         quantity = ""
     }
+    
+    private func checkCameraAuthorization(completion: @escaping (Bool) -> Void) {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            completion(true)
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    completion(granted)
+                }
+            }
+        default:
+            completion(false)
+        }
+    }
 }
 
 struct CameraPreviewView: UIViewRepresentable {
@@ -161,8 +185,13 @@ struct CameraPreviewView: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
         view.backgroundColor = .white
-        previewLayer.videoGravity = .resizeAspectFill
-        view.layer.addSublayer(previewLayer) // Add Preview to View
+        
+        // Entferne den Preview-Layer aus einem möglichen alten Superlayer
+        previewLayer.removeFromSuperlayer()
+        previewLayer.frame = view.bounds
+        
+        // Füge den Preview-Layer der neuen View hinzu
+        view.layer.addSublayer(previewLayer)
         print("makeUIView aufgerufen")
         return view
     }
