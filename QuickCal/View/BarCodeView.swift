@@ -8,7 +8,6 @@
 import SwiftUI
 import AVFoundation
 
-
 struct BarCodeView: View {
     @EnvironmentObject var barCodeViewModel: BarCodeViewModel
     @EnvironmentObject var mainViewModel: MainViewModel
@@ -33,100 +32,119 @@ struct BarCodeView: View {
                         .font(.headline)
                         .foregroundColor(.gray)
                         .padding()
-                } else if barCodeViewModel.isSessionRunning {
-                    CameraPreviewView(previewLayer: barCodeViewModel.getPreviewLayer())
-                        .edgesIgnoringSafeArea(.all)
+                } else {
+                    CameraPreviewView { view in
+                        print("CameraPreviewView: UIView erstellt – starte Scanning")
+                        barCodeViewModel.startScanning(in: view)
+                    }
+                    .edgesIgnoringSafeArea(.all)
                     
                     VStack {
                         Spacer()
-                        
-                        // Fester Bereich für den Barcode-Scan
                         ZStack {
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white, lineWidth: 4) // Weißer Rahmen
-                                .frame(width: 300, height: 180) // Größe des Scanbereichs
-                            
-                            VStack {
-                                Spacer()
-                                Spacer()
-                                Text("Barcode")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding(.top, 20)
-                                Spacer()
-                            }
+                                .stroke(Color.white, lineWidth: 4)
+                                .frame(width: 300, height: 180)
+                            Text("Barcode")
+                                .font(.headline)
+                                .foregroundColor(.white)
                         }
-                        .padding(.bottom, 100) // Abstand nach unten, damit es nicht ganz in der Mitte ist
-                        
+                        .padding(.bottom, 100)
                         Spacer()
                     }
-                } else {
-                    Text("Kamera wird vorbereitet...")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                        .padding()
                 }
-                
+
+                // Abbruch Button
                 VStack {
                     HStack {
                         Spacer()
                         Button(action: {
-                            barCodeViewModel.pauseScanning()
+                            barCodeViewModel.stopScanning()
                             dismiss()
                         }) {
                             Image(systemName: "xmark")
                                 .font(.title)
-                                .padding()
+                                .frame(width: 50, height: 50) // Feste Größe
                                 .background(Color.black.opacity(0.6))
                                 .clipShape(Circle())
                                 .foregroundColor(.white)
                         }
-                        .padding()
+                        .padding(.trailing, 35.0)
                     }
                     Spacer()
+                }
+                
+                // Taschenlampen
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            barCodeViewModel.toggleTorch()
+                        }) {
+                            Image(systemName: "flashlight.on.fill")
+                                .font(.title)
+                                .frame(width: 50, height: 50) // Gleiche feste Größe
+                                .background(Color.black.opacity(0.6))
+                                .clipShape(Circle())
+                                .foregroundColor(.white)
+                        }
+                        .padding(.trailing, 35.0)
+                    }
                 }
             }
             .onAppear {
                 checkCameraAuthorization { granted in
                     if granted {
                         print("Kamerazugriff erteilt.")
-                        barCodeViewModel.startScanning()
-                        configureCamera()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            isConfiguring = false
+                        }
                     } else {
                         print("Kamerazugriff verweigert.")
-                        // Hier kannst du ggf. eine Fehlermeldung anzeigen oder andere Maßnahmen ergreifen.
                     }
                 }
             }
-            .onDisappear {
-                
-            }
-            .onChange(of: barCodeViewModel.scannedBarcode) {
-                if let barcode = barCodeViewModel.scannedBarcode {
-                    barCodeViewModel.scannedBarcode = nil
-                    barCodeViewModel.searchProductByBarcode(barcode: barcode) { foodItem in
-                        if let item = foodItem {
-                            selectedFood = item
-                            showCustomAlert = true
-                        } else {
-                            print("Kein Produkt gefunden.")
-                        }
-                    }
+            // Barcode gescannt und Object auf OpenFoodFacts gefunden? Dann anzeigen:
+            .onChange(of: barCodeViewModel.product?.id) { newID, oldID in
+                if let product = barCodeViewModel.product {
+                    selectedFood = product
+                    showCustomAlert = true
                 }
-                
             }
             .navigationBarHidden(true)
         }
+        .gesture(
+            DragGesture(minimumDistance: 50)
+                .onEnded { gesture in
+                    if gesture.translation.height > 50 {
+                        barCodeViewModel.stopScanning()
+                        dismiss()
+                    }
+                }
+        )
         .overlay(
             Group {
                 if showCustomAlert {
                     CustomAlertOFF(
                         isPresented: $showCustomAlert,
                         quantity: $quantity,
-                        foodItem: selectedFood, // Übergib das ausgewählte FoodItem
+                        foodItem: selectedFood,
                         onSave: {
-                            if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                                barCodeViewModel.OpenFoodFactsFoodToDB(name: selectedFood?.name ?? "", defaultQuantity: selectedFood?.defaultQuantity ?? 0, unit: selectedFood?.unit ?? "g", calories: selectedFood?.kcal ?? 0, carbs: selectedFood?.carbohydrate ?? 0, protein: selectedFood?.protein ?? 0, fat: selectedFood?.fat ?? 0, daytime: Int16(selectedDaytime), quantity: quantityValue, selectedDate: selectedDate)
+                            if let food = selectedFood,
+                               let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                                barCodeViewModel.OpenFoodFactsFoodToDB(
+                                    name: food.name,
+                                    defaultQuantity: food.defaultQuantity,
+                                    unit: food.unit,
+                                    calories: food.kcal,
+                                    carbs: food.carbohydrate,
+                                    protein: food.protein,
+                                    fat: food.fat,
+                                    daytime: Int16(selectedDaytime),
+                                    quantity: quantityValue,
+                                    selectedDate: selectedDate
+                                )
                                 print("FoodItem \(food.name) mit Menge \(quantityValue) hinzugefügt!")
                                 mainViewModel.updateData()
                                 addTrackedFoodViewModel.fetchFoodItems()
@@ -145,14 +163,6 @@ struct BarCodeView: View {
             }
         )
         .animation(.easeInOut(duration: 0.2), value: showCustomAlert)
-    }
-    
-    // Delay needed, otherwise camera initializes with black screen
-    func configureCamera() {
-        barCodeViewModel.startScanning()
-        DispatchQueue.main.asyncAfter(deadline: .now()) {
-            isConfiguring = false
-        }
     }
     
     private func resetAlert() {
@@ -180,32 +190,17 @@ struct BarCodeView: View {
 }
 
 struct CameraPreviewView: UIViewRepresentable {
-    let previewLayer: AVCaptureVideoPreviewLayer
+    var onViewCreated: ((UIView) -> Void)? = nil
     
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
-        view.backgroundColor = .white
-        
-        // Entferne den Preview-Layer aus einem möglichen alten Superlayer
-        previewLayer.removeFromSuperlayer()
-        previewLayer.frame = view.bounds
-        
-        // Füge den Preview-Layer der neuen View hinzu
-        view.layer.addSublayer(previewLayer)
-        print("makeUIView aufgerufen")
+        view.backgroundColor = .black
+        onViewCreated?(view)
         return view
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        DispatchQueue.main.async {
-            self.previewLayer.frame = uiView.bounds
-            if let connection = self.previewLayer.connection, !connection.isEnabled {
-                connection.isEnabled = true
-                print("PreviewLayer aktiviert.")
-            } else if self.previewLayer.connection == nil {
-                //print("Keine Verbindung zum PreviewLayer vorhanden.")
-            }
-        }
+        // Kein Update notwendig
     }
 }
 

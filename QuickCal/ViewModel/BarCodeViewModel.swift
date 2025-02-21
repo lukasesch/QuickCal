@@ -4,7 +4,6 @@
 //
 //  Created by Lukas Esch on 05.12.24.
 //
-
 import Foundation
 import Combine
 import SwiftUI
@@ -19,66 +18,41 @@ class BarCodeViewModel: ObservableObject {
     @Published var isSessionRunning: Bool = false
     
     private let context: NSManagedObjectContext
-    
     private let cameraManager = CameraManager()
-    private var cancellables = Set<AnyCancellable>()
     
     init(context: NSManagedObjectContext) {
-        // CoraData
         self.context = context
-        
-        // Observe CameraManager Output for scanned Barcode
-        cameraManager.$scannedCode
-            .compactMap { $0 }  // Ignore Nil Values
-            .receive(on: DispatchQueue.global(qos: .userInitiated))
-            .sink { [weak self] barcode in
-                DispatchQueue.main.async {
-                    self?.scannedBarcode = barcode
-                    print("Erkannter Barcode im ViewModel: \(barcode)")
-                    
-                }
-            }
-            .store(in: &cancellables)
+        // Den neuen CameraManager als Delegate setzen
+        cameraManager.delegate = self
     }
     
-    func startScanning() {
-        cameraManager.configureSession { [weak self] success in
-            guard success else {
-                print("Kamera-Konfiguration fehlgeschlagen.")
-                return
-            }
-            self?.cameraManager.startSession()
-            DispatchQueue.main.async {
-                self?.isSessionRunning = true
-            }
+    // MARK: - Kamera-Management
+    
+    /// Startet die Kamerasession:
+    /// - Setzt die alte Session zurück, konfiguriert sie neu und startet sie.
+    func startScanning(in view: UIView) {
+        cameraManager.resetSession()  // Session zurücksetzen
+        cameraManager.configureSession(in: view)
+        cameraManager.startSession()
+        DispatchQueue.main.async {
+            self.isSessionRunning = true
         }
     }
     
+    /// Stoppt die laufende Kamerasession und aktualisiert den Status.
     func stopScanning() {
-        guard cameraManager.isSessionRunning() else {
-            //print("Session ist bereits gestoppt.")
-            return
-        }
         cameraManager.stopSession()
-        isSessionRunning = false
-        //clearPreviewLayer()
+        DispatchQueue.main.async {
+            self.isSessionRunning = false
+        }
     }
     
-    func pauseScanning() {
-        guard cameraManager.isSessionRunning() else { return }
-        cameraManager.pauseSession()
-        isSessionRunning = false
-    }
-    
-    func getPreviewLayer() -> AVCaptureVideoPreviewLayer {
+    /// Liefert den aktuellen Preview-Layer zurück.
+    func getPreviewLayer() -> AVCaptureVideoPreviewLayer? {
         return cameraManager.getPreviewLayer()
     }
     
-    func clearPreviewLayer() {
-        cameraManager.resetSession()
-        isSessionRunning = false
-    }
-    
+    // Produkt über Barcode über OpenFoodFacts API suchen
     func searchProductByBarcode(barcode: String, completion: @escaping (FoodItem?) -> Void) {
         print("Searching product for barcode: \(barcode)")
         
@@ -86,7 +60,7 @@ class BarCodeViewModel: ObservableObject {
         let urlString = "\(baseUrl)/api/v2/product/\(barcode).json"
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
-            completion(nil) // Rückgabe von nil bei ungültiger URL
+            completion(nil)
             return
         }
         
@@ -95,26 +69,24 @@ class BarCodeViewModel: ObservableObject {
         let task = URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
                 print("Network error: \(error.localizedDescription)")
-                completion(nil) // Rückgabe von nil bei einem Netzwerkfehler
+                completion(nil)
                 return
             }
             
             guard let data = data else {
                 print("No data received")
-                completion(nil) // Rückgabe von nil, wenn keine Daten empfangen wurden
+                completion(nil)
                 return
             }
             
             do {
-                // Parse Data
                 guard let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                       let productData = jsonResponse["product"] as? [String: Any] else {
                     print("Invalid JSON structure or product not found")
-                    completion(nil) // Rückgabe von nil bei ungültigem JSON
+                    completion(nil)
                     return
                 }
                 
-                // Extract the product and convert it to FoodItem
                 let brand = productData["brands"] as? String ?? "Unbekannte Marke"
                 let name = productData["product_name"] as? String ?? "Unbekanntes Produkt"
                 let unit = (productData["nutriments_unit"] as? String) ?? "g"
@@ -123,7 +95,6 @@ class BarCodeViewModel: ObservableObject {
                 let carbohydrate = (productData["nutriments"] as? [String: Any])?["carbohydrates_100g"] as? Double ?? 0.0
                 let protein = (productData["nutriments"] as? [String: Any])?["proteins_100g"] as? Double ?? 0.0
                 
-                // Create FoodItem
                 let foodItem = FoodItem(
                     name: "\(brand) \(name)",
                     unit: unit,
@@ -135,24 +106,23 @@ class BarCodeViewModel: ObservableObject {
                 )
                 
                 print("Product found: \(foodItem.name)")
-                completion(foodItem) // Rückgabe des FoodItem über den Completion-Handler
+                completion(foodItem)
             } catch {
                 print("JSON Parsing error: \(error.localizedDescription)")
-                completion(nil) // Rückgabe von nil bei einem Parsing-Fehler
+                completion(nil)
             }
         }
         
         task.resume()
     }
     
-    
+    // Lebensmittel zur Datenbank hinzufügen
     func OpenFoodFactsFoodToDB(name: String, defaultQuantity: Float, unit: String, calories: Int16, carbs: Float, protein: Float, fat: Float, daytime: Int16, quantity: Float, selectedDate: Date) {
         // Unique Hash in Hexadezimal erstellen
         let hashString = "\(name)\(defaultQuantity)\(unit)\(calories)\(carbs)\(protein)\(fat)"
         let hash = SHA256.hash(data: Data(hashString.utf8))
         let uniqueID = hash.compactMap { String(format: "%02x", $0) }.joined()
         
-        // Existiert es bereits?
         let fetchRequest: NSFetchRequest<Food> = Food.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "uniqueID == %@", uniqueID)
         
@@ -160,12 +130,10 @@ class BarCodeViewModel: ObservableObject {
         do {
             let existingFoods = try context.fetch(fetchRequest)
             if let existingFood = existingFoods.first {
-                // Existiert bereits
                 print("Lebensmittel existiert bereits in der Datenbank: \(name)")
                 food = existingFood
                 food?.lastUsed = Date()
             } else {
-                // Existiert noch nicht
                 food = Food(context: context)
                 food?.name = name
                 food?.defaultQuantity = defaultQuantity
@@ -183,7 +151,6 @@ class BarCodeViewModel: ObservableObject {
             return
         }
         
-        // Neues TrackedFood-Objekt erstellen
         guard let food = food else {
             print("Fehler: Lebensmittel konnte nicht erstellt oder abgerufen werden.")
             return
@@ -195,7 +162,6 @@ class BarCodeViewModel: ObservableObject {
         trackedFood.quantity = quantity
         trackedFood.food = food
         
-        // Speichern in DB
         do {
             try context.save()
             print("Lebensmittel erfolgreich aktualisiert (lastUsed) und in TrackedFood gespeichert")
@@ -204,23 +170,28 @@ class BarCodeViewModel: ObservableObject {
         }
     }
     
-    func restartSession() {
-        // Zuerst die bestehende Session komplett zurücksetzen:
-        cameraManager.resetSession()
+    func toggleTorch() {
+        cameraManager.toggleTorch()
+    }
+}
+
+extension BarCodeViewModel: CameraManagerDelegate {
+    func didDetectBarcode(with code: String) {
+        // Session stoppen um mehrmaliges Scannen eines BarCodes im Bild zu verhindern
+        self.stopScanning()
         
-        // Anschließend die Session neu konfigurieren:
-        cameraManager.configureSession { [weak self] success in
-            guard let self = self else { return }
-            if success {
-                // Sobald die Konfiguration erfolgreich war, die Session starten:
-                self.cameraManager.startSession()
-                DispatchQueue.main.async {
-                    self.isSessionRunning = true
-                }
-                print("Session wurde erfolgreich neu gestartet.")
-            } else {
-                print("Kamera-Konfiguration fehlgeschlagen beim Neustart.")
+        DispatchQueue.main.async {
+            self.scannedBarcode = code
+        }
+        
+        self.searchProductByBarcode(barcode: code) { [weak self] product in
+            DispatchQueue.main.async {
+                self?.product = product
             }
         }
+    }
+    
+    func didFail(with error: Error) {
+        print("Camera Manager Error: \(error.localizedDescription)")
     }
 }
