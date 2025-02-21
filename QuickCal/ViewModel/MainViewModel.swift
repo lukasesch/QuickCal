@@ -316,29 +316,32 @@ class MainViewModel: ObservableObject {
         print(kcalGoal)
     }
     
-    func copyEntriesToDate(fromSourceDaytime sourceDaytime: Int, toTargetDaytime targetDaytime: Int, toTargetDate targetDate: Date) {
-        let fromDate = selectedDate  // Datum, von dem kopiert werden soll
-        let toDate = targetDate        // Vom Aufrufer angegebenes Zieldatum
+    func copyEntriesToDate(daytime: Int, targetDate: Date) {
+        print("Copy angestoßen")
         
         let fetchRequest: NSFetchRequest<TrackedFood> = TrackedFood.fetchRequest()
-        // Filtere nach Datum, Benutzer und dem Quell-Tagesabschnitt
+        
+        let dayStart = Calendar.current.startOfDay(for: selectedDate)
+        let nextDay = Calendar.current.date(byAdding: .day, value: 1, to: dayStart)!
         fetchRequest.predicate = NSPredicate(
-            format: "date == %@ AND user == %@ AND daytime == %d",
-            fromDate as NSDate,
-            user ?? NSNull(),
-            sourceDaytime
+            format: "date >= %@ AND date < %@ AND daytime == %@",
+            dayStart as NSDate,
+            nextDay as NSDate,
+            NSNumber(value: daytime)
         )
         
         do {
             let itemsToCopy = try context.fetch(fetchRequest)
+            print("Gefundene Items: \(itemsToCopy.count)")
             
             for item in itemsToCopy {
                 let newItem = TrackedFood(context: context)
-                newItem.date = toDate
-                newItem.daytime = Int16(targetDaytime)
+                newItem.date = targetDate          // Zieldatum
+                newItem.daytime = Int16(daytime)     // Gleicher Tagesabschnitt
                 newItem.quantity = item.quantity
                 newItem.food = item.food
                 newItem.user = item.user
+                print("Kopiert: \(newItem.food?.name ?? "kein Name")")
             }
             
             try context.save()

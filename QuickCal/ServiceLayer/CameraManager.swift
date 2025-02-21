@@ -24,6 +24,8 @@ class CameraManager: NSObject, ObservableObject {
     // Session configured?
     @Published var isSessionConfigured: Bool = false
     
+    private var isStartingSession = false
+    
     
     // Create Session Configuration (camera type, barcode type, ...)
     func configureSession(barcodeTypes: [AVMetadataObject.ObjectType] = [.ean13, .ean8], completion: @escaping (Bool) -> Void) {
@@ -94,10 +96,17 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     func startSession() {
-        sessionQueue.async { [weak self] in
-            guard let self = self, !self.session.isRunning else { return }
+        sessionQueue.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            guard let self = self else { return }
+            // Wenn bereits ein Start-Versuch läuft oder die Session läuft, abbrechen
+            guard !self.isStartingSession, !self.session.isRunning else {
+                print("Meep")
+                return
+            }
+            self.isStartingSession = true
             self.session.startRunning()
             print("Session gestartet.")
+            self.isStartingSession = false
         }
     }
     
