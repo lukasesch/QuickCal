@@ -58,6 +58,7 @@ struct CalorieMacroView: View {
             Button(action: {
                 calorieMacroViewModel.saveCalorieData()
                 mainViewModel.checkAndCalculateDailyCalories()
+                mainViewModel.updateData();
                 dismiss()
             }) {
                 Text("Speichern")

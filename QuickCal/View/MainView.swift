@@ -10,6 +10,7 @@ import CoreData
 
 struct MainView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("onboarding") private var onboardingDone = false
     @State private var showingSettings = false
     @State private var selectedDaytime: Int? = nil
@@ -100,7 +101,7 @@ struct MainView: View {
 
                 HStack {
                     Spacer()
-                    HalfCircularProgressView(barColor: .blue, barWidth: 14, progressPercentage: mainViewModel.kcalProgressPercentage)
+                    HalfCircularProgressView(barColor: .blue, barWidth: 13, progressPercentage: mainViewModel.kcalProgressPercentage)
                         .frame(width: 180, height: 200)
                     
                     Spacer()
@@ -438,7 +439,21 @@ struct MainView: View {
                 }
                 mainViewModel.updateData()
             }
-            
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
+                print("Tageswechsel erkannt – Aktualisiere Datum")
+                mainViewModel.selectedDate = Date()
+                mainViewModel.updateData()
+            }
+            .task(id: scenePhase) {
+                if scenePhase == .active {
+                    let today = Calendar.current.startOfDay(for: Date())
+                    if !Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: today) {
+                        print("App aus Hintergrund zurück – Aktualisiere Datum")
+                        mainViewModel.selectedDate = today
+                        mainViewModel.updateData()
+                    }
+                }
+            }
             .tabViewStyle(.page)
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
             .padding(.bottom, 10)
@@ -521,7 +536,14 @@ struct MainView: View {
                 Circle()
                     .trim(from: 0, to: 0.63)
                     .stroke(
-                        barColor.opacity(0.25),
+                        Color(hex: "#F2F2F7"),
+                        style: StrokeStyle(lineWidth: barWidth+6, lineCap: .round))
+                    .rotationEffect(Angle(degrees: 157))
+                    .shadow(radius: 5)
+                Circle()
+                    .trim(from: 0, to: 0.63)
+                    .stroke(
+                        Color(hex: "#B5D4F9"),
                         style: StrokeStyle(lineWidth: barWidth, lineCap: .round))
                     .rotationEffect(Angle(degrees: 157))
                 //                    .shadow(radius: 5)
@@ -607,6 +629,12 @@ struct MainView: View {
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                 ZStack (alignment: .leading) {
+//                    Rectangle()
+//                        .frame(width: barWidth+5, height: barHeight+5)
+//                        .foregroundStyle(Color(hex: "#F2F2F7"))
+//                        .clipShape(.capsule)
+//                        .offset(x: -2.5)
+//                        .shadow(radius: 3)
                     Rectangle()
                         .frame(width: barWidth, height: barHeight)
                         .foregroundStyle(barColor)
@@ -725,6 +753,24 @@ struct CustomAlertEdit: View {
 }
 
 extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        
+        let a, r, g, b: Double
+        switch hex.count {
+        case 6: // RGB (kein Alpha)
+            (a, r, g, b) = (1, Double((int >> 16) & 0xFF) / 255, Double((int >> 8) & 0xFF) / 255, Double(int & 0xFF) / 255)
+        case 8: // ARGB
+            (a, r, g, b) = (Double((int >> 24) & 0xFF) / 255, Double((int >> 16) & 0xFF) / 255, Double((int >> 8) & 0xFF) / 255, Double(int & 0xFF) / 255)
+        default:
+            (a, r, g, b) = (1, 1, 1, 1) // Fallback auf Weiß
+        }
+        
+        self.init(red: r, green: g, blue: b, opacity: a)
+    }
+    
     func darker(by percentage: CGFloat) -> Color {
         let uiColor = UIColor(self)
         var hue: CGFloat = 0
