@@ -20,7 +20,7 @@ struct MainView: View {
     @State private var isWobbling = false
     @State private var resetTimer: Timer?
     
-    //Custom Alert to edit entries
+    //Custom Alert um Einträge zu bearbeiten
     @State private var showCustomAlert = false
     @State private var showCustomAlertEditAttributes = false
     @State private var selectedFood: TrackedFood?
@@ -67,7 +67,7 @@ struct MainView: View {
                                 )
                                 .datePickerStyle(.graphical)
                                 .labelsHidden()
-                                .onChange(of: mainViewModel.selectedDate) {
+                                .onChange(of: mainViewModel.selectedDate) { _, _ in
                                     mainViewModel.showingDatePicker = false
                                     mainViewModel.updateData()
                                 }
@@ -426,7 +426,7 @@ struct MainView: View {
             )
             .navigationBarBackButtonHidden(true)
             .onAppear {
-                //Preview debugging as no user exists here
+                //Debug part
                 if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
                     mainViewModel.kcalGoal = 2000
                     mainViewModel.kcalReached = 0
@@ -559,7 +559,7 @@ struct MainView: View {
                         style: StrokeStyle(lineWidth: barWidth, lineCap: .round)
                     )
                     .rotationEffect(Angle(degrees: 157))
-                // Calories overrreached, red transition
+                // Über Kalorienziel -> Kreis rot färben
                 if progressPercentage > 1.0 {
                     Circle()
                         .trim(from: 0, to: 0.63)
@@ -684,17 +684,14 @@ struct CustomAlertEdit: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {
-                    // Display the name of the selected food item
                     Text(food.name ?? "Unbekannt")
                         .font(.headline)
                         .padding(.top)
-                    
-                    // Display the default quantity of the food item
+            
                     Text("Portionsgröße: \(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "")")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                    
-                    // Quantity input field
+                
                     TextField("", text: $quantity)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
@@ -717,7 +714,7 @@ struct CustomAlertEdit: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     Divider()
-                    // Action buttons
+            
                     HStack {
                         Button("Abbrechen") {
                             onCancel()

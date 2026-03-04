@@ -20,14 +20,11 @@ struct CreateFoodPanelView: View {
     
     @EnvironmentObject var createPanelViewModel: CreateFoodPanelViewModel
         
-    //NEW FocusState for tracking focused field
+    //NEW FocusState für ausgewähltes Textfeld
     @FocusState private var focusedField: Field?
-    //NEW Enum for focus tracking
+    //NEW Enum zum tracken
     enum Field: Int, CaseIterable {
         case name, defaultQuantity, kcal, carbs, protein, fat
-    }
-    init() {
-        UILabel.appearance(whenContainedInInstancesOf: [UINavigationBar.self]).adjustsFontSizeToFitWidth = true
     }
     var body: some View {
         
@@ -186,7 +183,7 @@ struct CreateFoodPanelView: View {
 
             .navigationTitle("Neues Lebensmittel")
     }
-    // Function to move focus between fields
+    // Funktion um zwischen Textfeldern via UI Button zu wechseln
     private func moveFocus(_ direction: Int) {
         guard let current = focusedField,
               let newIndex = Field.allCases.firstIndex(of: current)?.advanced(by: direction),

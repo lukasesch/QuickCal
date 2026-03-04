@@ -132,22 +132,28 @@ class PersistenceController {
         }
     }
     
-    //For Debugging - deletes persistant storage
     static func deletePersistentStore() {
-        if let storeURL = shared.container.persistentStoreDescriptions.first?.url {
-            do {
-                try shared.container.persistentStoreCoordinator.destroyPersistentStore(
-                    at: storeURL,
-                    ofType: NSSQLiteStoreType,
-                    options: nil
-                )
-                
-                // WICHTIG: Container neu initialisieren
-                shared.container = NSPersistentContainer(name: "QuickCal")
-                print("Persistent store deleted and reinitialized")
-            } catch {
-                print("Failed to delete persistent store: \(error)")
+        guard let storeURL = shared.container.persistentStoreDescriptions.first?.url else { return }
+        do {
+            try shared.container.persistentStoreCoordinator.destroyPersistentStore(
+                at: storeURL,
+                ofType: NSSQLiteStoreType,
+                options: nil
+            )
+            shared.container = NSPersistentContainer(name: "QuickCal")
+            shared.container.loadPersistentStores { _, error in
+                if let error = error as NSError? {
+                    print("Failed to reload persistent store: \(error)")
+                    return
+                }
+                DispatchQueue.main.async {
+                    shared.loadDefaultFood(context: shared.container.viewContext)
+                }
             }
+            shared.container.viewContext.automaticallyMergesChangesFromParent = true
+            print("Persistent store deleted and reinitialized")
+        } catch {
+            print("Failed to delete persistent store: \(error)")
         }
     }
 }

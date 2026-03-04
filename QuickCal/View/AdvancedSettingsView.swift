@@ -63,17 +63,10 @@ struct AdvancedSettingsView: View {
                         .frame(maxWidth: .infinity)
                 }
                 
-                // Reset everything
+                // Alles zurücksetzen
                 Button(action: {
-                    advancedSettingsViewModel.deleteAllEntries(for: "Food")
-                    advancedSettingsViewModel.deleteAllEntries(for: "Meal")
-                    advancedSettingsViewModel.deleteAllEntries(for: "MealFood")
-                    advancedSettingsViewModel.deleteAllEntries(for: "TrackedFood")
-                    advancedSettingsViewModel.deleteAllEntries(for: "User")
-                    advancedSettingsViewModel.deleteAllEntries(for: "Kcal")
                     PersistenceController.deletePersistentStore()
                     onboardingDone = false
-                    exit(0)
                 }) {
                     Label("App zurücksetzen", systemImage: "exclamationmark.triangle")
                         .padding()

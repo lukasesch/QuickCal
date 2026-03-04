@@ -38,8 +38,7 @@ struct CreateMealIngredientsView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             selectedFood = food
-                            showCustomAlert = true // Trigger the custom alert
-                        }
+                            showCustomAlert = true                         }
                     }
                     .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
                 }
@@ -52,13 +51,9 @@ struct CreateMealIngredientsView: View {
             .onAppear {
                 addTrackedFoodViewModel.fetchFoodItems()
             }
-//            .searchable(text: $searchText)
-            .searchable(
-                text: $searchText,
-                placement: .navigationBarDrawer(displayMode:.always)
-            )
-            .onChange(of: searchText) {
-                addTrackedFoodViewModel.filterFoodItems(by: searchText)
+            .searchable(text: $searchText)
+            .onChange(of: searchText) { _, newValue in
+                addTrackedFoodViewModel.filterFoodItems(by: newValue)
             }
         }
         .overlay(

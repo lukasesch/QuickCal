@@ -36,9 +36,8 @@ struct AddTrackedFoodView: View {
     
     //State für FullScreenView
     @State private var showFullScreenBarCodeView = false
-
-    // State für FullScreen-View
     @State private var showBarcodeScanner = false
+    @State private var selectedTab = 0
     
     var body: some View {
         NavigationStack {
@@ -124,9 +123,16 @@ struct AddTrackedFoodView: View {
                     
                 }
                 .padding(.horizontal)
-                
+
                 VStack(alignment: .leading) {
-                    TabView {
+                    Picker("", selection: $selectedTab) {
+                        Label("Lebensmittel", systemImage: "carrot.fill").tag(0)
+                        Label("Gerichte", systemImage: "fork.knife").tag(1)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.bottom, 4)
+
+                    if selectedTab == 0 {
                         List {
                             Section(header: Text("Zuletzt benutzte Lebensmittel:")
                                 .font(.subheadline)
@@ -151,21 +157,19 @@ struct AddTrackedFoodView: View {
                                     }
                                     .onTapGesture {
                                         selectedFood = food
-                                        showCustomFoodAlert = true // Trigger the custom alert
+                                        showCustomFoodAlert = true
                                     }
-                                    
                                 }
                                 .onDelete { offsets in
                                     addTrackedFoodViewModel.deleteFoodItem(at: offsets)
                                     mainViewModel.updateData()
                                 }
                             }
-                            
                         }
-                        .tabItem {
-                            Label("Lebensmittel", systemImage: "carrot.fill")
-                        }
-                        
+                        .listStyle(.grouped)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .shadow(radius: 5)
+                    } else {
                         List {
                             Section(header: Text("Zuletzt benutzte Gerichte:")
                                 .font(.subheadline)
@@ -184,44 +188,36 @@ struct AddTrackedFoodView: View {
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         selectedMeal = meal
-                                        showCustomMealAlert = true // Trigger the custom alert
+                                        showCustomMealAlert = true
                                     }
                                 }
                                 .onDelete(perform: addTrackedFoodViewModel.deleteMealItem)
                             }
-                            
                         }
-                        .tabItem {
-                            Label("Gerichte", systemImage: "fork.knife")
-                        }
-                        
+                        .listStyle(.grouped)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .shadow(radius: 5)
                     }
-                    
-                    
-                    
-                    .listStyle(.grouped)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .shadow(radius: 5)
-                    
+
                     Spacer()
-                    Spacer()
-                    Spacer()
-                    
                 }
                 .padding([.top, .leading, .trailing])
                 .onAppear {
                     addTrackedFoodViewModel.fetchFoodItems()
                     addTrackedFoodViewModel.fetchMealItems()
                     createMealPanelViewModel.clearStruct()
-                    //barCodeViewModel.reset()
                     
-                    //barCodeViewModel.stopScanning()
                 }
                 .onDisappear {
                     //barCodeViewModel.stopScanning()
                 }
             }
             .navigationTitle("Hinzufügen")
+            .searchable(text: $searchText)
+            .onChange(of: searchText) { _, newValue in
+                addTrackedFoodViewModel.filterFoodItems(by: newValue)
+                addTrackedFoodViewModel.filterMealItems(by: newValue)
+            }
         }
         
         .overlay(
@@ -280,10 +276,7 @@ struct AddTrackedFoodView: View {
                 }
             }
         )
-        .searchable(text: $searchText)
-        .onChange(of: searchText) {
-            addTrackedFoodViewModel.filterFoodItems(by: searchText)
-        }
+        
         
         
     }
@@ -330,7 +323,7 @@ struct AddTrackedFoodView: View {
     
 }
 
-// Custom alert view with fields for quantity input and displays food name and default quantity
+// CustomAlert mit modifizierter Mengenangabe, sowie automatischer Berechnung
 struct CustomFoodAlert: View {
     @Binding var isPresented: Bool
     @Binding var quantity: String
@@ -349,17 +342,17 @@ struct CustomFoodAlert: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {
-                    // Display the name of the selected food item
+                    // Name
                     Text(food.name ?? "Unbekannt")
                         .font(.headline)
                         .padding(.top)
                     
-                    // Display the default quantity of the food item
+                    // Standardgroeße
                     Text("Portionsgröße: \(String(format: "%.1f", food.defaultQuantity)) \(food.unit ?? "")")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
-                    // Quantity input field
+                    // Mengenangabe
                     TextField("Anzahl an Portionen: 1", text: $quantity)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
@@ -382,7 +375,7 @@ struct CustomFoodAlert: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     Divider()
-                    // Action buttons
+                    // Buttons
                     HStack {
                         Button("Abbrechen") {
                             onCancel()
@@ -408,7 +401,7 @@ struct CustomFoodAlert: View {
     
 }
 
-// Custom alert view with fields for quantity input and displays meal name and default quantity
+// Selbiger Custom Alert nur fur Gerichte
 struct CustomMealAlert: View {
     @Binding var isPresented: Bool
     @Binding var quantity: String
@@ -430,17 +423,17 @@ struct CustomMealAlert: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {
-                    // Display the name of the selected meal item
+                    // Name
                     Text(meal.name ?? "Unbekannt")
                         .font(.headline)
                         .padding(.top)
                     
-                    // Display the default quantity of the meal item
+                    // Portionsgröße
                     Text("Portionsgröße: \(meal.defaultQuantity) \(meal.unit == "Portion" && meal.defaultQuantity > 1 ? "Portionen" : meal.unit ?? "")")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
-                    // Quantity input field
+                    // Textfeld für Portion
                     TextField("Anzahl an Portionen: \(meal.defaultQuantity)", text: $quantity)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
@@ -479,7 +472,7 @@ struct CustomMealAlert: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     Divider()
-                    // Action buttons
+                    // Buttons
                     HStack {
                         Button("Abbrechen") {
                             onCancel()
@@ -503,7 +496,7 @@ struct CustomMealAlert: View {
     }
 }
 
-//Custom Alert to edit entry
+//Custom Alert um bei Longpress Eintrag zu Bearbeiten
 struct CustomAlertEditFoodAttributes: View {
     @Binding var isPresented: Bool
     @Binding var newName: String

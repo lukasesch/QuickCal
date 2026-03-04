@@ -49,10 +49,20 @@ class AddTrackedFoodViewModel: ObservableObject {
     
     func filterFoodItems(by searchText: String) {
         if searchText.isEmpty {
-            foodItems = allFoodItems // Reset to all items if the search is empty
+            foodItems = allFoodItems
         } else {
             foodItems = allFoodItems.filter { food in
                 (food.name?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
+        }
+    }
+
+    func filterMealItems(by searchText: String) {
+        if searchText.isEmpty {
+            mealItems = allMealItems
+        } else {
+            mealItems = allMealItems.filter { meal in
+                (meal.name?.localizedCaseInsensitiveContains(searchText) ?? false)
             }
         }
     }
@@ -151,7 +161,7 @@ class AddTrackedFoodViewModel: ObservableObject {
             food.fat = fat
         }
         
-        // Generate new UniqueID
+        // Hashwert generieren für UniqueID
         let hashString = "\(newName)\(newDefaultQuantity)\(newUnit)\(newCalories)\(newCarbs)\(newProtein)\(newFat)"
         let hash = SHA256.hash(data: Data(hashString.utf8))
         let uniqueID = hash.compactMap { String(format: "%02x", $0) }.joined()

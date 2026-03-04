@@ -199,15 +199,24 @@ struct ProfileView: View {
                         .environmentObject(profileviewModel)
                     
                 }
-                .alert(item: $profileviewModel.errorMessage) { errorMessage in
-                    Alert(title: Text("Fehler"), message: Text(errorMessage.message), dismissButton: .default(Text("OK")))
+                .alert(
+                    "Fehler",
+                    isPresented: Binding<Bool>(
+                        get: { profileviewModel.errorMessage != nil },
+                        set: { if !$0 { profileviewModel.errorMessage = nil } }
+                    ),
+                    presenting: profileviewModel.errorMessage
+                ) { _ in
+                    Button("OK", role: .cancel) {}
+                } message: { item in
+                    Text(item.message)
                 }
                 .navigationTitle("Dein Profil")
             }
         }
     }
     
-    // Function to move focus between fields
+    // Funktion um zwischen Textfeldern in UI zu wechseln
     private func moveFocus(_ direction: Int) {
         guard let current = focusedField,
               let newIndex = Field.allCases.firstIndex(of: current)?.advanced(by: direction),

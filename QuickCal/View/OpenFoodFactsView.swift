@@ -58,13 +58,13 @@ struct OpenFoodFactsView: View {
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         selectedFood = food
-                                        showCustomAlert = true // Trigger the custom alert
+                                        showCustomAlert = true // Custom Alert triggern
                                     }
                                 }
                             }
                             
                         }
-                        .searchable(text: $textfield, placement: .navigationBarDrawer(displayMode: .always))
+                        .searchable(text: $textfield)
                         .onSubmit(of: .search) {
                             openFoodFactsViewModel.search(text: textfield)
                         }
@@ -132,17 +132,16 @@ struct CustomAlertOFF: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {
-                    // Display the name of the selected food item
-                    Text(food.name)
+                                        Text(food.name)
                         .font(.headline)
                         .padding(.top)
                     
-                    // Display the default quantity of the food item
+                
                     Text("Portionsgröße: \(String(format: "%.1f", food.defaultQuantity)) \(food.unit)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
-                    // Quantity input field
+                
                     TextField("Anzahl an Portionen: 1", text: $quantity)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
@@ -165,7 +164,7 @@ struct CustomAlertOFF: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     Divider()
-                    // Action buttons
+                    
                     HStack {
                         Button("Abbrechen") {
                             onCancel()
@@ -192,5 +191,5 @@ struct CustomAlertOFF: View {
 #Preview {
     let context = PersistenceController.preview.container.viewContext
     OpenFoodFactsView(selectedDaytime: 0, selectedDate: Date())
-        .environmentObject(OpenFoodFactsViewModel(context: context)) // Ensure the EnvironmentObject is provided
+        .environmentObject(OpenFoodFactsViewModel(context: context))
 }
