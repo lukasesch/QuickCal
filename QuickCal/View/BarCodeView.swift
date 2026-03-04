@@ -16,8 +16,6 @@ struct BarCodeView: View {
     
     @State private var isConfiguring = true
     
-    // Alert
-    @State private var showCustomAlert = false
     @State private var selectedFood: FoodItem?
     @State private var quantity: String = ""
     
@@ -109,7 +107,6 @@ struct BarCodeView: View {
             .onChange(of: barCodeViewModel.product?.id) { newID, oldID in
                 if let product = barCodeViewModel.product {
                     selectedFood = product
-                    showCustomAlert = true
                 }
             }
             .navigationBarHidden(true)
@@ -123,54 +120,39 @@ struct BarCodeView: View {
                     }
                 }
         )
-        .overlay(
-            Group {
-                if showCustomAlert {
-                    CustomAlertOFF(
-                        isPresented: $showCustomAlert,
-                        quantity: $quantity,
-                        foodItem: selectedFood,
-                        onSave: {
-                            if let food = selectedFood,
-                               let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                                barCodeViewModel.OpenFoodFactsFoodToDB(
-                                    name: food.name,
-                                    defaultQuantity: food.defaultQuantity,
-                                    unit: food.unit,
-                                    calories: food.kcal,
-                                    carbs: food.carbohydrate,
-                                    protein: food.protein,
-                                    fat: food.fat,
-                                    daytime: Int16(selectedDaytime),
-                                    quantity: quantityValue,
-                                    selectedDate: selectedDate
-                                )
-                                print("FoodItem \(food.name) mit Menge \(quantityValue) hinzugefügt!")
-                                mainViewModel.updateData()
-                                addTrackedFoodViewModel.fetchFoodItems()
-                                addTrackedFoodViewModel.fetchMealItems()
-                                resetAlert()
-                                dismiss()
-                            }
-                        },
-                        onCancel: {
-                            resetAlert()
-                            dismiss()
-                        }
-                    )
-                    .transition(.opacity)
+        .sheet(item: $selectedFood, onDismiss: { selectedFood = nil; quantity = "" }) { food in
+            CustomAlertOFF(
+                quantity: $quantity,
+                foodItem: food,
+                onSave: {
+                    if let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                        barCodeViewModel.OpenFoodFactsFoodToDB(
+                            name: food.name,
+                            defaultQuantity: food.defaultQuantity,
+                            unit: food.unit,
+                            calories: food.kcal,
+                            carbs: food.carbohydrate,
+                            protein: food.protein,
+                            fat: food.fat,
+                            daytime: Int16(selectedDaytime),
+                            quantity: quantityValue,
+                            selectedDate: selectedDate
+                        )
+                        mainViewModel.updateData()
+                        addTrackedFoodViewModel.fetchFoodItems()
+                        addTrackedFoodViewModel.fetchMealItems()
+                        selectedFood = nil
+                        dismiss()
+                    }
+                },
+                onCancel: {
+                    selectedFood = nil
+                    dismiss()
                 }
-            }
-        )
-        .animation(.easeInOut(duration: 0.2), value: showCustomAlert)
-    }
-    
-    private func resetAlert() {
-        withAnimation {
-            showCustomAlert = false
+            )
+            .presentationDetents([.fraction(0.4)])
+            .presentationDragIndicator(.visible)
         }
-        selectedFood = nil
-        quantity = ""
     }
     
     private func checkCameraAuthorization(completion: @escaping (Bool) -> Void) {

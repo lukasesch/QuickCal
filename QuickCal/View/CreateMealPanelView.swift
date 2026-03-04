@@ -18,8 +18,8 @@ struct CreateMealPanelView: View {
         case name, portions
     }
     
-    var body: some View {
-    
+    @ViewBuilder private var coreView: some View {
+
             VStack(alignment: .leading) {
                 HStack {
                     Text("Name:")
@@ -161,10 +161,18 @@ struct CreateMealPanelView: View {
             }
             //.navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Neues Gericht")
-        
+
     }
-    
-    // Function to move focus between fields
+
+    var body: some View {
+        if #available(iOS 18.0, *) {
+            coreView.containerBackground(.clear, for: .navigation)
+        } else {
+            coreView
+        }
+    }
+
+    // Funktion um zwischen Textfeldern in der UI zu wechseln
     private func moveFocus(_ direction: Int) {
         guard let current = focusedField,
               let newIndex = Field.allCases.firstIndex(of: current)?.advanced(by: direction),

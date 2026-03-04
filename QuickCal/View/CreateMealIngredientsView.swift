@@ -14,7 +14,6 @@ struct CreateMealIngredientsView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var searchText = ""
-    @State private var showCustomAlert = false
     @State private var quantity: String = ""
     @State private var selectedFood: Food?
     
@@ -38,7 +37,7 @@ struct CreateMealIngredientsView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             selectedFood = food
-                            showCustomAlert = true                         }
+                        }
                     }
                     .onDelete(perform: addTrackedFoodViewModel.deleteFoodItem)
                 }
@@ -56,39 +55,22 @@ struct CreateMealIngredientsView: View {
                 addTrackedFoodViewModel.filterFoodItems(by: newValue)
             }
         }
-        .overlay(
-            Group {
-                if showCustomAlert {
-                    CustomFoodAlert(
-                        isPresented: $showCustomAlert,
-                        quantity: $quantity,
-                        foodItem: selectedFood,
-                        onSave: {
-                            if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                                createMealPanelViewModel.addIngredient(food: food, quantity: quantityValue)
-                                resetAlert()
-                                dismiss()
-                            }
-                        },
-                        onCancel: {
-                            resetAlert()
-                        }
-                    )
-                    .transition(.opacity) // Transition hinzufügen
-                }
-            }
-        )
-        
-        .animation(.easeInOut(duration: 0.2), value: showCustomAlert) // Animation aktivieren
-        
-    }
-    
-    private func resetAlert() {
-        withAnimation {
-            showCustomAlert = false
+        .sheet(item: $selectedFood, onDismiss: { selectedFood = nil; quantity = "" }) { food in
+            CustomFoodAlert(
+                quantity: $quantity,
+                foodItem: food,
+                onSave: {
+                    if let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                        createMealPanelViewModel.addIngredient(food: food, quantity: quantityValue)
+                        selectedFood = nil
+                        dismiss()
+                    }
+                },
+                onCancel: { selectedFood = nil }
+            )
+            .presentationDetents([.fraction(0.4)])
+            .presentationDragIndicator(.visible)
         }
-        selectedFood = nil
-        quantity = ""
     }
 }
 

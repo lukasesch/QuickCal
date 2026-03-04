@@ -26,8 +26,8 @@ struct CreateFoodPanelView: View {
     enum Field: Int, CaseIterable {
         case name, defaultQuantity, kcal, carbs, protein, fat
     }
-    var body: some View {
-        
+    @ViewBuilder private var coreView: some View {
+
             VStack(alignment: .leading) {
                 HStack {
                     Text("Name:")
@@ -182,6 +182,14 @@ struct CreateFoodPanelView: View {
             }
 
             .navigationTitle("Neues Lebensmittel")
+    }
+
+    var body: some View {
+        if #available(iOS 18.0, *) {
+            coreView.containerBackground(.clear, for: .navigation)
+        } else {
+            coreView
+        }
     }
     // Funktion um zwischen Textfeldern via UI Button zu wechseln
     private func moveFocus(_ direction: Int) {

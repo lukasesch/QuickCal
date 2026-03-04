@@ -19,12 +19,10 @@ struct AddTrackedFoodView: View {
     var selectedDate: Date
     
     @State private var searchText = ""
-    @State private var showCustomFoodAlert = false
-    @State private var showCustomMealAlert = false
-    @State private var showCustomAlertEditAttributes = false
     @State private var quantity: String = ""
     @State private var selectedFood: Food?
     @State private var selectedMeal: Meal?
+    @State private var editFood: Food?
     
     @State private var newName: String = ""
     @State private var newUnit: String = ""
@@ -150,14 +148,10 @@ struct AddTrackedFoodView: View {
                                     }
                                     .contentShape(Rectangle())
                                     .onLongPressGesture {
-                                        selectedFood = food
-                                        withAnimation {
-                                            showCustomAlertEditAttributes = true
-                                        }
+                                        editFood = food
                                     }
                                     .onTapGesture {
                                         selectedFood = food
-                                        showCustomFoodAlert = true
                                     }
                                 }
                                 .onDelete { offsets in
@@ -188,7 +182,6 @@ struct AddTrackedFoodView: View {
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         selectedMeal = meal
-                                        showCustomMealAlert = true
                                     }
                                 }
                                 .onDelete(perform: addTrackedFoodViewModel.deleteMealItem)
@@ -220,285 +213,223 @@ struct AddTrackedFoodView: View {
             }
         }
         
-        .overlay(
-            Group {
-                if showCustomFoodAlert {
-                    CustomFoodAlert(
-                        isPresented: $showCustomFoodAlert,
-                        quantity: $quantity,
-                        foodItem: selectedFood,
-                        onSave: {
-                            if let food = selectedFood, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                                addTrackedFoodViewModel.addTrackedFood(
-                                    food: food,
-                                    quantity: quantityValue,
-                                    daytime: Int16(selectedDaytime),
-                                    selectedDate: selectedDate
-                                )
-                                resetAlert()
-                                mainViewModel.updateData()
-                            }
-                        },
-                        onCancel: {
-                            resetAlert()
-                        }
-                    )
-                    .transition(.opacity) // Transition hinzufügen
-                    .animation(.easeInOut(duration: 0.2), value: showCustomFoodAlert)
-                }
-                
-                if showCustomMealAlert {
-                    CustomMealAlert(
-                        isPresented: $showCustomMealAlert,
-                        quantity: $quantity,
-                        mealItem: selectedMeal,
-                        onSave: {
-                            if let meal = selectedMeal, let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                                addTrackedFoodViewModel.addTrackedMeal(
-                                    meal: meal,
-                                    quantity: quantityValue,
-                                    daytime: Int16(selectedDaytime),
-                                    selectedDate: selectedDate
-                                )
-                                resetAlert()
-                                mainViewModel.updateData()
-                            }
-                        }, onCancel: {
-                            resetAlert()
-                        }
-                    )
-                    .transition(.opacity)
-                    .animation(.easeInOut(duration: 0.2), value: showCustomMealAlert)
-                }
-                
-                if showCustomAlertEditAttributes {
-                    buildCustomAlertEditAttributes()
-                }
-            }
-        )
-        
-        
-        
-    }
-    
-    private func buildCustomAlertEditAttributes() -> some View {
-        Group {
-            if let food = selectedFood {
-                CustomAlertEditFoodAttributes(
-                    isPresented: $showCustomAlertEditAttributes,
-                    newName: $newName,
-                    newUnit: $newUnit,
-                    newDefaultQuantity: $newDefaultQuantity,
-                    newCalories: $newCalories,
-                    newCarbs: $newCarbs,
-                    newProtein: $newProtein,
-                    newFat: $newFat,
-                    foodItem: food,
-                    onSave: {
-                        print("Funktion aufgerufen")
-                        addTrackedFoodViewModel.updateFoodItemAttributes(food: food, newName: newName, newUnit: newUnit, newDefaultQuantity: newDefaultQuantity, newCalories: newCalories, newCarbs: newCarbs, newProtein: newProtein, newFat: newFat)
-                        resetAlert()
+        .sheet(item: $selectedFood, onDismiss: { selectedFood = nil; quantity = "" }) { food in
+            CustomFoodAlert(
+                quantity: $quantity,
+                foodItem: food,
+                onSave: {
+                    if let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                        addTrackedFoodViewModel.addTrackedFood(
+                            food: food,
+                            quantity: quantityValue,
+                            daytime: Int16(selectedDaytime),
+                            selectedDate: selectedDate
+                        )
+                        selectedFood = nil
                         mainViewModel.updateData()
-                    },
-                    onCancel: {
-                        resetAlert()
                     }
-                )
-            } else {
-                EmptyView()
-            }
+                },
+                onCancel: { selectedFood = nil }
+            )
+            .presentationDetents([.fraction(0.4)])
+            .presentationDragIndicator(.visible)
         }
-    }
-    
-    private func resetAlert() {
-        withAnimation {
-            showCustomFoodAlert = false
-            showCustomMealAlert = false
-            showCustomAlertEditAttributes = false
+        .sheet(item: $selectedMeal, onDismiss: { selectedMeal = nil; quantity = "" }) { meal in
+            CustomMealAlert(
+                quantity: $quantity,
+                mealItem: meal,
+                onSave: {
+                    if let quantityValue = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                        addTrackedFoodViewModel.addTrackedMeal(
+                            meal: meal,
+                            quantity: quantityValue,
+                            daytime: Int16(selectedDaytime),
+                            selectedDate: selectedDate
+                        )
+                        selectedMeal = nil
+                        mainViewModel.updateData()
+                    }
+                },
+                onCancel: { selectedMeal = nil }
+            )
+            .presentationDetents([.fraction(0.4)])
+            .presentationDragIndicator(.visible)
         }
-        selectedFood = nil
-        selectedMeal = nil
-        quantity = ""
+        .sheet(item: $editFood, onDismiss: { editFood = nil }) { food in
+            CustomAlertEditFoodAttributes(
+                newName: $newName,
+                newUnit: $newUnit,
+                newDefaultQuantity: $newDefaultQuantity,
+                newCalories: $newCalories,
+                newCarbs: $newCarbs,
+                newProtein: $newProtein,
+                newFat: $newFat,
+                foodItem: food,
+                onSave: {
+                    addTrackedFoodViewModel.updateFoodItemAttributes(food: food, newName: newName, newUnit: newUnit, newDefaultQuantity: newDefaultQuantity, newCalories: newCalories, newCarbs: newCarbs, newProtein: newProtein, newFat: newFat)
+                    editFood = nil
+                    mainViewModel.updateData()
+                },
+                onCancel: { editFood = nil }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .scrollContentBackground(.hidden)
+        }
     }
     
 }
 
 // CustomAlert mit modifizierter Mengenangabe, sowie automatischer Berechnung
 struct CustomFoodAlert: View {
-    @Binding var isPresented: Bool
     @Binding var quantity: String
-    var foodItem: Food? // Übergebe das gesamte Food-Objekt
+    var foodItem: Food
     var onSave: () -> Void
     var onCancel: () -> Void
-    
+
     private var portionAmount: Float {
         Float(quantity.replacingOccurrences(of: ",", with: ".")) ?? 1.0
     }
-    
+
     var body: some View {
-        if isPresented, let food = foodItem {
-            ZStack {
-                Color.black.opacity(0.3)
-                    .ignoresSafeArea()
-                
-                VStack(spacing: 20) {
-                    // Name
-                    Text(food.name ?? "Unbekannt")
-                        .font(.headline)
-                        .padding(.top)
-                    
-                    // Standardgroeße
-                    Text("Portionsgröße: \(String(format: "%.1f", food.defaultQuantity)) \(food.unit ?? "")")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                    // Mengenangabe
-                    TextField("Anzahl an Portionen: 1", text: $quantity)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.decimalPad)
-                        .padding(.horizontal)
-                    
-                    Divider()
-                    
-                    Text("Kcal: \(String(format: "%.0f", Float(food.kcal) * portionAmount))")
-                        .font(.subheadline)
-                    
-                    HStack {
-                        Spacer()
-                        Text("K: \(String(format: "%.1f", food.carbohydrate * portionAmount)) g")
-                        Spacer()
-                        Text("P: \(String(format: "%.1f", food.protein * portionAmount)) g")
-                        Spacer()
-                        Text("F: \(String(format: "%.1f", food.fat * portionAmount)) g")
-                        Spacer()
-                    }
+        VStack(alignment: .leading, spacing: 16) {
+
+            // Header
+            VStack(spacing: 4) {
+                Text(foodItem.name ?? "Unbekannt")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Text("\(String(format: "%.0f", foodItem.defaultQuantity)) \(foodItem.unit ?? "") pro Portion")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    Divider()
-                    // Buttons
-                    HStack {
-                        Button("Abbrechen") {
-                            onCancel()
-                        }
-                        .padding()
-                        
-                        Button("Hinzufügen") {
-                            onSave()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .padding()
-                    }
-                }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(10)
-                .shadow(radius: 10)
-                .frame(maxWidth: 300)
+                    .foregroundStyle(.secondary)
             }
+            .frame(maxWidth: .infinity)
+
+            // Quantity input
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Menge")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                TextField("1", text: $quantity)
+                    .font(.title2)
+                    .keyboardType(.decimalPad)
+                    .padding(10)
+                    .background(Color(.systemGray6))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+
+            // Macros
+            HStack {
+                Spacer()
+                Text("Kcal: \(String(format: "%.0f", Float(foodItem.kcal) * portionAmount))")
+                Spacer()
+                Text("K: \(String(format: "%.1fg", foodItem.carbohydrate * portionAmount))")
+                Spacer()
+                Text("P: \(String(format: "%.1fg", foodItem.protein * portionAmount))")
+                Spacer()
+                Text("F: \(String(format: "%.1fg", foodItem.fat * portionAmount))")
+                Spacer()
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+
+            // Action button
+            Button(action: onSave) {
+                Text("Hinzufügen")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 13)
+            }
+            .buttonStyle(.borderedProminent)
         }
+        .padding(20)
     }
-    
-    
 }
 
 // Selbiger Custom Alert nur fur Gerichte
 struct CustomMealAlert: View {
-    @Binding var isPresented: Bool
     @Binding var quantity: String
-    var mealItem: Meal? // Übergebe das gesamte Meal-Objekt
+    var mealItem: Meal
     var onSave: () -> Void
     var onCancel: () -> Void
-    
+
     private var portionAmount: Float {
-        guard let defaultQuantity = mealItem?.defaultQuantity else {
-            return Float(quantity.replacingOccurrences(of: ",", with: ".")) ?? 1.0
-        }
-        return Float(quantity.replacingOccurrences(of: ",", with: ".")) ?? Float(defaultQuantity)
+        Float(quantity.replacingOccurrences(of: ",", with: ".")) ?? Float(mealItem.defaultQuantity)
     }
-    
+
     var body: some View {
-        if isPresented, let meal = mealItem {
-            ZStack {
-                Color.black.opacity(0.3)
-                    .ignoresSafeArea()
-                
-                VStack(spacing: 20) {
-                    // Name
-                    Text(meal.name ?? "Unbekannt")
-                        .font(.headline)
-                        .padding(.top)
-                    
-                    // Portionsgröße
-                    Text("Portionsgröße: \(meal.defaultQuantity) \(meal.unit == "Portion" && meal.defaultQuantity > 1 ? "Portionen" : meal.unit ?? "")")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                    // Textfeld für Portion
-                    TextField("Anzahl an Portionen: \(meal.defaultQuantity)", text: $quantity)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.decimalPad)
-                        .padding(.horizontal)
-                    
-                    Divider()
-                    
-                    VStack {
-                        Text("Zutaten:")
-                            .font(.subheadline)
-                        
-                        if let mealFoods = meal.mealFood as? Set<MealFood> {
-                            let foodNames = mealFoods.compactMap { $0.food?.name }.sorted()
-                            let foodList = foodNames.joined(separator: "\n- ")
-                            Text("- \(foodList)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.leading)
-                        }
-                    }
-                    
-                    Divider()
-                    
-                    Text("Kcal: \(String(format: "%.0f", Float(meal.kcal) / Float(meal.defaultQuantity) * portionAmount))")
-                        .font(.subheadline)
-                    
-                    HStack {
-                        Spacer()
-                        Text("K: \(String(format: "%.1f", meal.carbohydrate / Float(meal.defaultQuantity) * portionAmount)) g")
-                        Spacer()
-                        Text("P: \(String(format: "%.1f", meal.protein / Float(meal.defaultQuantity) * portionAmount)) g")
-                        Spacer()
-                        Text("F: \(String(format: "%.1f", meal.fat / Float(meal.defaultQuantity) * portionAmount)) g")
-                        Spacer()
-                    }
+        VStack(alignment: .leading, spacing: 24) {
+
+            // Header
+            VStack(spacing: 4) {
+                Text(mealItem.name ?? "Unbekannt")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Text("\(mealItem.defaultQuantity) \(mealItem.unit == "Portion" && mealItem.defaultQuantity > 1 ? "Portionen" : mealItem.unit ?? "") pro Portion")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    Divider()
-                    // Buttons
-                    HStack {
-                        Button("Abbrechen") {
-                            onCancel()
-                        }
-                        .padding()
-                        
-                        Button("Hinzufügen") {
-                            onSave()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .padding()
-                    }
-                }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(10)
-                .shadow(radius: 10)
-                .frame(maxWidth: 300)
+                    .foregroundStyle(.secondary)
             }
+            .frame(maxWidth: .infinity)
+
+            // Quantity input
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Menge")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                TextField("1", text: $quantity)
+                    .font(.title2)
+                    .keyboardType(.decimalPad)
+                    .padding(12)
+                    .background(Color(.systemGray6))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+
+            // Ingredients
+            if let mealFoods = mealItem.mealFood as? Set<MealFood> {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Zutaten")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                    let foodNames = mealFoods.compactMap { $0.food?.name }.sorted()
+                    Text(foodNames.joined(separator: ", "))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            // Macros
+            HStack {
+                Spacer()
+                Text("Kcal: \(String(format: "%.0f", Float(mealItem.kcal) / Float(mealItem.defaultQuantity) * portionAmount))")
+                Spacer()
+                Text("K: \(String(format: "%.1fg", mealItem.carbohydrate / Float(mealItem.defaultQuantity) * portionAmount))")
+                Spacer()
+                Text("P: \(String(format: "%.1fg", mealItem.protein / Float(mealItem.defaultQuantity) * portionAmount))")
+                Spacer()
+                Text("F: \(String(format: "%.1fg", mealItem.fat / Float(mealItem.defaultQuantity) * portionAmount))")
+                Spacer()
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+
+            // Action button
+            Button(action: onSave) {
+                Text("Hinzufügen")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            }
+            .buttonStyle(.borderedProminent)
         }
+        .padding(24)
     }
 }
 
 //Custom Alert um bei Longpress Eintrag zu Bearbeiten
 struct CustomAlertEditFoodAttributes: View {
-    @Binding var isPresented: Bool
     @Binding var newName: String
     @Binding var newUnit: String
     @Binding var newDefaultQuantity: String
@@ -506,58 +437,48 @@ struct CustomAlertEditFoodAttributes: View {
     @Binding var newCarbs: String
     @Binding var newProtein: String
     @Binding var newFat: String
-    var foodItem: Food? // Übergebe das gesamte Food-Objekt
+    var foodItem: Food
     var onSave: () -> Void
     var onCancel: () -> Void
 
     var body: some View {
-        if isPresented, let food = foodItem {
-            
-            ZStack {
-                Color.black.opacity(0.3)
-                    .ignoresSafeArea()
-                
-                VStack(spacing: 20) {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 11) {
 
-                    HStack {
-                        Text("Name:")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                        Spacer()
-                        TextField("Neuer Name", text: $newName)
-                            .font(.headline)
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.trailing)
-                            .submitLabel(.done)
-                            .padding(.trailing, 16.0)
-                            .onAppear {
-                                newName = food.name ?? ""
-                            }
-                    }
-                    //Divider()
-                    HStack {
-                        Text("Portionsgröße:")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                        Spacer()
+                // Header
+                Text("Bearbeiten")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .center)
+
+                // Name
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Name")
+                        .font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
+                    TextField("Neuer Name", text: $newName)
+                        .submitLabel(.done)
+                        .padding(10)
+                        .background(Color(.systemGray6))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .onAppear { newName = foodItem.name ?? "" }
+                }
+
+                // Portionsgröße + Einheit
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Portionsgröße")
+                            .font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
                         TextField("100", text: $newDefaultQuantity)
                             .keyboardType(.numberPad)
-                            .font(.headline)
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.trailing)
-                            .onAppear {
-                                newDefaultQuantity = String(food.defaultQuantity)
-                            }
                             .submitLabel(.done)
-                            .padding(.trailing, 16.0)
-                        
-                        
+                            .padding(8)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .onAppear { newDefaultQuantity = String(foodItem.defaultQuantity) }
                     }
-                    HStack {
-                        Text("Einheit:")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                        Spacer()
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Einheit")
+                            .font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
                         Picker("Einheit", selection: $newUnit) {
                             Text("Gramm").tag("g")
                             Text("Kilogramm").tag("kg")
@@ -565,103 +486,78 @@ struct CustomAlertEditFoodAttributes: View {
                             Text("Liter").tag("l")
                             Text("Stück").tag("Stück")
                         }
-                        .pickerStyle(MenuPickerStyle())
-                        .onAppear {
-                            newUnit = food.unit ?? "g"
-                        }
-                    }
-                    //Divider()
-                    HStack {
-                        Text("Kalorien (kcal):")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                        Spacer()
-                        TextField("83", text: $newCalories)
-                            .keyboardType(.decimalPad)
-                            .font(.headline)
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.trailing)
-                            .submitLabel(.done)
-                            .padding(.trailing, 16.0)
-                            .onAppear {
-                                newCalories = String(food.kcal)
-                            }
-                    }
-                    HStack {
-                        Text("Kohlenhydrate:")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                        Spacer()
-                        TextField("43", text: $newCarbs)
-                            .keyboardType(.decimalPad)
-                            .font(.headline)
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.trailing)
-                            .submitLabel(.done)
-                            .padding(.trailing, 16.0)
-                            .onAppear {
-                                newCarbs = String(food.carbohydrate)
-                            }
-                    }
-                    HStack {
-                        Text("Protein:")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                        Spacer()
-                        TextField("5.1", text: $newProtein)
-                            .keyboardType(.decimalPad)
-                            .font(.headline)
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.trailing)
-                            .submitLabel(.done)
-                            .padding(.trailing, 16.0)
-                            .onAppear {
-                                newProtein = String(food.protein)
-                            }
-                    }
-                    HStack {
-                        Text("Fett:")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                        Spacer()
-                        TextField("1.3", text: $newFat)
-                            .keyboardType(.decimalPad)
-                            .font(.headline)
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.trailing)
-                            .submitLabel(.done)
-                            .padding(.trailing, 16.0)
-                            .onAppear {
-                                newFat = String(food.fat)
-                            }
-                    }
-                    //Divider()
-                    HStack {
-                        Button("Abbrechen") {
-                            isPresented = false
-                            onCancel()
-                        }
-                        .buttonStyle(.bordered)
-                        
-                        Button("Speichern") {
-                            onSave()
-                            isPresented = false
-                        }
-                        .buttonStyle(.borderedProminent)
+                        .pickerStyle(.menu)
+                        .padding(8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(.systemGray6))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .onAppear { newUnit = foodItem.unit ?? "g" }
                     }
                 }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(10)
-                .shadow(radius: 10)
-                .frame(maxWidth: 300)
-                
-                
+
+                // Kalorien
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Kalorien (kcal)")
+                        .font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
+                    TextField("83", text: $newCalories)
+                        .keyboardType(.decimalPad)
+                        .submitLabel(.done)
+                        .padding(10)
+                        .background(Color(.systemGray6))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .onAppear { newCalories = String(foodItem.kcal) }
+                }
+
+                // Kohlenhydrate / Protein / Fett
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("K (g)")
+                            .font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
+                        TextField("43", text: $newCarbs)
+                            .keyboardType(.decimalPad)
+                            .submitLabel(.done)
+                            .padding(8)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .onAppear { newCarbs = String(foodItem.carbohydrate) }
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("P (g)")
+                            .font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
+                        TextField("5.1", text: $newProtein)
+                            .keyboardType(.decimalPad)
+                            .submitLabel(.done)
+                            .padding(8)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .onAppear { newProtein = String(foodItem.protein) }
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("F (g)")
+                            .font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
+                        TextField("1.3", text: $newFat)
+                            .keyboardType(.decimalPad)
+                            .submitLabel(.done)
+                            .padding(8)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .onAppear { newFat = String(foodItem.fat) }
+                    }
+                }
+
+                // Save button
+                Button(action: onSave) {
+                    Text("Speichern")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                }
+                .buttonStyle(.borderedProminent)
             }
-            
+            .padding(20)
         }
+        .background(.clear)
     }
-    
 }
 
 #Preview {
