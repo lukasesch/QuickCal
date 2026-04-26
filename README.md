@@ -15,9 +15,7 @@ QuickCal operates using the open-source database **OpenFoodFacts**, which contai
 
 
 ## 💡 Feedback
-Since QuickCal is still in development, **suggestions and feedback** are always welcome! 🚀 If you're interested in testing QuickCal via TestFlight, feel free to contact me directly.
-
-The official release is planned for March to April 2025.
+Since QuickCal is still in development, **suggestions and feedback** are always welcome! If you're interested in testing QuickCal via TestFlight, feel free to contact me directly.
 
 
 ## 🧰 Frameworks
