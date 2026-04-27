@@ -7,6 +7,8 @@
 
 import Foundation
 import CoreData
+import SwiftUI
+import UIKit
 
 class MainViewModel: ObservableObject {
     @Published var kcalGoal: Double = 0
@@ -41,13 +43,41 @@ class MainViewModel: ObservableObject {
     @Published var proteinSnacks: Double = 0
     @Published var fatSnacks: Double = 0
     
-    @Published var selectedDate: Date = Date()
+    @Published var selectedDate: Date = Date() {
+        didSet {
+            guard !Calendar.current.isDate(oldValue, inSameDayAs: selectedDate) else { return }
+            showingDatePicker = false
+            updateData()
+        }
+    }
     @Published var showingDatePicker: Bool = false
-    
-    
+
+    var dateLabel: String {
+        let cal = Calendar.current
+        let date = selectedDate
+        if cal.isDate(date, inSameDayAs: Date()) { return "Heute" }
+        if let y = cal.date(byAdding: .day, value: -1, to: Date()),
+           cal.isDate(date, inSameDayAs: y) { return "Gestern" }
+        if let v = cal.date(byAdding: .day, value: -2, to: Date()),
+           cal.isDate(date, inSameDayAs: v) { return "Vorgestern" }
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "de_DE")
+        f.dateFormat = "d. MMMM"
+        return f.string(from: date)
+    }
+
     private let context: NSManagedObjectContext
+    private var timeChangeObserver: NSObjectProtocol?
+
     init(context: NSManagedObjectContext) {
         self.context = context
+        timeChangeObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.significantTimeChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.selectedDate = Date()
+        }
     }
     
     var kcalProgressPercentage: Double {
@@ -78,6 +108,29 @@ class MainViewModel: ObservableObject {
         calculateAggregates(forDaytime: 1, into: &kcalMidday, &carbsMidday, &proteinMidday, &fatMidday)
         calculateAggregates(forDaytime: 2, into: &kcalEvening, &carbsEvening, &proteinEvening, &fatEvening)
         calculateAggregates(forDaytime: 3, into: &kcalSnacks, &carbsSnacks, &proteinSnacks, &fatSnacks)
+    }
+
+    func handleScenePhase(_ phase: ScenePhase) {
+        if phase == .active {
+            let today = Calendar.current.startOfDay(for: Date())
+            if !Calendar.current.isDate(selectedDate, inSameDayAs: today) {
+                selectedDate = today
+            }
+        }
+    }
+
+    @MainActor
+    func onAppear() {
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+            kcalGoal = 2000
+            kcalReached = 0
+            carbsGoal = 200
+            proteinGoal = 100
+            fatGoal = 70
+        } else {
+            checkAndCalculateDailyCalories()
+        }
+        updateData()
     }
     
     @MainActor

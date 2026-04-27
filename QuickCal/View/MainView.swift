@@ -58,7 +58,7 @@ struct MainView: View {
                 ScrollView {
                     VStack(spacing: 0) {
                         TopHeader(
-                            dateLabel: dateLabel,
+                            dateLabel: mainViewModel.dateLabel,
                             isWobbling: isWobbling,
                             onIcon: handleIconTap,
                             onDate: { mainViewModel.showingDatePicker.toggle() },
@@ -137,10 +137,6 @@ struct MainView: View {
                     )
                     .datePickerStyle(.graphical)
                     .labelsHidden()
-                    .onChange(of: mainViewModel.selectedDate) { _, _ in
-                        mainViewModel.showingDatePicker = false
-                        mainViewModel.updateData()
-                    }
                     Spacer()
                 }
                 .presentationDetents([.fraction(0.51)])
@@ -159,29 +155,10 @@ struct MainView: View {
                 }
             }
             .onAppear {
-                if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
-                    mainViewModel.kcalGoal = 2000
-                    mainViewModel.kcalReached = 0
-                    mainViewModel.carbsGoal = 200
-                    mainViewModel.proteinGoal = 100
-                    mainViewModel.fatGoal = 70
-                } else {
-                    mainViewModel.checkAndCalculateDailyCalories()
-                }
-                mainViewModel.updateData()
+                mainViewModel.onAppear()
             }
-            .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
-                mainViewModel.selectedDate = Date()
-                mainViewModel.updateData()
-            }
-            .task(id: scenePhase) {
-                if scenePhase == .active {
-                    let today = Calendar.current.startOfDay(for: Date())
-                    if !Calendar.current.isDate(mainViewModel.selectedDate, inSameDayAs: today) {
-                        mainViewModel.selectedDate = today
-                        mainViewModel.updateData()
-                    }
-                }
+            .onChange(of: scenePhase) { _, newPhase in
+                mainViewModel.handleScenePhase(newPhase)
             }
         }
         .sheet(item: $selectedFood, onDismiss: { selectedFood = nil; quantity = "" }) { trackedFood in
@@ -203,20 +180,6 @@ struct MainView: View {
     }
 
     // MARK: - Helpers
-
-    private var dateLabel: String {
-        let cal = Calendar.current
-        let date = mainViewModel.selectedDate
-        if cal.isDate(date, inSameDayAs: Date()) { return "Heute" }
-        if let y = cal.date(byAdding: .day, value: -1, to: Date()),
-           cal.isDate(date, inSameDayAs: y) { return "Gestern" }
-        if let v = cal.date(byAdding: .day, value: -2, to: Date()),
-           cal.isDate(date, inSameDayAs: v) { return "Vorgestern" }
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "de_DE")
-        f.dateFormat = "d. MMMM"
-        return f.string(from: date)
-    }
 
     private func handleIconTap() {
         tapCount += 1
@@ -762,25 +725,21 @@ private struct MealRow: View {
     let isLast: Bool
 
     var body: some View {
-        let portion = food.quantity
-        let kcal = food.food?.kcal ?? 0
-        let defaultQuantity = food.food?.defaultQuantity ?? 0
-        let totalKcal = Float(kcal) * portion
         VStack(spacing: 0) {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(food.food?.name ?? "Unknown Food")
+                    Text(food.displayName)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(QC.fg)
                         .lineLimit(1)
-                    Text("\(String(format: "%.0f", portion * defaultQuantity)) \(food.food?.unit ?? "")")
+                    Text(food.portionDisplayString)
                         .font(.system(size: 12))
                         .monospacedDigit()
                         .foregroundStyle(QC.fg2)
                 }
                 Spacer(minLength: 8)
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
-                    Text("\(Int(totalKcal.rounded()))")
+                    Text("\(Int(food.totalKcalValue.rounded()))")
                         .font(.system(size: 15, weight: .semibold))
                         .monospacedDigit()
                         .foregroundStyle(QC.fg)
