@@ -887,7 +887,7 @@ struct PortionSheet: View {
                 EyebrowLabel("MENGE", size: 10, tracking: 0.8)
                 HStack(spacing: 10) {
                     StepperButton(symbol: "minus") {
-                        let step: Float = isFood ? max(1, baseDefault * 0.5) : 0.5
+                        let step: Float = isFood ? 10 : 0.5
                         let next = max(isFood ? 1 : 0.5, qtyVal - step)
                         quantity = formatNum(next)
                     }
@@ -911,7 +911,7 @@ struct PortionSheet: View {
                             .overlay(RoundedRectangle(cornerRadius: 12).stroke(QC.glassBorder, lineWidth: 0.5))
                     )
                     StepperButton(symbol: "plus", tinted: true) {
-                        let step: Float = isFood ? max(1, baseDefault * 0.5) : 0.5
+                        let step: Float = isFood ? 10 : 0.5
                         quantity = formatNum(qtyVal + step)
                     }
                 }

@@ -136,20 +136,37 @@ struct MainView: View {
             }
         }
         .sheet(item: $selectedFood, onDismiss: { selectedFood = nil; quantity = "" }) { trackedFood in
-            CustomAlertEdit(
-                quantity: $quantity,
-                foodItem: trackedFood.food,
-                onSave: {
-                    if let q = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
-                        mainViewModel.updateTrackedFoodQuantity(food: trackedFood, newQuantity: q)
-                        selectedFood = nil
-                    }
-                    mainViewModel.updateData()
-                },
-                onCancel: { selectedFood = nil }
-            )
-            .presentationDetents([.fraction(0.4)])
-            .presentationDragIndicator(.visible)
+            if let food = trackedFood.food {
+                let p = mealPreset(Int(trackedFood.daytime))
+                PortionSheet(
+                    title: food.name ?? "Unbekannt",
+                    subtitle: "\(formatNum(food.defaultQuantity)) \(food.unit ?? "") pro Portion",
+                    isFood: true,
+                    headerIcon: p.icon,
+                    baseDefault: food.defaultQuantity,
+                    unit: food.unit ?? "",
+                    baseKcal: Float(food.kcal),
+                    baseCarbs: food.carbohydrate,
+                    baseProtein: food.protein,
+                    baseFat: food.fat,
+                    tint: p.tint,
+                    ctaLabel: "Speichern",
+                    ctaIcon: "checkmark",
+                    quantity: $quantity,
+                    onSave: {
+                        if let q = Float(quantity.replacingOccurrences(of: ",", with: ".")) {
+                            let multiplier = q / max(food.defaultQuantity, 0.0001)
+                            mainViewModel.updateTrackedFoodQuantity(food: trackedFood, newQuantity: multiplier)
+                            selectedFood = nil
+                        }
+                        mainViewModel.updateData()
+                    },
+                    onCancel: { selectedFood = nil }
+                )
+                .presentationDetents([.fraction(0.55), .large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(.regularMaterial)
+            }
         }
     }
 
@@ -197,7 +214,8 @@ struct MainView: View {
             },
             onTapItem: { food in
                 selectedFood = food
-                quantity = String(format: "%g", food.quantity)
+                let grams = food.quantity * (food.food?.defaultQuantity ?? 1)
+                quantity = String(format: "%g", grams)
             },
             onDeleteItem: { food in
                 if let idx = mainViewModel.trackedFood(forDaytime: daytime).firstIndex(of: food) {
@@ -701,71 +719,6 @@ private struct FloatingTabBar: View {
             )
         }
         .buttonStyle(.plain)
-    }
-}
-
-// MARK: - Edit sheet (unchanged behavior)
-
-struct CustomAlertEdit: View {
-    @Binding var quantity: String
-    var foodItem: Food?
-    var onSave: () -> Void
-    var onCancel: () -> Void
-
-    private var portionAmount: Float {
-        Float(quantity.replacingOccurrences(of: ",", with: ".")) ?? 1.0
-    }
-
-    var body: some View {
-        if let food = foodItem {
-            VStack(alignment: .leading, spacing: 16) {
-                VStack(spacing: 4) {
-                    Text(food.name ?? "Unbekannt")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    Text("\(String(format: "%.0f", food.defaultQuantity)) \(food.unit ?? "") pro Portion")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Menge")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                    TextField("1", text: $quantity)
-                        .font(.title2)
-                        .keyboardType(.decimalPad)
-                        .padding(10)
-                        .background(Color(.systemGray6))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-
-                HStack {
-                    Spacer()
-                    Text("Kcal: \(String(format: "%.0f", Float(food.kcal) * portionAmount))")
-                    Spacer()
-                    Text("K: \(String(format: "%.1fg", food.carbohydrate * portionAmount))")
-                    Spacer()
-                    Text("P: \(String(format: "%.1fg", food.protein * portionAmount))")
-                    Spacer()
-                    Text("F: \(String(format: "%.1fg", food.fat * portionAmount))")
-                    Spacer()
-                }
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-                Button(action: onSave) {
-                    Text("Ändern")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 13)
-                }
-                .buttonStyle(.borderedProminent)
-            }
-            .padding(20)
-        }
     }
 }
 
