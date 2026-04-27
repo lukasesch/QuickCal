@@ -586,16 +586,21 @@ private struct MealCardView: View {
                 VStack(spacing: 0) {
                     ForEach(items.indices, id: \.self) { idx in
                         let food = items[idx]
-                        MealRow(food: food, isLast: idx == items.count - 1)
-                            .contentShape(Rectangle())
-                            .onTapGesture { onTapItem(food) }
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    onDeleteItem(food)
-                                } label: {
-                                    Label("Löschen", systemImage: "trash")
-                                }
+                        MealRow(
+                            name: food.displayName,
+                            portion: food.portionDisplayString,
+                            kcal: Int(food.totalKcalValue.rounded()),
+                            isLast: idx == items.count - 1
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture { onTapItem(food) }
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                onDeleteItem(food)
+                            } label: {
+                                Label("Löschen", systemImage: "trash")
                             }
+                        }
                     }
                 }
             }
@@ -633,25 +638,27 @@ private struct MealCardView: View {
 }
 
 private struct MealRow: View {
-    let food: TrackedFood
+    let name: String
+    let portion: String
+    let kcal: Int
     let isLast: Bool
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(food.displayName)
+                    Text(name)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(QC.fg)
                         .lineLimit(1)
-                    Text(food.portionDisplayString)
+                    Text(portion)
                         .font(.system(size: 12))
                         .monospacedDigit()
                         .foregroundStyle(QC.fg2)
                 }
                 Spacer(minLength: 8)
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
-                    Text("\(Int(food.totalKcalValue.rounded()))")
+                    Text("\(kcal)")
                         .font(.system(size: 15, weight: .semibold))
                         .monospacedDigit()
                         .foregroundStyle(QC.fg)
