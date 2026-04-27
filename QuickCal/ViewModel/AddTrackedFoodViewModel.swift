@@ -10,19 +10,28 @@ import CoreData
 import CryptoKit
 
 class AddTrackedFoodViewModel: ObservableObject {
-    
+
+    // MARK: - Published properties
+
+    @Published var foodItems: [Food] = []
+    @Published var mealItems: [Meal] = []
+
+    // MARK: - Private state
+
     private let context: NSManagedObjectContext
+    private var allFoodItems: [Food] = []
+    private var allMealItems: [Meal] = []
+
+    // MARK: - Init
+
     init(context: NSManagedObjectContext) {
         self.context = context
         fetchFoodItems()
         fetchMealItems()
     }
-    
-    @Published var foodItems: [Food] = []
-    @Published var mealItems: [Meal] = []
-    private var allFoodItems: [Food] = []
-    private var allMealItems: [Meal] = []
-    
+
+    // MARK: - Data fetching
+
     func fetchFoodItems() {
         let request: NSFetchRequest<Food> = Food.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(keyPath: \Food.lastUsed, ascending: false)]
@@ -47,6 +56,8 @@ class AddTrackedFoodViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Filtering
+
     func filterFoodItems(by searchText: String) {
         if searchText.isEmpty {
             foodItems = allFoodItems
@@ -67,6 +78,8 @@ class AddTrackedFoodViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Tracking (add)
+
     func addTrackedFood(food: Food, quantity: Float, daytime: Int16, selectedDate: Date) {
         let trackedFood = TrackedFood(context: context)
         trackedFood.date = selectedDate
@@ -112,6 +125,8 @@ class AddTrackedFoodViewModel: ObservableObject {
         fetchMealItems()
     }
     
+    // MARK: - Deletion
+
     func deleteFoodItem(at offsets: IndexSet) {
         offsets.forEach { index in
             let food = foodItems[index]
@@ -140,6 +155,8 @@ class AddTrackedFoodViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Update food attributes
+
     func updateFoodItemAttributes(food: Food, newName: String, newUnit: String, newDefaultQuantity: String, newCalories: String, newCarbs: String, newProtein: String, newFat: String) {
         food.name = newName
         food.unit = newUnit

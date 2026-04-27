@@ -12,14 +12,24 @@ import CoreData
 import CryptoKit
 
 class BarCodeViewModel: ObservableObject {
+
+    // MARK: - Environment
+
     @EnvironmentObject var mainViewModel: MainViewModel
+
+    // MARK: - Published properties
+
     @Published var scannedBarcode: String? = nil
     @Published var product: FoodItem? = nil
     @Published var isSessionRunning: Bool = false
-    
+
+    // MARK: - Private state
+
     private let context: NSManagedObjectContext
     private let cameraManager = CameraManager()
-    
+
+    // MARK: - Init
+
     init(context: NSManagedObjectContext) {
         self.context = context
         // Den neuen CameraManager als Delegate setzen
@@ -52,6 +62,8 @@ class BarCodeViewModel: ObservableObject {
         return cameraManager.getPreviewLayer()
     }
     
+    // MARK: - OpenFoodFacts lookup
+
     // Produkt über Barcode über OpenFoodFacts API suchen
     func searchProductByBarcode(barcode: String, completion: @escaping (FoodItem?) -> Void) {
         print("Searching product for barcode: \(barcode)")
@@ -116,6 +128,8 @@ class BarCodeViewModel: ObservableObject {
         task.resume()
     }
     
+    // MARK: - Persistence
+
     // Lebensmittel zur Datenbank hinzufügen
     func OpenFoodFactsFoodToDB(name: String, defaultQuantity: Float, unit: String, calories: Int16, carbs: Float, protein: Float, fat: Float, daytime: Int16, quantity: Float, selectedDate: Date) {
         // Unique Hash in Hexadezimal erstellen
@@ -170,10 +184,14 @@ class BarCodeViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Torch
+
     func toggleTorch() {
         cameraManager.toggleTorch()
     }
 }
+
+// MARK: - CameraManagerDelegate
 
 extension BarCodeViewModel: CameraManagerDelegate {
     func didDetectBarcode(with code: String) {

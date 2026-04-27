@@ -20,66 +20,6 @@ extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
     }
 }
 
-// MARK: - Design tokens
-
-private enum QC {
-    static let blue          = Color(hex: "0A84FF")
-    static let blueDark      = Color(hex: "0F2055")
-    static let carbs         = Color(hex: "14B8A6")
-    static let carbsSoft     = Color(hex: "D7F2EE")
-    static let protein       = Color(hex: "FF6A5B")
-    static let proteinSoft   = Color(hex: "FFE1DD")
-    static let fat           = Color(hex: "F5B63F")
-    static let fatSoft       = Color(hex: "FCEBC8")
-    static let fg            = Color.black
-    static let fg2           = Color(red: 60/255, green: 60/255, blue: 67/255).opacity(0.60)
-    static let fg3           = Color(red: 60/255, green: 60/255, blue: 67/255).opacity(0.30)
-    static let separator     = Color(red: 60/255, green: 60/255, blue: 67/255).opacity(0.18)
-    static let glassBorder   = Color.white.opacity(0.55)
-    static let shadowColor   = Color(hex: "0F2055").opacity(0.10)
-}
-
-// MARK: - Meal preset (per daytime)
-
-private struct MealPreset {
-    let label: String
-    let tint: Color
-    let icon: String
-}
-
-private let MEAL_PRESETS: [Int: MealPreset] = [
-    0: MealPreset(label: "Frühstück",   tint: QC.fat,     icon: "sun.max.fill"),
-    1: MealPreset(label: "Mittagessen", tint: QC.carbs,   icon: "fork.knife"),
-    2: MealPreset(label: "Abendessen",  tint: QC.blue,    icon: "moon.fill"),
-    3: MealPreset(label: "Snacks",      tint: QC.protein, icon: "leaf.fill"),
-]
-
-private func preset(_ d: Int) -> MealPreset { MEAL_PRESETS[d] ?? MEAL_PRESETS[0]! }
-
-// MARK: - Backdrop
-
-private struct LiquidBackdrop: View {
-    var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [Color(hex: "F6FAFF"), Color(hex: "EEF3FA")],
-                startPoint: .top, endPoint: .bottom
-            )
-            RadialGradient(
-                colors: [QC.blue.opacity(0.22), .clear],
-                center: UnitPoint(x: 0.18, y: 0.08),
-                startRadius: 5, endRadius: 360
-            )
-            RadialGradient(
-                colors: [QC.blueDark.opacity(0.14), .clear],
-                center: UnitPoint(x: 0.92, y: 0.96),
-                startRadius: 5, endRadius: 320
-            )
-        }
-        .ignoresSafeArea()
-    }
-}
-
 // MARK: - Main view
 
 struct AddTrackedFoodView: View {
@@ -119,7 +59,7 @@ struct AddTrackedFoodView: View {
 
     enum SourceMode { case food, meal }
 
-    private var p: MealPreset { preset(daytime) }
+    private var p: MealPreset { mealPreset(daytime) }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -183,6 +123,7 @@ struct AddTrackedFoodView: View {
                 title: food.name ?? "Unbekannt",
                 subtitle: "\(formatNum(food.defaultQuantity)) \(food.unit ?? "") pro Portion",
                 isFood: true,
+                headerIcon: "carrot.fill",
                 baseDefault: food.defaultQuantity,
                 unit: food.unit ?? "",
                 baseKcal: Float(food.kcal),
@@ -215,6 +156,7 @@ struct AddTrackedFoodView: View {
                 title: meal.name ?? "Unbekannt",
                 subtitle: mealIngredients(meal),
                 isFood: false,
+                headerIcon: "fork.knife",
                 baseDefault: Float(meal.defaultQuantity),
                 unit: meal.unit ?? "Portion",
                 baseKcal: Float(meal.kcal) / Float(max(meal.defaultQuantity, 1)),
@@ -288,11 +230,7 @@ struct AddTrackedFoodView: View {
 
     private var sectionHeader: some View {
         HStack(spacing: 10) {
-            Text("Zuletzt benutzt")
-                .font(.system(size: 12, weight: .bold))
-                .tracking(0.7)
-                .foregroundStyle(QC.fg2)
-                .textCase(.uppercase)
+            EyebrowLabel("Zuletzt benutzt", size: 12)
             Spacer()
             Button {
                 if mode == .food { navigateToCreateFood = true }
@@ -403,54 +341,6 @@ struct AddTrackedFoodView: View {
     }
 }
 
-// MARK: - Glass card background
-
-private struct GlassCardBg: View {
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(.regularMaterial)
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color.white.opacity(0.78))
-        }
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .strokeBorder(Color.black.opacity(0.06), lineWidth: 0.5)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .inset(by: 0.5)
-                .stroke(Color.white.opacity(0.85), lineWidth: 0.5)
-        )
-        .shadow(color: QC.blueDark.opacity(0.06), radius: 18, x: 0, y: 6)
-    }
-}
-
-// MARK: - Glass circle button
-
-private struct CircleGlassButton: View {
-    let systemName: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: systemName)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(QC.blue)
-                .frame(width: 36, height: 36)
-                .background(
-                    ZStack {
-                        Circle().fill(.regularMaterial)
-                        Circle().fill(Color.white.opacity(0.55))
-                    }
-                    .overlay(Circle().stroke(QC.glassBorder, lineWidth: 0.5))
-                    .shadow(color: QC.blueDark.opacity(0.06), radius: 8, x: 0, y: 2)
-                )
-        }
-        .buttonStyle(.plain)
-    }
-}
-
 // MARK: - Meal mode pill (dropdown)
 
 private struct MealModePill: View {
@@ -462,22 +352,22 @@ private struct MealModePill: View {
     private let snapThreshold: CGFloat = 44
 
     var body: some View {
-        let pre = preset(daytime)
+        let pre = mealPreset(daytime)
         ZStack {
             // Adjacent peek labels (Camera-app style mode reveal)
             HStack(spacing: 14) {
                 if daytime > 0 {
-                    Text(preset(daytime - 1).label)
+                    Text(mealPreset(daytime - 1).label)
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(preset(daytime - 1).tint.opacity(0.55))
+                        .foregroundStyle(mealPreset(daytime - 1).tint.opacity(0.55))
                         .offset(x: dragX * 0.6 - 70)
                         .opacity(min(1, Double(dragX / snapThreshold)))
                 }
                 Spacer()
                 if daytime < 3 {
-                    Text(preset(daytime + 1).label)
+                    Text(mealPreset(daytime + 1).label)
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(preset(daytime + 1).tint.opacity(0.55))
+                        .foregroundStyle(mealPreset(daytime + 1).tint.opacity(0.55))
                         .offset(x: dragX * 0.6 + 70)
                         .opacity(min(1, Double(-dragX / snapThreshold)))
                 }
@@ -500,14 +390,7 @@ private struct MealModePill: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(
-                ZStack {
-                    Capsule().fill(.regularMaterial)
-                    Capsule().fill(Color.white.opacity(0.55))
-                }
-                .overlay(Capsule().stroke(QC.glassBorder, lineWidth: 0.5))
-                .shadow(color: QC.blueDark.opacity(0.06), radius: 8, x: 0, y: 2)
-            )
+            .glassCapsule()
             .offset(x: dragX)
             .scaleEffect(1 - min(0.04, abs(dragX) / 800))
             .contentShape(Capsule())
@@ -542,7 +425,7 @@ private struct MealModePill: View {
             .popover(isPresented: $menuOpen, attachmentAnchor: .point(.bottom), arrowEdge: .top) {
                 VStack(spacing: 0) {
                     ForEach(0..<4, id: \.self) { i in
-                        let m = preset(i)
+                        let m = mealPreset(i)
                         Button {
                             UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
@@ -919,14 +802,8 @@ private struct BottomSearchDock: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(
-                ZStack {
-                    Capsule().fill(.regularMaterial)
-                    Capsule().fill(Color.white.opacity(0.55))
-                }
-                .overlay(Capsule().stroke(QC.glassBorder, lineWidth: 0.5))
-                .shadow(color: QC.blueDark.opacity(0.18), radius: 24, x: 0, y: 8)
-            )
+            .glassCapsule()
+            .shadow(color: QC.blueDark.opacity(0.12), radius: 16, x: 0, y: 6)
 
             Button(action: onScan) {
                 Image(systemName: "barcode.viewfinder")
@@ -948,10 +825,11 @@ private struct BottomSearchDock: View {
 
 // MARK: - Portion sheet
 
-private struct PortionSheet: View {
+struct PortionSheet: View {
     let title: String
     let subtitle: String
     let isFood: Bool
+    let headerIcon: String
     let baseDefault: Float
     let unit: String
     let baseKcal: Float
@@ -985,7 +863,7 @@ private struct PortionSheet: View {
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12).fill(tint.opacity(0.18))
-                    Image(systemName: isFood ? "carrot.fill" : "fork.knife")
+                    Image(systemName: headerIcon)
                         .font(.system(size: 19, weight: .semibold))
                         .foregroundStyle(tint)
                 }
@@ -1006,10 +884,7 @@ private struct PortionSheet: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("MENGE")
-                    .font(.system(size: 10, weight: .bold))
-                    .tracking(0.8)
-                    .foregroundStyle(QC.fg2)
+                EyebrowLabel("MENGE", size: 10, tracking: 0.8)
                 HStack(spacing: 10) {
                     StepperButton(symbol: "minus") {
                         let step: Float = isFood ? max(1, baseDefault * 0.5) : 0.5
@@ -1056,7 +931,7 @@ private struct PortionSheet: View {
                                 .padding(.vertical, 7)
                                 .background(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .fill(active ? QC.blue.opacity(0.14) : Color(red: 60/255, green: 60/255, blue: 67/255).opacity(0.06))
+                                        .fill(active ? QC.blue.opacity(0.14) : QC.fillTertiary)
                                 )
                         }
                         .buttonStyle(.plain)
@@ -1078,10 +953,7 @@ private struct PortionSheet: View {
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(QC.fg2)
                     Spacer()
-                    Text("GESAMT")
-                        .font(.system(size: 10, weight: .bold))
-                        .tracking(0.8)
-                        .foregroundStyle(QC.fg2)
+                    EyebrowLabel("GESAMT", size: 10, tracking: 0.8)
                 }
                 HStack(spacing: 10) {
                     MacroBar(label: "K", value: liveC, target: 200, color: QC.carbs, soft: QC.carbsSoft)
@@ -1119,7 +991,7 @@ private struct PortionSheet: View {
     }
 }
 
-private struct StepperButton: View {
+struct StepperButton: View {
     let symbol: String
     var tinted: Bool = false
     let action: () -> Void
@@ -1134,14 +1006,14 @@ private struct StepperButton: View {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(tinted
                               ? QC.blue.opacity(0.14)
-                              : Color(red: 60/255, green: 60/255, blue: 67/255).opacity(0.08))
+                              : QC.fillTertiarySolid)
                 )
         }
         .buttonStyle(.plain)
     }
 }
 
-private struct MacroBar: View {
+struct MacroBar: View {
     let label: String
     let value: Float
     let target: Float
@@ -1176,15 +1048,6 @@ private struct MacroBar: View {
         }
         .frame(maxWidth: .infinity)
     }
-}
-
-// MARK: - Helpers
-
-private func formatNum(_ v: Float) -> String {
-    if v.truncatingRemainder(dividingBy: 1) == 0 {
-        return String(format: "%.0f", v)
-    }
-    return String(format: "%g", v)
 }
 
 // MARK: - CustomFoodAlert (used by CreateMealIngredientsView)

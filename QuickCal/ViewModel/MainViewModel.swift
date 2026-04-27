@@ -11,6 +11,9 @@ import SwiftUI
 import UIKit
 
 class MainViewModel: ObservableObject {
+
+    // MARK: - Published properties
+
     @Published var kcalGoal: Double = 0
     @Published var kcalReached: Double = 0
     @Published var carbsGoal: Double = 0
@@ -22,6 +25,7 @@ class MainViewModel: ObservableObject {
     @Published var user: User?
     @Published var trackedFood: [TrackedFood] = []
     @Published var showAddTrackedFoodPanel: Bool = false
+    @Published var selectedDaytime: Int? = nil
     
     @Published var kcalMorning: Double = 0
     @Published var carbsMorning: Double = 0
@@ -52,6 +56,8 @@ class MainViewModel: ObservableObject {
     }
     @Published var showingDatePicker: Bool = false
 
+    // MARK: - Computed
+
     var dateLabel: String {
         let cal = Calendar.current
         let date = selectedDate
@@ -66,8 +72,12 @@ class MainViewModel: ObservableObject {
         return f.string(from: date)
     }
 
+    // MARK: - Private state
+
     private let context: NSManagedObjectContext
     private var timeChangeObserver: NSObjectProtocol?
+
+    // MARK: - Init / Deinit
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -79,7 +89,15 @@ class MainViewModel: ObservableObject {
             self?.selectedDate = Date()
         }
     }
+
+    deinit {
+        if let observer = timeChangeObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
     
+    // MARK: - Progress percentages
+
     var kcalProgressPercentage: Double {
         guard kcalGoal > 0 else { return 0 }
         return 1.0 - ((kcalGoal - kcalReached) / kcalGoal)
@@ -97,6 +115,8 @@ class MainViewModel: ObservableObject {
         return 1.0 - ((Double(fatGoal) - Double(fatReached)) / Double(fatGoal))
     }
     
+    // MARK: - Data refresh
+
     func updateData() {
         fetchTrackedFood()
         self.kcalReached = trackedFood.reduce(0.0) { $0 + Double($1.food?.kcal ?? 0) * Double($1.quantity) }
@@ -109,6 +129,8 @@ class MainViewModel: ObservableObject {
         calculateAggregates(forDaytime: 2, into: &kcalEvening, &carbsEvening, &proteinEvening, &fatEvening)
         calculateAggregates(forDaytime: 3, into: &kcalSnacks, &carbsSnacks, &proteinSnacks, &fatSnacks)
     }
+
+    // MARK: - Lifecycle
 
     func handleScenePhase(_ phase: ScenePhase) {
         if phase == .active {
@@ -133,6 +155,8 @@ class MainViewModel: ObservableObject {
         updateData()
     }
     
+    // MARK: - Data fetching
+
     @MainActor
     func fetchOrCreateUser() {
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
@@ -197,6 +221,8 @@ class MainViewModel: ObservableObject {
     }
     
     
+    // MARK: - Daily kcal calculations
+
     private func assignDailyKcalValues(_ dailyKcal: Kcal) {
         kcalGoal = dailyKcal.kcalGoal
         kcalReached = dailyKcal.kcalReached
@@ -309,6 +335,8 @@ class MainViewModel: ObservableObject {
         
     }
     
+    // MARK: - Mutations
+
     func deleteTrackedFoodItem(at offsets: IndexSet, forDaytime daytime: Int16) {
         let itemsToDelete = trackedFood(forDaytime: daytime)
         
@@ -338,6 +366,8 @@ class MainViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Aggregates
+
     private func calculateAggregates(forDaytime daytime: Int16, into kcal: inout Double, _ carbs: inout Double, _ protein: inout Double, _ fat: inout Double) {
         let filteredFoods = trackedFood.filter { $0.daytime == daytime }
         
@@ -347,7 +377,8 @@ class MainViewModel: ObservableObject {
         fat = filteredFoods.reduce(0.0) { $0 + Double($1.food?.fat ?? 0) * Double($1.quantity) }
     }
     
-    //NEU
+    // MARK: - Recalculate
+
     @MainActor
     func recalculateCalories() {
         fetchOrCreateUser()
@@ -369,6 +400,8 @@ class MainViewModel: ObservableObject {
         print(kcalGoal)
     }
     
+    // MARK: - Copy entries
+
     func copyEntriesToDate(daytime: Int, targetDate: Date) {
         print("Copy angestoßen")
         

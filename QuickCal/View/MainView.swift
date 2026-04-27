@@ -8,27 +8,6 @@
 import SwiftUI
 import CoreData
 
-// MARK: - Design tokens
-
-private enum QC {
-    static let blue          = Color(hex: "0A84FF")
-    static let blueDark      = Color(hex: "0F2055")
-    static let blueRail      = Color(hex: "DCEBFF")
-    static let blueWash      = Color(hex: "EEF5FF")
-    static let carbs         = Color(hex: "14B8A6")
-    static let carbsSoft     = Color(hex: "D7F2EE")
-    static let protein       = Color(hex: "FF6A5B")
-    static let proteinSoft   = Color(hex: "FFE1DD")
-    static let fat           = Color(hex: "F5B63F")
-    static let fatSoft       = Color(hex: "FCEBC8")
-    static let fg            = Color.black
-    static let fg2           = Color(red: 60/255, green: 60/255, blue: 67/255).opacity(0.60)
-    static let fg3           = Color(red: 60/255, green: 60/255, blue: 67/255).opacity(0.30)
-    static let separator     = Color(red: 60/255, green: 60/255, blue: 67/255).opacity(0.18)
-    static let glassBorder   = Color.white.opacity(0.55)
-    static let shadowColor   = Color(hex: "0F2055").opacity(0.10)
-}
-
 // MARK: - Main view
 
 struct MainView: View {
@@ -36,7 +15,6 @@ struct MainView: View {
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("onboarding") private var onboardingDone = false
     @State private var showingSettings = false
-    @State private var selectedDaytime: Int? = nil
 
     // Easter egg
     @State private var tapCount = 0
@@ -91,26 +69,22 @@ struct MainView: View {
                             .padding(.bottom, 8)
 
                         VStack(spacing: 12) {
-                            mealCard(daytime: 0, title: "Frühstück",
-                                     iconName: "sun.max.fill", tint: QC.fat,
+                            mealCard(daytime: 0,
                                      kcal: mainViewModel.kcalMorning,
                                      carbs: mainViewModel.carbsMorning,
                                      protein: mainViewModel.proteinMorning,
                                      fat: mainViewModel.fatMorning)
-                            mealCard(daytime: 1, title: "Mittagessen",
-                                     iconName: "fork.knife", tint: QC.carbs,
+                            mealCard(daytime: 1,
                                      kcal: mainViewModel.kcalMidday,
                                      carbs: mainViewModel.carbsMidday,
                                      protein: mainViewModel.proteinMidday,
                                      fat: mainViewModel.fatMidday)
-                            mealCard(daytime: 2, title: "Abendessen",
-                                     iconName: "moon.fill", tint: QC.blue,
+                            mealCard(daytime: 2,
                                      kcal: mainViewModel.kcalEvening,
                                      carbs: mainViewModel.carbsEvening,
                                      protein: mainViewModel.proteinEvening,
                                      fat: mainViewModel.fatEvening)
-                            mealCard(daytime: 3, title: "Snacks",
-                                     iconName: "leaf.fill", tint: QC.protein,
+                            mealCard(daytime: 3,
                                      kcal: mainViewModel.kcalSnacks,
                                      carbs: mainViewModel.carbsSnacks,
                                      protein: mainViewModel.proteinSnacks,
@@ -146,7 +120,7 @@ struct MainView: View {
                 SettingsView()
             }
             .navigationDestination(isPresented: $mainViewModel.showAddTrackedFoodPanel) {
-                if let daytime = selectedDaytime {
+                if let daytime = mainViewModel.selectedDaytime {
                     AddTrackedFoodView(
                         showAddTrackedFoodPanel: $mainViewModel.showAddTrackedFoodPanel,
                         selectedDaytime: daytime,
@@ -204,12 +178,13 @@ struct MainView: View {
     }
 
     @ViewBuilder
-    private func mealCard(daytime: Int16, title: String, iconName: String, tint: Color,
+    private func mealCard(daytime: Int16,
                           kcal: Double, carbs: Double, protein: Double, fat: Double) -> some View {
+        let p = mealPreset(Int(daytime))
         MealCardView(
-            title: title,
-            iconName: iconName,
-            tint: tint,
+            title: p.label,
+            iconName: p.icon,
+            tint: p.tint,
             totalKcal: kcal,
             totalCarbs: carbs,
             totalProtein: protein,
@@ -217,7 +192,7 @@ struct MainView: View {
             items: mainViewModel.trackedFood(forDaytime: daytime),
             sourceDaytime: Int(daytime),
             onAdd: {
-                selectedDaytime = Int(daytime)
+                mainViewModel.selectedDaytime = Int(daytime)
                 mainViewModel.showAddTrackedFoodPanel.toggle()
             },
             onTapItem: { food in
@@ -230,61 +205,6 @@ struct MainView: View {
                 }
             }
         )
-    }
-}
-
-// MARK: - Backdrop
-
-private struct LiquidBackdrop: View {
-    var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [Color(hex: "F6FAFF"), Color(hex: "EEF3FA")],
-                startPoint: .top, endPoint: .bottom
-            )
-            RadialGradient(
-                colors: [QC.blue.opacity(0.22), .clear],
-                center: UnitPoint(x: 0.18, y: 0.08),
-                startRadius: 5, endRadius: 360
-            )
-            RadialGradient(
-                colors: [QC.blueDark.opacity(0.14), .clear],
-                center: UnitPoint(x: 0.92, y: 0.96),
-                startRadius: 5, endRadius: 320
-            )
-        }
-        .ignoresSafeArea()
-    }
-}
-
-// MARK: - Glass card
-
-private struct GlassCard<Content: View>: View {
-    var radius: CGFloat = 24
-    var pad: CGFloat = 16
-    @ViewBuilder var content: () -> Content
-    var body: some View {
-        content()
-            .padding(pad)
-            .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .fill(.regularMaterial)
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .fill(Color.white.opacity(0.78))
-                }
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder(Color.black.opacity(0.06), lineWidth: 0.5)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .inset(by: 0.5)
-                    .stroke(Color.white.opacity(0.85), lineWidth: 0.5)
-            )
-            .shadow(color: QC.blueDark.opacity(0.05), radius: 18, x: 0, y: 6)
-            .shadow(color: QC.blueDark.opacity(0.03), radius: 2, x: 0, y: 1)
     }
 }
 
@@ -319,33 +239,13 @@ private struct TopHeader: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(
-                ZStack {
-                    Capsule().fill(.regularMaterial)
-                    Capsule().fill(Color.white.opacity(0.55))
-                }
-                .overlay(Capsule().stroke(QC.glassBorder, lineWidth: 0.5))
-                .shadow(color: QC.blueDark.opacity(0.06), radius: 8, x: 0, y: 2)
-            )
+            .glassCapsule()
             .contentShape(Capsule())
             .onTapGesture(perform: onDate)
 
             Spacer(minLength: 0)
 
-            Button(action: onSettings) {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 18, weight: .regular))
-                    .foregroundStyle(QC.blue)
-                    .frame(width: 42, height: 42)
-                    .background(
-                        ZStack {
-                            Circle().fill(.regularMaterial)
-                            Circle().fill(Color.white.opacity(0.55))
-                        }
-                        .overlay(Circle().stroke(QC.glassBorder, lineWidth: 0.5))
-                        .shadow(color: QC.blueDark.opacity(0.06), radius: 8, x: 0, y: 2)
-                    )
-            }
+            CircleGlassButton(systemName: "gearshape", size: 42, iconSize: 18, iconWeight: .regular, action: onSettings)
         }
         .padding(.horizontal, 14)
     }
@@ -374,10 +274,7 @@ private struct KcalHeroCard: View {
                         .frame(width: 260, height: 130)
 
                     VStack(spacing: 2) {
-                        Text("VERBRAUCHT")
-                            .font(.system(size: 10, weight: .bold))
-                            .tracking(0.8)
-                            .foregroundStyle(QC.fg2)
+                        EyebrowLabel("VERBRAUCHT", size: 10, tracking: 0.8)
                         Text("\(Int(kcal.rounded()))")
                             .font(.system(size: 56, weight: .heavy, design: .rounded))
                             .kerning(-1.5)
@@ -462,10 +359,7 @@ private struct FlankStat: View {
 
     var body: some View {
         VStack(alignment: align, spacing: 2) {
-            Text(label)
-                .font(.system(size: 10, weight: .bold))
-                .tracking(0.6)
-                .foregroundStyle(QC.fg2)
+            EyebrowLabel(label, size: 10, tracking: 0.6)
             HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text(value)
                     .font(.system(size: 20, weight: .bold))
@@ -924,42 +818,6 @@ struct CopyMenuView: View {
                 .font(.system(size: 13, weight: .semibold))
         }
         .textCase(nil)
-    }
-}
-
-// MARK: - Color hex helpers (kept as extension for app-wide use)
-
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: Double
-        switch hex.count {
-        case 6:
-            (a, r, g, b) = (1, Double((int >> 16) & 0xFF) / 255, Double((int >> 8) & 0xFF) / 255, Double(int & 0xFF) / 255)
-        case 8:
-            (a, r, g, b) = (Double((int >> 24) & 0xFF) / 255, Double((int >> 16) & 0xFF) / 255, Double((int >> 8) & 0xFF) / 255, Double(int & 0xFF) / 255)
-        default:
-            (a, r, g, b) = (1, 1, 1, 1)
-        }
-        self.init(red: r, green: g, blue: b, opacity: a)
-    }
-
-    func darker(by percentage: CGFloat) -> Color {
-        let uiColor = UIColor(self)
-        var hue: CGFloat = 0, saturation: CGFloat = 0, brightness: CGFloat = 0, alpha: CGFloat = 0
-        uiColor.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
-        return Color(hue: Double(hue), saturation: Double(saturation),
-                     brightness: Double(max(brightness - percentage, 0)), opacity: Double(alpha))
-    }
-
-    func lighter(by percentage: CGFloat) -> Color {
-        let uiColor = UIColor(self)
-        var hue: CGFloat = 0, saturation: CGFloat = 0, brightness: CGFloat = 0, alpha: CGFloat = 0
-        uiColor.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
-        return Color(hue: Double(hue), saturation: Double(saturation),
-                     brightness: Double(max(brightness + percentage, 0)), opacity: Double(alpha))
     }
 }
 
