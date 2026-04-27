@@ -199,11 +199,19 @@ struct AddTrackedFoodView: View {
                     editFood = nil
                     mainViewModel.updateData()
                 },
-                onCancel: { editFood = nil }
+                onCancel: { editFood = nil },
+                onDelete: {
+                    if let i = addTrackedFoodViewModel.foodItems.firstIndex(of: food) {
+                        addTrackedFoodViewModel.deleteFoodItem(at: IndexSet(integer: i))
+                        mainViewModel.updateData()
+                    }
+                    editFood = nil
+                }
             )
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.fraction(0.62), .large])
             .presentationDragIndicator(.visible)
             .scrollContentBackground(.hidden)
+            .presentationBackground(.regularMaterial)
         }
     }
 
@@ -1118,35 +1126,109 @@ struct CustomAlertEditFoodAttributes: View {
     var foodItem: Food
     var onSave: () -> Void
     var onCancel: () -> Void
+    var onDelete: () -> Void
+
+    private var qtyVal: Float {
+        Float(newDefaultQuantity.replacingOccurrences(of: ",", with: ".")) ?? foodItem.defaultQuantity
+    }
+    private var kcalVal: Float {
+        Float(newCalories.replacingOccurrences(of: ",", with: ".")) ?? Float(foodItem.kcal)
+    }
+    private var carbsVal: Float {
+        Float(newCarbs.replacingOccurrences(of: ",", with: ".")) ?? foodItem.carbohydrate
+    }
+    private var proteinVal: Float {
+        Float(newProtein.replacingOccurrences(of: ",", with: ".")) ?? foodItem.protein
+    }
+    private var fatVal: Float {
+        Float(newFat.replacingOccurrences(of: ",", with: ".")) ?? foodItem.fat
+    }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 11) {
-                Text("Bearbeiten")
-                    .font(.title2).fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Name").font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
-                    TextField("Neuer Name", text: $newName)
-                        .submitLabel(.done)
-                        .padding(10)
-                        .background(Color(.systemGray6))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .onAppear { newName = foodItem.name ?? "" }
+            VStack(alignment: .leading, spacing: 16) {
+                // MARK: Header
+                HStack(alignment: .top, spacing: 12) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12).fill(QC.blue.opacity(0.18))
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.system(size: 19, weight: .semibold))
+                            .foregroundStyle(QC.blue)
+                    }
+                    .frame(width: 42, height: 42)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(foodItem.name ?? "Unbekannt")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(QC.fg)
+                            .lineLimit(2)
+                        Text("Lebensmittel bearbeiten")
+                            .font(.system(size: 12))
+                            .foregroundStyle(QC.fg2)
+                    }
+                    Spacer()
+                    Button(action: onDelete) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.red)
+                            .frame(width: 32, height: 32)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.red.opacity(0.10))
+                            )
+                    }
+                    .buttonStyle(.plain)
                 }
 
+                // MARK: Name
+                VStack(alignment: .leading, spacing: 6) {
+                    EyebrowLabel("NAME", size: 10, tracking: 0.8)
+                    TextField("Name", text: $newName)
+                        .submitLabel(.done)
+                        .padding(10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.7))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(QC.glassBorder, lineWidth: 0.5))
+                        )
+                }
+
+                // MARK: Portion & Unit
                 HStack(alignment: .top, spacing: 12) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Portionsgröße").font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
-                        TextField("100", text: $newDefaultQuantity)
-                            .keyboardType(.numberPad).submitLabel(.done)
-                            .padding(8).background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .onAppear { newDefaultQuantity = String(foodItem.defaultQuantity) }
+                        EyebrowLabel("PORTION", size: 10, tracking: 0.8)
+                        HStack(spacing: 10) {
+                            StepperButton(symbol: "minus") {
+                                let next = max(1, qtyVal - 10)
+                                newDefaultQuantity = formatNum(next)
+                            }
+                            HStack(spacing: 6) {
+                                TextField("100", text: $newDefaultQuantity)
+                                    .keyboardType(.decimalPad)
+                                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                    .monospacedDigit()
+                                    .multilineTextAlignment(.center)
+                                    .foregroundStyle(QC.fg)
+                                Text(newUnit.isEmpty ? "g" : newUnit)
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(QC.fg2)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.white.opacity(0.7))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(QC.glassBorder, lineWidth: 0.5))
+                            )
+                            StepperButton(symbol: "plus", tinted: true) {
+                                newDefaultQuantity = formatNum(qtyVal + 10)
+                            }
+                        }
                     }
+                    .frame(maxWidth: .infinity)
+
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Einheit").font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
+                        EyebrowLabel("EINHEIT", size: 10, tracking: 0.8)
                         Picker("Einheit", selection: $newUnit) {
                             Text("Gramm").tag("g")
                             Text("Kilogramm").tag("kg")
@@ -1157,59 +1239,121 @@ struct CustomAlertEditFoodAttributes: View {
                         .pickerStyle(.menu)
                         .padding(8)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(.systemGray6))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .onAppear { newUnit = foodItem.unit ?? "g" }
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.7))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(QC.glassBorder, lineWidth: 0.5))
+                        )
                     }
+                    .frame(maxWidth: 130)
                 }
 
+                // MARK: Calories
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Kalorien (kcal)").font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
-                    TextField("83", text: $newCalories)
-                        .keyboardType(.decimalPad).submitLabel(.done)
-                        .padding(10).background(Color(.systemGray6))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .onAppear { newCalories = String(foodItem.kcal) }
-                }
-
-                HStack(alignment: .top, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("K (g)").font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
-                        TextField("43", text: $newCarbs)
-                            .keyboardType(.decimalPad).submitLabel(.done)
-                            .padding(8).background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .onAppear { newCarbs = String(foodItem.carbohydrate) }
-                    }
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("P (g)").font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
-                        TextField("5.1", text: $newProtein)
-                            .keyboardType(.decimalPad).submitLabel(.done)
-                            .padding(8).background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .onAppear { newProtein = String(foodItem.protein) }
-                    }
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("F (g)").font(.caption).foregroundStyle(.secondary).textCase(.uppercase)
-                        TextField("1.3", text: $newFat)
-                            .keyboardType(.decimalPad).submitLabel(.done)
-                            .padding(8).background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .onAppear { newFat = String(foodItem.fat) }
-                    }
-                }
-
-                Button(action: onSave) {
-                    Text("Speichern")
-                        .fontWeight(.semibold)
+                    EyebrowLabel("KALORIEN", size: 10, tracking: 0.8)
+                    HStack(spacing: 10) {
+                        StepperButton(symbol: "minus") {
+                            let next = max(0, kcalVal - 10)
+                            newCalories = formatNum(next)
+                        }
+                        HStack(spacing: 6) {
+                            TextField("0", text: $newCalories)
+                                .keyboardType(.decimalPad)
+                                .font(.system(size: 20, weight: .heavy, design: .rounded))
+                                .monospacedDigit()
+                                .multilineTextAlignment(.center)
+                                .foregroundStyle(QC.fg)
+                            Text("kcal")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(QC.fg2)
+                        }
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 13)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.7))
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(QC.glassBorder, lineWidth: 0.5))
+                        )
+                        StepperButton(symbol: "plus", tinted: true) {
+                            newCalories = formatNum(kcalVal + 10)
+                        }
+                    }
                 }
-                .buttonStyle(.borderedProminent)
+
+                // MARK: Macros
+                HStack(alignment: .top, spacing: 12) {
+                    macroField(label: "KOHLEHYDRATE", value: $newCarbs, color: QC.carbs, soft: QC.carbsSoft, unit: "g")
+                    macroField(label: "PROTEIN", value: $newProtein, color: QC.protein, soft: QC.proteinSoft, unit: "g")
+                    macroField(label: "FETT", value: $newFat, color: QC.fat, soft: QC.fatSoft, unit: "g")
+                }
+
+                // MARK: Save
+                Button(action: onSave) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 13, weight: .bold))
+                        Text("Speichern")
+                            .font(.system(size: 15, weight: .semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(LinearGradient(colors: [QC.blue, QC.blue.opacity(0.86)],
+                                                 startPoint: .top, endPoint: .bottom))
+                            .shadow(color: QC.blue.opacity(0.40), radius: 12, x: 0, y: 6)
+                    )
+                }
+                .buttonStyle(.plain)
             }
             .padding(20)
         }
-        .background(.clear)
+        .scrollContentBackground(.hidden)
+        .onAppear {
+            newName = foodItem.name ?? ""
+            newUnit = foodItem.unit ?? "g"
+            newDefaultQuantity = String(foodItem.defaultQuantity)
+            newCalories = String(foodItem.kcal)
+            newCarbs = String(foodItem.carbohydrate)
+            newProtein = String(foodItem.protein)
+            newFat = String(foodItem.fat)
+        }
+    }
+
+    private func macroField(label: String, value: Binding<String>, color: Color, soft: Color, unit: String) -> some View {
+        let val = Float(value.wrappedValue.replacingOccurrences(of: ",", with: ".")) ?? 0
+        return VStack(alignment: .leading, spacing: 6) {
+            EyebrowLabel(label, size: 8, tracking: 0.6)
+            HStack(spacing: 6) {
+                TextField("0", text: value)
+                    .keyboardType(.decimalPad)
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(QC.fg)
+                Text(unit)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(QC.fg2)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(0.7))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(QC.glassBorder, lineWidth: 0.5))
+            )
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(soft)
+                    Capsule().fill(color)
+                        .frame(width: geo.size.width * CGFloat(min(val / 100, 1)))
+                }
+            }
+            .frame(height: 4)
+        }
     }
 }
 
