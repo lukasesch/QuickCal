@@ -123,8 +123,9 @@ struct MainView: View {
                 }
                 .scrollIndicators(.hidden)
 
-                FloatingTabBar(active: $activeTab)
-                    .padding(.bottom, 12)
+                // Temporarily disabled until Kalender/Statistik/Profil implemented
+                // FloatingTabBar(active: $activeTab)
+                //     .padding(.bottom, 12)
             }
             .navigationBarBackButtonHidden(true)
             .sheet(isPresented: $mainViewModel.showingDatePicker) {
@@ -148,7 +149,7 @@ struct MainView: View {
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
             }
-            .sheet(isPresented: $mainViewModel.showAddTrackedFoodPanel) {
+            .navigationDestination(isPresented: $mainViewModel.showAddTrackedFoodPanel) {
                 if let daytime = selectedDaytime {
                     AddTrackedFoodView(
                         showAddTrackedFoodPanel: $mainViewModel.showAddTrackedFoodPanel,
@@ -305,16 +306,22 @@ private struct GlassCard<Content: View>: View {
             .background(
                 ZStack {
                     RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(.regularMaterial)
                     RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .fill(Color.white.opacity(0.25))
+                        .fill(Color.white.opacity(0.78))
                 }
             )
             .overlay(
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .stroke(QC.glassBorder, lineWidth: 0.5)
+                    .strokeBorder(Color.black.opacity(0.06), lineWidth: 0.5)
             )
-            .shadow(color: QC.shadowColor, radius: 20, x: 0, y: 8)
+            .overlay(
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .inset(by: 0.5)
+                    .stroke(Color.white.opacity(0.85), lineWidth: 0.5)
+            )
+            .shadow(color: QC.blueDark.opacity(0.05), radius: 18, x: 0, y: 6)
+            .shadow(color: QC.blueDark.opacity(0.03), radius: 2, x: 0, y: 1)
     }
 }
 
@@ -350,9 +357,12 @@ private struct TopHeader: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
             .background(
-                Capsule().fill(.ultraThinMaterial)
-                    .overlay(Capsule().stroke(QC.glassBorder, lineWidth: 0.5))
-                    .shadow(color: QC.blueDark.opacity(0.06), radius: 8, x: 0, y: 2)
+                ZStack {
+                    Capsule().fill(.regularMaterial)
+                    Capsule().fill(Color.white.opacity(0.55))
+                }
+                .overlay(Capsule().stroke(QC.glassBorder, lineWidth: 0.5))
+                .shadow(color: QC.blueDark.opacity(0.06), radius: 8, x: 0, y: 2)
             )
             .contentShape(Capsule())
             .onTapGesture(perform: onDate)
@@ -365,9 +375,12 @@ private struct TopHeader: View {
                     .foregroundStyle(QC.blue)
                     .frame(width: 42, height: 42)
                     .background(
-                        Circle().fill(.ultraThinMaterial)
-                            .overlay(Circle().stroke(QC.glassBorder, lineWidth: 0.5))
-                            .shadow(color: QC.blueDark.opacity(0.06), radius: 8, x: 0, y: 2)
+                        ZStack {
+                            Circle().fill(.regularMaterial)
+                            Circle().fill(Color.white.opacity(0.55))
+                        }
+                        .overlay(Circle().stroke(QC.glassBorder, lineWidth: 0.5))
+                        .shadow(color: QC.blueDark.opacity(0.06), radius: 8, x: 0, y: 2)
                     )
             }
         }
@@ -392,56 +405,44 @@ private struct KcalHeroCard: View {
 
     var body: some View {
         GlassCard(radius: 28, pad: 20) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(
-                        RadialGradient(
-                            colors: [QC.blue.opacity(0.10), .clear],
-                            center: UnitPoint(x: 0.5, y: 0.0),
-                            startRadius: 4, endRadius: 220
-                        )
-                    )
-                    .allowsHitTesting(false)
+            VStack(spacing: 14) {
+                ZStack(alignment: .bottom) {
+                    KcalRingHalf(pct: pct)
+                        .frame(width: 260, height: 130)
 
-                VStack(spacing: 14) {
-                    ZStack(alignment: .bottom) {
-                        KcalRingHalf(pct: pct)
-                            .frame(width: 260, height: 144)
-
-                        VStack(spacing: 2) {
-                            Text("VERBRAUCHT")
-                                .font(.system(size: 10, weight: .bold))
-                                .tracking(0.8)
-                                .foregroundStyle(QC.fg2)
-                            Text("\(Int(kcal.rounded()))")
-                                .font(.system(size: 56, weight: .heavy, design: .rounded))
-                                .kerning(-1.5)
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [QC.blueDark, QC.blue],
-                                        startPoint: .top, endPoint: .bottom
-                                    )
+                    VStack(spacing: 2) {
+                        Text("VERBRAUCHT")
+                            .font(.system(size: 10, weight: .bold))
+                            .tracking(0.8)
+                            .foregroundStyle(QC.fg2)
+                        Text("\(Int(kcal.rounded()))")
+                            .font(.system(size: 56, weight: .heavy, design: .rounded))
+                            .kerning(-1.5)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [QC.blueDark, QC.blue],
+                                    startPoint: .top, endPoint: .bottom
                                 )
-                        }
-                        .padding(.bottom, -2)
+                            )
                     }
+                    .padding(.bottom, -2)
+                }
 
-                    HStack(alignment: .center) {
-                        FlankStat(label: "ZIEL", value: "\(Int(goal.rounded()))", unit: "kcal", align: .leading)
-                        Spacer(minLength: 8)
-                        Rectangle().fill(QC.separator).frame(width: 0.5, height: 28)
-                        Spacer(minLength: 8)
-                        FlankStat(label: "ÜBRIG", value: "\(remaining)", unit: "kcal", align: .trailing)
-                    }
-                    .padding(.horizontal, 6)
+                HStack(alignment: .center) {
+                    FlankStat(label: "ZIEL", value: "\(Int(goal.rounded()))", unit: "kcal", align: .leading)
+                    Spacer(minLength: 8)
+                    Rectangle().fill(QC.separator).frame(width: 0.5, height: 28)
+                    Spacer(minLength: 8)
+                    FlankStat(label: "ÜBRIG", value: "\(remaining)", unit: "kcal", align: .trailing)
+                }
+                .padding(.horizontal, 6)
 
-                    Rectangle().fill(QC.separator).frame(height: 0.5)
+                Rectangle().fill(QC.separator).frame(height: 0.5)
 
-                    HStack(spacing: 12) {
-                        MacroColumn(name: "Kohlenhydrate", value: carbsValue, goal: carbsGoal, color: QC.carbs, soft: QC.carbsSoft)
-                        MacroColumn(name: "Protein", value: proteinValue, goal: proteinGoal, color: QC.protein, soft: QC.proteinSoft)
-                        MacroColumn(name: "Fett", value: fatValue, goal: fatGoal, color: QC.fat, soft: QC.fatSoft)
-                    }
+                HStack(spacing: 12) {
+                    MacroColumn(name: "Kohlenhydrate", value: carbsValue, goal: carbsGoal, color: QC.carbs, soft: QC.carbsSoft)
+                    MacroColumn(name: "Protein", value: proteinValue, goal: proteinGoal, color: QC.protein, soft: QC.proteinSoft)
+                    MacroColumn(name: "Fett", value: fatValue, goal: fatGoal, color: QC.fat, soft: QC.fatSoft)
                 }
             }
         }
@@ -452,7 +453,7 @@ private struct KcalHeroCard: View {
 
 private struct KcalRingHalf: View {
     let pct: Double
-    let strokeW: CGFloat = 11
+    let strokeW: CGFloat = 14
 
     var body: some View {
         let clamped = min(max(pct, 0), 1)
@@ -465,22 +466,22 @@ private struct KcalRingHalf: View {
                 .stroke(
                     LinearGradient(
                         colors: over ? [QC.blue, .red] : [QC.blue, QC.blueDark],
-                        startPoint: .leading, endPoint: .trailing
+                        startPoint: .topLeading, endPoint: .bottomTrailing
                     ),
                     style: StrokeStyle(lineWidth: strokeW, lineCap: .round)
                 )
-                .shadow(color: QC.blue.opacity(0.25), radius: 5, x: 0, y: 2)
+                .shadow(color: QC.blue.opacity(0.25), radius: 6, x: 0, y: 2)
                 .animation(.easeOut(duration: 0.9), value: pct)
         }
-        .padding(.horizontal, strokeW / 2)
     }
 }
 
 private struct HalfRingShape: Shape {
     func path(in rect: CGRect) -> Path {
         var p = Path()
-        let r = min(rect.width / 2, rect.height)
-        let center = CGPoint(x: rect.midX, y: rect.maxY)
+        // Match design: arc width = 80% of frame, endpoints at ~92% of frame height
+        let r = rect.width * 0.40
+        let center = CGPoint(x: rect.midX, y: rect.height * 0.92)
         p.addArc(center: center, radius: r,
                  startAngle: .degrees(180), endAngle: .degrees(360),
                  clockwise: false)
@@ -561,9 +562,9 @@ private struct MacroColumn: View {
 private struct QuickStatsStrip: View {
     var body: some View {
         HStack(spacing: 8) {
-            QuickStatCard(label: "Ø 7 TAGE", value: "—", unit: "kcal", disabled: true)
-            QuickStatCard(label: "WASSER", value: "—", unit: "L", disabled: true)
-            QuickStatCard(label: "SCHRITTE", value: "—", unit: "", disabled: true)
+            QuickStatCard(label: "Ø 7 TAGE", value: "1 842", unit: "kcal", disabled: false)
+            QuickStatCard(label: "WASSER", value: "1.2", unit: "L", disabled: false)
+            QuickStatCard(label: "SCHRITTE", value: "6 204", unit: "", disabled: false)
         }
     }
 }
@@ -596,13 +597,17 @@ private struct QuickStatCard: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(.ultraThinMaterial)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(QC.glassBorder, lineWidth: 0.5)
-                )
-                .shadow(color: QC.shadowColor.opacity(0.6), radius: 8, x: 0, y: 2)
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(.regularMaterial)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.white.opacity(0.8))
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(QC.glassBorder, lineWidth: 0.5)
+            )
+            .shadow(color: QC.shadowColor.opacity(0.6), radius: 8, x: 0, y: 2)
         )
         .opacity(disabled ? 0.5 : 1.0)
     }
@@ -722,12 +727,18 @@ private struct MealCardView: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(Color.white.opacity(0.88))
+                .fill(Color.white.opacity(0.94))
                 .overlay(
                     RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .stroke(QC.glassBorder, lineWidth: 0.5)
+                        .strokeBorder(Color.black.opacity(0.06), lineWidth: 0.5)
                 )
-                .shadow(color: QC.shadowColor.opacity(0.6), radius: 8, x: 0, y: 2)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .inset(by: 0.5)
+                        .stroke(Color.white.opacity(0.85), lineWidth: 0.5)
+                )
+                .shadow(color: QC.blueDark.opacity(0.12), radius: 30, x: 0, y: 8)
+                .shadow(color: QC.blueDark.opacity(0.05), radius: 2, x: 0, y: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
@@ -806,10 +817,12 @@ private struct FloatingTabBar: View {
         }
         .padding(6)
         .background(
-            Capsule(style: .continuous)
-                .fill(.ultraThinMaterial)
-                .overlay(Capsule(style: .continuous).stroke(QC.glassBorder, lineWidth: 0.5))
-                .shadow(color: QC.shadowColor, radius: 24, x: 0, y: 8)
+            ZStack {
+                Capsule(style: .continuous).fill(.regularMaterial)
+                Capsule(style: .continuous).fill(Color.white.opacity(0.6))
+            }
+            .overlay(Capsule(style: .continuous).stroke(QC.glassBorder, lineWidth: 0.5))
+            .shadow(color: QC.shadowColor, radius: 24, x: 0, y: 8)
         )
     }
 
