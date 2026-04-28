@@ -46,6 +46,9 @@ class MainViewModel: ObservableObject {
     @Published var carbsSnacks: Double = 0
     @Published var proteinSnacks: Double = 0
     @Published var fatSnacks: Double = 0
+
+    @Published var steps: Int = 0
+    @Published var stepsAuthorized: Bool = false
     
     @Published var selectedDate: Date = Date() {
         didSet {
@@ -128,6 +131,41 @@ class MainViewModel: ObservableObject {
         calculateAggregates(forDaytime: 1, into: &kcalMidday, &carbsMidday, &proteinMidday, &fatMidday)
         calculateAggregates(forDaytime: 2, into: &kcalEvening, &carbsEvening, &proteinEvening, &fatEvening)
         calculateAggregates(forDaytime: 3, into: &kcalSnacks, &carbsSnacks, &proteinSnacks, &fatSnacks)
+
+        Task { await refreshSteps() }
+    }
+
+    // MARK: - HealthKit steps
+
+    @MainActor
+    func refreshSteps() async {
+        let manager = HealthKitManager.shared
+        guard manager.isAvailable, stepsAuthorized else {
+            steps = 0
+            return
+        }
+        do {
+            steps = try await manager.stepCount(for: selectedDate)
+        } catch {
+            steps = 0
+            print("Failed to fetch steps: \(error)")
+        }
+    }
+
+    @MainActor
+    func requestHealthKitAccess() async {
+        guard HealthKitManager.shared.isAvailable else {
+            stepsAuthorized = false
+            return
+        }
+        do {
+            try await HealthKitManager.shared.requestAuthorization()
+            stepsAuthorized = true
+        } catch {
+            print("HealthKit auth failed: \(error)")
+            stepsAuthorized = false
+        }
+        await refreshSteps()
     }
 
     // MARK: - Lifecycle
@@ -153,6 +191,7 @@ class MainViewModel: ObservableObject {
             checkAndCalculateDailyCalories()
         }
         updateData()
+        Task { await requestHealthKitAccess() }
     }
     
     // MARK: - Data fetching

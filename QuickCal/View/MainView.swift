@@ -59,7 +59,10 @@ struct MainView: View {
                         )
                         .padding(.horizontal, 16)
 
-                        QuickStatsStrip()
+                        QuickStatsStrip(
+                            steps: mainViewModel.steps,
+                            stepsAuthorized: mainViewModel.stepsAuthorized
+                        )
                             .padding(.horizontal, 16)
                             .padding(.top, 14)
 
@@ -435,11 +438,23 @@ private struct MacroColumn: View {
 // MARK: - Quick stats strip
 
 private struct QuickStatsStrip: View {
+    let steps: Int
+    let stepsAuthorized: Bool
+
+    private var stepsValue: String {
+        guard stepsAuthorized else { return "–" }
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.locale = Locale(identifier: "de_DE")
+        f.groupingSeparator = " "
+        return f.string(from: NSNumber(value: steps)) ?? "0"
+    }
+
     var body: some View {
         HStack(spacing: 8) {
             QuickStatCard(label: "Ø 7 TAGE", value: "1 842", unit: "kcal", disabled: false)
             QuickStatCard(label: "WASSER", value: "1.2", unit: "L", disabled: false)
-            QuickStatCard(label: "SCHRITTE", value: "6 204", unit: "", disabled: false)
+            QuickStatCard(label: "SCHRITTE", value: stepsValue, unit: "", disabled: false)
         }
     }
 }
