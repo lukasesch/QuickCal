@@ -113,7 +113,7 @@ struct AddTrackedFoodView: View {
         .navigationDestination(isPresented: $navigateToCreateFood) { CreateFoodPanelView() }
         .navigationDestination(isPresented: $navigateToCreateMeal) { CreateMealPanelView() }
         .navigationDestination(isPresented: $navigateToOpenFoodFacts) {
-            OpenFoodFactsView(selectedDaytime: daytime, selectedDate: selectedDate)
+            OpenFoodFactsView(showAddTrackedFoodPanel: $showAddTrackedFoodPanel, selectedDaytime: daytime, selectedDate: selectedDate, initialQuery: searchText)
         }
         .fullScreenCover(isPresented: $showFullScreenBarCodeView) {
             BarCodeView(selectedDaytime: daytime, selectedDate: selectedDate)
@@ -270,9 +270,7 @@ struct AddTrackedFoodView: View {
         if items.isEmpty {
             EmptyStateCreate(
                 mode: mode, query: searchText,
-                onCreateFood: { navigateToCreateFood = true },
-                onCreateMeal: { navigateToCreateMeal = true },
-                onScan: { showFullScreenBarCodeView = true }
+                onOpenFoodFacts: { navigateToOpenFoodFacts = true }
             )
             .padding(.horizontal, 16)
         } else {
@@ -311,9 +309,7 @@ struct AddTrackedFoodView: View {
         if items.isEmpty {
             EmptyStateCreate(
                 mode: mode, query: searchText,
-                onCreateFood: { navigateToCreateFood = true },
-                onCreateMeal: { navigateToCreateMeal = true },
-                onScan: { showFullScreenBarCodeView = true }
+                onOpenFoodFacts: { navigateToOpenFoodFacts = true }
             )
             .padding(.horizontal, 16)
         } else {
@@ -524,51 +520,15 @@ private struct FoodResultRow: View {
     let isLast: Bool
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .center, spacing: 12) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(food.name ?? "Unbekannt")
-                        .font(.system(size: 14.5, weight: .medium))
-                        .foregroundStyle(QC.fg)
-                        .lineLimit(1)
-                    HStack(spacing: 8) {
-                        Text("\(formatNum(food.defaultQuantity)) \(food.unit ?? "")")
-                            .font(.system(size: 11.5))
-                            .foregroundStyle(QC.fg2)
-                            .monospacedDigit()
-                    }
-                    HStack(spacing: 8) {
-                        MacroMini(c: Double(food.carbohydrate), p: Double(food.protein), f: Double(food.fat))
-                            .frame(width: 64, height: 4)
-                        Text(macroSummary(food.carbohydrate, food.protein, food.fat))
-                            .font(.system(size: 10.5))
-                            .foregroundStyle(QC.fg2)
-                            .monospacedDigit()
-                    }
-                    .padding(.top, 1)
-                }
-                Spacer(minLength: 8)
-                HStack(alignment: .firstTextBaseline, spacing: 3) {
-                    Text("\(food.kcal)")
-                        .font(.system(size: 15, weight: .semibold))
-                        .monospacedDigit()
-                        .foregroundStyle(QC.fg)
-                    Text("kcal")
-                        .font(.system(size: 11))
-                        .foregroundStyle(QC.fg2)
-                }
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-
-            if !isLast {
-                Rectangle().fill(QC.separator).frame(height: 0.5)
-            }
-        }
-    }
-
-    private func macroSummary(_ c: Float, _ p: Float, _ f: Float) -> String {
-        "K \(Int(c.rounded()))g  P \(Int(p.rounded()))g  F \(Int(f.rounded()))g"
+        ResultRow(
+            name: food.name ?? "Unbekannt",
+            portion: "\(formatNum(food.defaultQuantity)) \(food.unit ?? "")",
+            kcal: Int(food.kcal),
+            carbs: food.carbohydrate,
+            protein: food.protein,
+            fat: food.fat,
+            isLast: isLast
+        )
     }
 }
 
@@ -628,41 +588,16 @@ private struct MealResultRow: View {
     }
 }
 
-// MARK: - Macro mini bar
-
-private struct MacroMini: View {
-    let c: Double
-    let p: Double
-    let f: Double
-
-    var body: some View {
-        GeometryReader { geo in
-            let cKcal = c * 4, pKcal = p * 4, fKcal = f * 9
-            let total = max(cKcal + pKcal + fKcal, 1)
-            HStack(spacing: 0) {
-                Rectangle().fill(QC.carbs).frame(width: geo.size.width * cKcal / total)
-                Rectangle().fill(QC.protein).frame(width: geo.size.width * pKcal / total)
-                Rectangle().fill(QC.fat).frame(width: geo.size.width * fKcal / total)
-            }
-        }
-        .background(QC.fg3.opacity(0.4))
-        .clipShape(Capsule())
-    }
-}
-
 // MARK: - Empty state
 
 private struct EmptyStateCreate: View {
     let mode: AddTrackedFoodView.SourceMode
     let query: String
-    let onCreateFood: () -> Void
-    let onCreateMeal: () -> Void
-    let onScan: () -> Void
+    let onOpenFoodFacts: () -> Void
 
     var body: some View {
         VStack(spacing: 12) {
             VStack(spacing: 4) {
-                Text("🔍").font(.system(size: 36)).opacity(0.55)
                 if query.isEmpty {
                     Text("Keine Treffer")
                         .font(.system(size: 15, weight: .semibold))
@@ -672,43 +607,27 @@ private struct EmptyStateCreate: View {
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(QC.fg)
                 }
-                Text("Du kannst es selbst hinzufügen.")
+                Text("Du kannst es selbst hinzufügen oder auf OpenFoodFacts suchen und importieren!")
                     .font(.system(size: 13))
                     .foregroundStyle(QC.fg3)
+                    .multilineTextAlignment(.center)
             }
             .padding(.top, 8)
 
-            HStack(spacing: 10) {
-                CreateTile(
-                    label: "Lebensmittel\nerstellen",
-                    sub: "Eigenes mit Nährwerten anlegen",
-                    icon: "carrot.fill", tint: QC.protein,
-                    active: mode == .food,
-                    action: onCreateFood
-                )
-                CreateTile(
-                    label: "Gericht\nerstellen",
-                    sub: "Mehrere Lebensmittel kombinieren",
-                    icon: "fork.knife", tint: QC.carbs,
-                    active: mode == .meal,
-                    action: onCreateMeal
-                )
-            }
-
-            Button(action: onScan) {
+            Button(action: onOpenFoodFacts) {
                 HStack(spacing: 11) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 8).fill(QC.blue.opacity(0.14))
-                        Image(systemName: "barcode.viewfinder")
+                        Image(systemName: "magnifyingglass")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(QC.blue)
                     }
                     .frame(width: 30, height: 30)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("Barcode scannen")
+                        Text("Auf OpenFoodFacts suchen")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(QC.fg)
-                        Text("Wenn das Produkt verpackt ist")
+                        Text("Online-Datenbank durchsuchen und importieren")
                             .font(.system(size: 11))
                             .foregroundStyle(QC.fg3)
                     }
@@ -719,115 +638,11 @@ private struct EmptyStateCreate: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
-                .background(GlassCardBg())
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .background(GlassCardBg(radius: 16))
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(.plain)
         }
-    }
-}
-
-private struct CreateTile: View {
-    let label: String
-    let sub: String
-    let icon: String
-    let tint: Color
-    let active: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10).fill(tint.opacity(0.18))
-                    Image(systemName: icon)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(tint)
-                }
-                .frame(width: 34, height: 34)
-                Spacer(minLength: 0)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(label)
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(active ? tint : QC.fg)
-                        .multilineTextAlignment(.leading)
-                    Text(sub)
-                        .font(.system(size: 11))
-                        .foregroundStyle(QC.fg3)
-                        .multilineTextAlignment(.leading)
-                }
-            }
-            .padding(14)
-            .frame(maxWidth: .infinity, minHeight: 118, alignment: .topLeading)
-            .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(active
-                              ? AnyShapeStyle(LinearGradient(colors: [tint.opacity(0.10), tint.opacity(0.05)], startPoint: .top, endPoint: .bottom))
-                              : AnyShapeStyle(.regularMaterial))
-                }
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(active ? tint.opacity(0.33) : QC.glassBorder, lineWidth: 0.5)
-                )
-                .shadow(color: active ? tint.opacity(0.15) : QC.blueDark.opacity(0.05), radius: 8, x: 0, y: 3)
-            )
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-// MARK: - Bottom search dock
-
-private struct BottomSearchDock: View {
-    @Binding var text: String
-    @Binding var focused: Bool
-    let onScan: () -> Void
-
-    @FocusState private var fieldFocused: Bool
-
-    var body: some View {
-        HStack(spacing: 8) {
-            HStack(spacing: 9) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(QC.fg2)
-                TextField("Suchen", text: $text)
-                    .font(.system(size: 15))
-                    .foregroundStyle(QC.fg)
-                    .focused($fieldFocused)
-                    .submitLabel(.search)
-                if !text.isEmpty {
-                    Button {
-                        text = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 14))
-                            .foregroundStyle(QC.fg3)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .glassCapsule()
-            .shadow(color: QC.blueDark.opacity(0.12), radius: 16, x: 0, y: 6)
-
-            Button(action: onScan) {
-                Image(systemName: "barcode.viewfinder")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 48, height: 48)
-                    .background(
-                        Circle().fill(QC.blue.opacity(0.92))
-                            .overlay(Circle().stroke(Color.white.opacity(0.30), lineWidth: 0.5))
-                            .shadow(color: QC.blue.opacity(0.40), radius: 12, x: 0, y: 6)
-                    )
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 14)
-        .onChange(of: fieldFocused) { _, v in focused = v }
     }
 }
 

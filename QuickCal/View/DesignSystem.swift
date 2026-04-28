@@ -197,6 +197,139 @@ extension View {
     }
 }
 
+// MARK: - Bottom search dock
+
+struct BottomSearchDock: View {
+    @Binding var text: String
+    @Binding var focused: Bool
+    var placeholder: String = "Suchen"
+    var onSubmit: (() -> Void)? = nil
+    let onScan: () -> Void
+
+    @FocusState private var fieldFocused: Bool
+
+    var body: some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 9) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(QC.fg2)
+                TextField(placeholder, text: $text)
+                    .font(.system(size: 15))
+                    .foregroundStyle(QC.fg)
+                    .focused($fieldFocused)
+                    .submitLabel(.search)
+                    .onSubmit { onSubmit?() }
+                if !text.isEmpty {
+                    Button {
+                        text = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(QC.fg3)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .glassCapsule()
+            .shadow(color: QC.blueDark.opacity(0.12), radius: 16, x: 0, y: 6)
+
+            Button(action: onScan) {
+                Image(systemName: "barcode.viewfinder")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 48, height: 48)
+                    .background(
+                        Circle().fill(QC.blue.opacity(0.92))
+                            .overlay(Circle().stroke(Color.white.opacity(0.30), lineWidth: 0.5))
+                            .shadow(color: QC.blue.opacity(0.40), radius: 12, x: 0, y: 6)
+                    )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 14)
+        .onChange(of: fieldFocused) { _, v in focused = v }
+    }
+}
+
+// MARK: - Macro mini bar
+
+struct MacroMini: View {
+    let c: Double
+    let p: Double
+    let f: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            let cKcal = c * 4, pKcal = p * 4, fKcal = f * 9
+            let total = max(cKcal + pKcal + fKcal, 1)
+            HStack(spacing: 0) {
+                Rectangle().fill(QC.carbs).frame(width: geo.size.width * cKcal / total)
+                Rectangle().fill(QC.protein).frame(width: geo.size.width * pKcal / total)
+                Rectangle().fill(QC.fat).frame(width: geo.size.width * fKcal / total)
+            }
+        }
+        .background(QC.fg3.opacity(0.4))
+        .clipShape(Capsule())
+    }
+}
+
+// MARK: - Result row primitive
+
+struct ResultRow: View {
+    let name: String
+    let portion: String
+    let kcal: Int
+    let carbs: Float
+    let protein: Float
+    let fat: Float
+    let isLast: Bool
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .center, spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(name)
+                        .font(.system(size: 14.5, weight: .medium))
+                        .foregroundStyle(QC.fg)
+                        .lineLimit(1)
+                    Text(portion)
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(QC.fg2)
+                        .monospacedDigit()
+                    HStack(spacing: 8) {
+                        MacroMini(c: Double(carbs), p: Double(protein), f: Double(fat))
+                            .frame(width: 64, height: 4)
+                        Text("K \(Int(carbs.rounded()))g  P \(Int(protein.rounded()))g  F \(Int(fat.rounded()))g")
+                            .font(.system(size: 10.5))
+                            .foregroundStyle(QC.fg2)
+                            .monospacedDigit()
+                    }
+                    .padding(.top, 1)
+                }
+                Spacer(minLength: 8)
+                HStack(alignment: .firstTextBaseline, spacing: 3) {
+                    Text("\(kcal)")
+                        .font(.system(size: 15, weight: .semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(QC.fg)
+                    Text("kcal")
+                        .font(.system(size: 11))
+                        .foregroundStyle(QC.fg2)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+
+            if !isLast {
+                Rectangle().fill(QC.separator).frame(height: 0.5)
+            }
+        }
+    }
+}
+
 // MARK: - Components
 
 // MARK: Eyebrow label (uppercase, tracked, secondary)

@@ -11,30 +11,40 @@ import CoreData
 import CryptoKit
 
 class OpenFoodFactsViewModel: ObservableObject {
-    @EnvironmentObject var mainViewModel: MainViewModel
     @Published var products: [FoodItem] = []
     @Published var isLoading: Bool = false
     private let context: NSManagedObjectContext
+    private var currentTask: URLSessionDataTask?
     init(context: NSManagedObjectContext) {
         self.context = context
     }
-    
+
+    func cancelSearch() {
+        currentTask?.cancel()
+        currentTask = nil
+        isLoading = false
+        products.removeAll()
+    }
+
     func search(text query: String) {
         print("Search initiated for: \(query)")
+        currentTask?.cancel()
         isLoading = true
-        
-        let baseUrl = "https://de.openfoodfacts.org"
-        let urlString = "\(baseUrl)/cgi/search.pl?search_terms=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&action=process&json=true"
+
+        let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let fields = "product_name,brands,nutriments,serving_quantity_unit,product_quantity_unit"
+        let urlString = "https://de.openfoodfacts.org/cgi/search.pl?search_terms=\(encoded)&fields=\(fields)&page_size=30&action=process&json=1"
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
             isLoading = false
             return
         }
-        
+
         print("Requesting URL: \(url)")
-        
+
         let task = URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
+                if (error as NSError).code == NSURLErrorCancelled { return }
                 print("Network error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     self.products = []
@@ -110,6 +120,7 @@ class OpenFoodFactsViewModel: ObservableObject {
             }
         }
         
+        currentTask = task
         task.resume()
     }
     
@@ -126,62 +137,56 @@ class OpenFoodFactsViewModel: ObservableObject {
         }
     }
     
-    func OpenFoodFactsFoodToDB(name: String, defaultQuantity: Float, unit: String, calories: Int16, carbs: Float, protein: Float, fat: Float, daytime: Int16, quantity: Float, selectedDate: Date) {
-        
-        // Unique Hash in Hexadezimal erstellen
-        let hashString = "\(name)\(defaultQuantity)\(unit)\(calories)\(carbs)\(protein)\(fat)"
+    @discardableResult
+    func addToTracker(item: FoodItem, quantityString: String, daytime: Int16, date: Date) -> Bool {
+        guard let q = Float(quantityString.replacingOccurrences(of: ",", with: ".")) else {
+            return false
+        }
+        let multiplier = q / max(item.defaultQuantity, 0.0001)
+
+        let hashString = "\(item.name)\(item.defaultQuantity)\(item.unit)\(item.kcal)\(item.carbohydrate)\(item.protein)\(item.fat)"
         let hash = SHA256.hash(data: Data(hashString.utf8))
         let uniqueID = hash.compactMap { String(format: "%02x", $0) }.joined()
-        
-        // Existiert es bereits?
+
         let fetchRequest: NSFetchRequest<Food> = Food.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "uniqueID == %@", uniqueID)
-        
+
         var food: Food?
         do {
-            let existingFoods = try context.fetch(fetchRequest)
-            if let existingFood = existingFoods.first {
-                // Existiert bereits
-                print("Lebensmittel existiert bereits in der Datenbank: \(name)")
-                food = existingFood
+            if let existing = try context.fetch(fetchRequest).first {
+                food = existing
                 food?.lastUsed = Date()
             } else {
-                // Existiert noch nicht
                 food = Food(context: context)
-                food?.name = name
-                food?.defaultQuantity = defaultQuantity
-                food?.unit = unit
-                food?.kcal = calories
-                food?.carbohydrate = carbs
-                food?.protein = protein
-                food?.fat = fat
+                food?.name = item.name
+                food?.defaultQuantity = item.defaultQuantity
+                food?.unit = item.unit
+                food?.kcal = item.kcal
+                food?.carbohydrate = item.carbohydrate
+                food?.protein = item.protein
+                food?.fat = item.fat
                 food?.uniqueID = uniqueID
                 food?.lastUsed = Date()
-                print("Neues Lebensmittel wurde erstellt: \(name)")
             }
         } catch {
             print("Fehler beim Abrufen von Lebensmitteln: \(error.localizedDescription)")
-            return
+            return false
         }
-        
-        // Neues TrackedFood-Objekt erstellen
-        guard let food = food else {
-            print("Fehler: Lebensmittel konnte nicht erstellt oder abgerufen werden.")
-            return
-        }
-        
+
+        guard let food = food else { return false }
+
         let trackedFood = TrackedFood(context: context)
-        trackedFood.date = selectedDate
+        trackedFood.date = date
         trackedFood.daytime = daytime
-        trackedFood.quantity = quantity
+        trackedFood.quantity = multiplier
         trackedFood.food = food
-        
-        // Speichern in DB
+
         do {
             try context.save()
-            print("Lebensmittel erfolgreich aktualisiert (lastUsed) und in TrackedFood gespeichert")
+            return true
         } catch {
             print("Fehler beim Speichern: \(error.localizedDescription)")
+            return false
         }
     }
 }
